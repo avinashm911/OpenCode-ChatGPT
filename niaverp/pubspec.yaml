@@ -84,6 +84,8 @@ flutter:
     - lib/data/migrations/m011_dss_fy_drcr.sql
     - lib/data/migrations/m012_series_mode.sql
     - lib/data/migrations/m013_ledger_masters.sql
+    - lib/data/migrations/m014_ledger_bank.sql
+    - lib/data/migrations/m015_stock_valuation.sql
 
   # To add assets to your application, add an assets section, like this:
   # assets:

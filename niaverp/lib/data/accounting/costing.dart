@@ -80,3 +80,45 @@ int fallbackShortfallValue(int shortfallQ4, int lastKnownCostPaise) {
   if (lastKnownCostPaise < 0) throw ArgumentError('cost must be >= 0');
   return ((shortfallQ4 * lastKnownCostPaise) + 5000) ~/ 10000;
 }
+
+/// Valuation-method vocabulary (D-M5: Weighted Average and FIFO only).
+/// Stored as TEXT 'fifo'/'wa' on item (override) and item_group (default);
+/// NULL means unset at that level.
+const String kCostMethodFifo = 'fifo';
+const String kCostMethodWa = 'wa';
+
+/// True when [method] is an allowed stored value (or null = unset).
+bool isValidCostMethod(String? method) =>
+    method == null || method == kCostMethodFifo || method == kCostMethodWa;
+
+/// Resolve the effective method: item override wins over the group default,
+/// and an unset chain falls back to Weighted Average (D-M5 default).
+/// Throws [ArgumentError] on an invalid stored value (never silently mapped).
+String resolveCostMethod(String? itemMethod, String? groupMethod) {
+  if (!isValidCostMethod(itemMethod) || !isValidCostMethod(groupMethod)) {
+    throw ArgumentError('cost method must be fifo, wa or unset');
+  }
+  return itemMethod ?? groupMethod ?? kCostMethodWa;
+}
+
+/// Movement cost-source family produced by layer-priced issues. Only these
+/// sources lock the valuation method of a book (fallback/zero issues price
+/// nothing from layers, so they bind nothing).
+const Set<String> kMethodLockSources = <String>{
+  'average',
+  'fifo',
+  'fifo-fallback',
+};
+
+/// Effective method behind a layer-priced movement source.
+String? methodOfPricedSource(String costSource) {
+  switch (costSource) {
+    case 'average':
+      return kCostMethodWa;
+    case 'fifo':
+    case 'fifo-fallback':
+      return kCostMethodFifo;
+    default:
+      return null;
+  }
+}

@@ -1,61 +1,193 @@
-// Phase 00 tests: five-item shell (OD-UI-001 / G0-CON-005).
-// Asserts the approved navigation model renders and switches tabs. Tab pages
-// are placeholders until their vertical slices land; no business state is
-// asserted here. Traceability: OD-UI-001; G0-CON-005; DECISIONS.md.
+// Navigation slice tests: five-item shell over real destinations.
+// The shell renders the approved model (OD-UI-001 / G0-CON-005) with every
+// tab bound to a real screen over a real in-memory backend — no fake data.
+// Proves: without a scope every tab shows the scope gate; the company gate
+// shows onboarding until a company opens; with scope + company each tab
+// shows its real destination; tab switching preserves navigation state;
+// company switching rebinds the tabs.
+// Traceability: OD-UI-001; G0-CON-005.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:niaverp/app/composition_root.dart';
 import 'package:niaverp/app/niav_app.dart';
+import 'package:niaverp/core/value_objects/ids.dart';
+import 'package:niaverp/core/value_objects/niav_date.dart';
+import 'package:niaverp/data/db/niav_database.dart';
+import 'package:niaverp/presentation/billing/billing_hub_screen.dart';
+import 'package:niaverp/presentation/home/home_dashboard_screen.dart';
+import 'package:niaverp/presentation/onboarding/onboarding_screen.dart';
+import 'package:niaverp/presentation/parties_items/parties_items_screen.dart';
+import 'package:niaverp/presentation/reports/reports_hub_screen.dart';
+import 'package:niaverp/presentation/shared/company_scope.dart';
+import 'package:niaverp/presentation/shared/screen_wiring.dart';
 import 'package:niaverp/presentation/shell/niav_shell.dart';
 
+import '../helpers/test_database.dart';
+
 void main() {
-  NiavApp buildApp() =>
-      NiavApp(root: CompositionRoot.forTest(fixedMs: 0));
+  late NiavDatabase db;
+  late BackendBundle backend;
+  late CompanyScope scope;
+  final CompanyId companyId = CompanyId('c-n');
 
-  testWidgets('shell shows all five destinations', (WidgetTester tester) async {
-    await tester.pumpWidget(buildApp());
-
-    for (final String label in <String>[
-      'Home',
-      'Billing',
-      'Parties & Items',
-      'Reports',
-      'More',
-    ]) {
-      expect(find.text(label), findsWidgets);
-    }
-    expect(find.byType(BottomNavigationBar), findsOneWidget);
-  });
-
-  testWidgets('tapping tabs switches the visible page', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(buildApp());
-
-    await tester.tap(find.text('Reports'));
-    await tester.pumpAndSettle();
-    final NiavShellState state =
-        tester.state<NiavShellState>(find.byType(NiavShell));
-    expect(state.selectedIndex, NiavDestination.reports.index);
-
-    await tester.tap(find.text('Billing'));
-    await tester.pumpAndSettle();
-    expect(state.selectedIndex, NiavDestination.billing.index);
-  });
-
-  testWidgets('composition root injects config without widget state', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      NiavApp(
-        root: CompositionRoot.forTest(
-          config: const AppConfig(appTitle: 'NiAvERP-Test'),
-          fixedMs: 0,
-        ),
-      ),
+  setUp(() {
+    db = openTestDatabase();
+    backend = CompositionRoot.backend(
+      engine: rawEngineOf(db),
+      sqlByVersion: loadMigrationSql(),
+      clock: testClock(),
     );
-    expect(find.text('NiAvERP-Test'), findsWidgets);
+    scope = scopeOfBackend(
+      backend,
+      write: WriteContext(
+        deviceId: 'host-test',
+        actor: 'tester',
+        idMint: CounterIdMint().call,
+      ),
+      today: NiavDate('2026-04-01'),
+    );
+    expect(
+      backend.companies
+          .create(
+            id: companyId,
+            name: 'Nav Co',
+            deviceId: 'host-test',
+            opId: 'op-cn',
+            eventId: 'ev-cn',
+            actor: 'tester',
+          )
+          .isOk,
+      isTrue,
+    );
+  });
+
+  tearDown(() {
+    rawEngineOf(db).close();
+  });
+
+  NiavApp buildApp({CompanyScope? useScope, CompanyId? company}) {
+    return NiavApp(
+      root: CompositionRoot.forTest(fixedMs: 0),
+      scope: useScope,
+      companyId: company,
+    );
+  }
+
+  group('shell navigation (OD-UI-001 / G0-CON-005)', () {
+    testWidgets('five destinations render with the bottom bar',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildApp());
+
+      for (final String label in <String>[
+        'Home',
+        'Billing',
+        'Parties & Items',
+        'Reports',
+        'More',
+      ]) {
+        expect(find.text(label), findsWidgets);
+      }
+      expect(find.byType(BottomNavigationBar), findsOneWidget);
+    });
+
+    testWidgets('without a scope every tab shows the gate, never fakes',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildApp());
+
+      for (final NiavDestination d in NiavDestination.values) {
+        await tester.tap(find.text(d.label));
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(ValueKey<String>('scope-gate-${d.name}')),
+          findsOneWidget,
+        );
+      }
+      expect(find.textContaining('coming in its vertical slice'),
+          findsNothing);
+    });
+
+    testWidgets('scope without a company shows onboarding',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(buildApp(useScope: scope));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey<String>('company-gate')),
+          findsOneWidget);
+      expect(find.byType(OnboardingScreen), findsOneWidget);
+    });
+
+    testWidgets('each tab shows its real destination',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+          buildApp(useScope: scope, company: companyId));
+
+      await tester.tap(find.text('Home'));
+      await tester.pumpAndSettle();
+      expect(find.byType(HomeDashboardScreen), findsOneWidget);
+      expect(find.text('Nav Co'), findsOneWidget);
+
+      await tester.tap(find.text('Billing'));
+      await tester.pumpAndSettle();
+      expect(find.byType(BillingHubScreen), findsOneWidget);
+      expect(find.byKey(const ValueKey<String>('billing-empty')),
+          findsOneWidget);
+
+      await tester.tap(find.text('Parties & Items'));
+      await tester.pumpAndSettle();
+      expect(find.byType(PartiesItemsScreen), findsOneWidget);
+
+      await tester.tap(find.text('Reports'));
+      await tester.pumpAndSettle();
+      expect(find.byType(ReportsHubScreen), findsOneWidget);
+      expect(find.byKey(const ValueKey<String>('reports-hub-stock')),
+          findsOneWidget);
+
+      await tester.tap(find.text('More'));
+      await tester.pumpAndSettle();
+      expect(find.byType(OnboardingScreen), findsOneWidget);
+    });
+
+    testWidgets('opening another company rebinds the tabs',
+        (WidgetTester tester) async {
+      expect(
+        backend.companies
+            .create(
+              id: CompanyId('c-second'),
+              name: 'Second Co',
+              deviceId: 'host-test',
+              opId: 'op-c2',
+              eventId: 'ev-c2',
+              actor: 'tester',
+            )
+            .isOk,
+        isTrue,
+      );
+      await tester.pumpWidget(
+          buildApp(useScope: scope, company: companyId));
+      await tester.pumpAndSettle();
+      expect(find.text('Nav Co'), findsOneWidget);
+
+      tester
+          .state<NiavShellState>(find.byType(NiavShell))
+          .openCompany(CompanyId('c-second'));
+      await tester.pumpAndSettle();
+      expect(find.text('Second Co'), findsOneWidget);
+      expect(find.text('Nav Co'), findsNothing);
+    });
+
+    testWidgets('composition root injects config without widget state',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(
+        NiavApp(
+          root: CompositionRoot.forTest(
+            config: const AppConfig(appTitle: 'NiAvERP-Test'),
+            fixedMs: 0,
+          ),
+        ),
+      );
+      expect(find.text('NiAvERP-Test'), findsWidgets);
+    });
   });
 }

@@ -59,3 +59,18 @@ abstract-only. Still missing (G0-VER-001 stays open, not PASS): native
 cipher licence text from the bundled manifest + Android 8 compatibility
 proof on device; `main()` wiring waits on the sandbox-path decision
 (path_provider unapproved) and Keystore key bytes.
+
+## Addendum 2026-10-05 — Flutter host verification rerun
+
+Flutter SDK `3.47.6` stable / Dart `3.13.5` was installed at
+`E:\NiAvERP v2 OpenAI\tools\flutter` and `android/local.properties` was
+updated. `flutter analyze` passed with no issues. The complete suite passed
+**360 tests, 0 failures**, when run through temporary no-space drive alias
+`N:\niaverp`.
+
+The direct project path failed before test execution because the `sqlite3`
+native-assets hook did not quote the space-containing path. This is a tooling
+path limitation and is recorded in
+`docs/implementation/TEST_RUN_20261005.md`. The host run does not close
+device, printer, legal, statutory-schema, Keystore, native-cipher-licence or
+release-channel evidence.

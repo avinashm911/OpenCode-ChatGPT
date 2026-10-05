@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 
 import 'package:niaverp/application/queries/stock_levels.dart';
 import 'package:niaverp/core/value_objects/ids.dart';
+import 'package:niaverp/core/value_objects/money.dart';
 import 'package:niaverp/core/value_objects/quantity.dart';
 import 'package:niaverp/data/repositories/item_repository.dart';
 import 'package:niaverp/data/repositories/voucher_type_repository.dart';
@@ -22,14 +23,21 @@ class StockBalanceRow {
     required this.itemName,
     required this.godownName,
     required this.qtyQ4,
+    required this.valuePaise,
   });
 
   final String itemName;
   final String godownName;
   final int qtyQ4;
 
+  /// Live book value (paise) behind the row.
+  final int valuePaise;
+
   /// Formatted quantity (integer ×10⁴, explicit scale — D-M4).
   String get qtyText => QuantityQ4(qtyQ4).format();
+
+  /// Formatted book value (rupees, D-M4).
+  String get valueText => '₹${MoneyPaise(valuePaise).toRupeesString()}';
 }
 
 /// Company stock balances, read from persisted movements.
@@ -63,14 +71,14 @@ class StockReportScreenState extends State<StockReportScreen> {
   Future<List<StockBalanceRow>> _load() async {
     await Future<void>.delayed(Duration.zero);
     if (!mounted) return <StockBalanceRow>[];
-    final List<StockBalance> balances =
-        widget.levels.balances(widget.companyId);
+    final List<StockValuation> held =
+        widget.levels.valuation(widget.companyId);
     final Map<String, String> godownNames = <String, String>{
       for (final Godown g in widget.godowns.listByCompany(widget.companyId))
         g.id.value: g.name,
     };
     return <StockBalanceRow>[
-      for (final StockBalance b in balances)
+      for (final StockValuation b in held)
         StockBalanceRow(
           itemName: widget.items
                   .get(widget.companyId, b.itemId)
@@ -78,6 +86,7 @@ class StockReportScreenState extends State<StockReportScreen> {
               b.itemId.value,
           godownName: godownNames[b.godownId.value] ?? b.godownId.value,
           qtyQ4: b.qtyQ4,
+          valuePaise: b.valuePaise,
         ),
     ];
   }
@@ -138,7 +147,7 @@ class StockReportScreenState extends State<StockReportScreen> {
               return ListTile(
                 title: Text(r.itemName),
                 subtitle: Text(r.godownName),
-                trailing: Text(r.qtyText),
+                trailing: Text('${r.qtyText} · ${r.valueText}'),
               );
             },
           );

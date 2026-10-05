@@ -213,6 +213,46 @@ void main() {
     });
   });
 
+  group('settlement-side cap (FR-M06-001/002)', () {
+    test('history plus specs must fit the permitted line amount', () {
+      expect(
+          checkSettlementCap(
+            settlementLineId: 'P1',
+            lineTotalPaise: 5000,
+            preAllocatedPaise: 2000,
+            newAllocationsPaise: 3000,
+          ),
+          isEmpty);
+      expect(
+          checkSettlementCap(
+            settlementLineId: 'P1',
+            lineTotalPaise: 5000,
+            preAllocatedPaise: 2000,
+            newAllocationsPaise: 3001,
+          ),
+          isNotEmpty);
+    });
+
+    test('negative line totals permit by magnitude; bad history rejected', () {
+      expect(
+          checkSettlementCap(
+            settlementLineId: 'P1',
+            lineTotalPaise: -5000,
+            preAllocatedPaise: 0,
+            newAllocationsPaise: 5000,
+          ),
+          isEmpty);
+      expect(
+          checkSettlementCap(
+            settlementLineId: 'P1',
+            lineTotalPaise: 5000,
+            preAllocatedPaise: -1,
+            newAllocationsPaise: 0,
+          ),
+          isNotEmpty);
+    });
+  });
+
   group('F-SETL-006 impossible balances are detected, never clamped', () {
     test('allocated 20000 on 10000 throws StateError', () {
       final Database raw = _settlementDb();

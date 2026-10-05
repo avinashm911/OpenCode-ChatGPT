@@ -142,6 +142,20 @@ void main() {
           .isOk,
       isTrue,
     );
+    expect(
+      godowns
+          .create(
+            id: EntityId('g-b'),
+            companyId: companyId,
+            name: 'Branch',
+            deviceId: 'host-test',
+            opId: 'op-gb',
+            eventId: 'ev-gb',
+            actor: 'tester',
+          )
+          .isOk,
+      isTrue,
+    );
   });
 
   tearDown(() {
@@ -166,14 +180,17 @@ void main() {
   }
 
   void addStockLine(String vid, String lid, int qty,
-      {int rate = 1000, int line = 1, bool party = true}) {
+      {int rate = 1000,
+      int line = 1,
+      bool party = true,
+      String godown = 'g-p'}) {
     final Result<VoucherLine> r = vouchers.addLine(
       lineId: EntityId(lid),
       voucherId: EntityId(vid),
       companyId: companyId,
       lineNo: line,
       itemId: EntityId('i-p'),
-      godownId: EntityId('g-p'),
+      godownId: EntityId(godown),
       partyId: party ? EntityId('p-p') : null,
       qtyQ4: qty,
       ratePaise: rate,
@@ -243,6 +260,23 @@ void main() {
             .qtyQ4,
         80000,
       );
+      // Consumption decremented remaining balances; the receipt record
+      // itself is immutable (no retro revaluation).
+      final List<Map<String, Object?>> layers = db.queryArgs(
+        'SELECT qty_q4, value_paise, remaining_qty_q4, '
+        'remaining_value_paise FROM stock_cost_layer '
+        'WHERE voucher_line_id = ?',
+        <Object?>['v-buy-l1'],
+      );
+      expect(layers.single['qty_q4'], 100000);
+      expect(layers.single['value_paise'], 10000);
+      expect(layers.single['remaining_qty_q4'], 80000);
+      expect(layers.single['remaining_value_paise'], 8000);
+      expect(
+        stock.layerValuePaise(
+            companyId, EntityId('i-p'), EntityId('g-p')),
+        8000,
+      );
     });
 
     test('blocked policy aborts everything; warn approves with warning', () {
@@ -264,18 +298,78 @@ void main() {
       expect(movementCount(), 1);
     });
 
-    test('transfer posts the document with an explicit pending leg', () {
+    test('transfer posts two legs with value preserved', () {
+      // Stock the source first: 10.0 @ 1000 in Main.
+      createVoucher('v-buy', 'Purchase Invoice');
+      addStockLine('v-buy', 'v-buy-l1', 100000);
+      expect(postStock('v-buy', StockPolicy.allow).isOk, isTrue);
+
+      // 4.0 Main → Branch: OUT leg (negative qty, source) + IN leg.
+      // Transfer legs carry zero rate: value flows from the book.
       createVoucher('v-t', 'Stock Transfer');
-      addStockLine('v-t', 'v-t-l1', 10000);
+      addStockLine('v-t', 'v-t-out', -40000, rate: 0, line: 1);
+      addStockLine('v-t', 'v-t-in', 40000, rate: 0, line: 2, godown: 'g-b');
       final Result<PostingResult> r =
           postStock('v-t', StockPolicy.allow);
       expect(r.isOk, isTrue);
       final PostingResult pr = (r as Ok<PostingResult>).value;
-      expect(pr.movementIds, isEmpty);
-      expect(pr.pendingEffects,
-          contains('transfer stock legs pending two-leg slice'));
+      expect(pr.movementIds,
+          <String>['mv-v-t-out', 'mv-v-t-in']);
       expect(vouchers.get(companyId, EntityId('v-t'))?.voucher.status,
           'posted');
+      final List<StockBalance> held = stock.balances(companyId);
+      expect(
+        held
+            .firstWhere((StockBalance b) => b.godownId.value == 'g-p')
+            .qtyQ4,
+        60000,
+      );
+      expect(
+        held
+            .firstWhere((StockBalance b) => b.godownId.value == 'g-b')
+            .qtyQ4,
+        40000,
+      );
+      // Value moved with the goods: 6000 + 4000 = 10000 (nothing created).
+      expect(stock.layerValuePaise(companyId, EntityId('i-p'), EntityId('g-p')),
+          6000);
+      expect(stock.layerValuePaise(companyId, EntityId('i-p'), EntityId('g-b')),
+          4000);
+    });
+
+    test('unbalanced and same-godown transfers rejected atomically', () {
+      createVoucher('v-buy', 'Purchase Invoice');
+      addStockLine('v-buy', 'v-buy-l1', 100000);
+      expect(postStock('v-buy', StockPolicy.allow).isOk, isTrue);
+
+      createVoucher('v-bad', 'Stock Transfer');
+      addStockLine('v-bad', 'v-bad-out', -40000, rate: 0, line: 1);
+      addStockLine('v-bad', 'v-bad-in', 30000, rate: 0, line: 2, godown: 'g-b');
+      final Result<PostingResult> bad =
+          postStock('v-bad', StockPolicy.allow);
+      expect(bad.isErr, isTrue);
+      expect(vouchers.get(companyId, EntityId('v-bad'))?.voucher.status,
+          'draft');
+      expect(movementCount(), 1);
+
+      createVoucher('v-same', 'Stock Transfer');
+      addStockLine('v-same', 'v-same-out', -40000, rate: 0, line: 1);
+      addStockLine('v-same', 'v-same-in', 40000, rate: 0, line: 2);
+      final Result<PostingResult> same =
+          postStock('v-same', StockPolicy.allow);
+      expect(same.isErr, isTrue);
+      expect(movementCount(), 1);
+
+      // Priced transfer legs are rejected: value flows from the book.
+      // (The OUT leg must already be rate-free to be storable at all.)
+      createVoucher('v-price', 'Stock Transfer');
+      addStockLine('v-price', 'v-price-out', -40000, rate: 0, line: 1);
+      addStockLine('v-price', 'v-price-in', 40000, line: 2, godown: 'g-b');
+      final Result<PostingResult> priced =
+          postStock('v-price', StockPolicy.allow);
+      expect(priced.isErr, isTrue);
+      expect((priced as Err<PostingResult>).error.message, contains('no price'));
+      expect(movementCount(), 1);
     });
 
     test('unbalanced journal rejected; orders never post', () {

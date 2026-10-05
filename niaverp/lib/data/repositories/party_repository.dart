@@ -2,7 +2,8 @@
 // CRUD over the v9 `party` + `party_address` tables. Role vocabulary is
 // exactly the documented pair (customer/supplier); GSTIN and mobile are
 // stored as-entered text (format rules pending M17/G3 — no invented regex).
-// Ledger linkage is a nullable hook (ledger masters land with prompt 04);
+// Ledger linkage is validated when set (the ledger must exist in the same
+// company; DB §3 N:1 ledger); null stays allowed for quick-add parties.
 // price-list/salesperson linkage waits on their P2/P3 subsystems.
 // Every write is company-scoped, single-transaction, with operation + audit
 // lineage. Traceability: REG M03.3; DSS §3; DB §3; DSS-C-001/004; OD-DB-004.
@@ -126,6 +127,17 @@ class PartyRepository {
     }
     if (!kPartyRoles.contains(role)) {
       return err('validation', 'party role must be customer or supplier');
+    }
+    // Ledger hook (DB §3 N:1 ledger): when set, the ledger must exist in
+    // the same company. Null stays allowed (quick-add party before ledger).
+    if (ledgerId != null) {
+      final List<Map<String, Object?>> ledger = _db.queryArgs(
+        'SELECT ledger_id FROM ledger WHERE company_id = ? AND ledger_id = ?',
+        <Object?>[companyId.value, ledgerId],
+      );
+      if (ledger.isEmpty) {
+        return err('foreign-key', 'party ledger must exist in this company');
+      }
     }
     Party? done;
     AppError? txFailure;

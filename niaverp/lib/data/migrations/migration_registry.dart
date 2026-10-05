@@ -113,7 +113,23 @@ const List<Migration> kMigrations = <Migration>[
         'opening side/value and bill-wise flag (balances derived by query)',
     fileName: 'm013_ledger_masters.sql',
   ),
+  Migration(
+    version: 14,
+    g0Id: 'M03',
+    description: 'Ledger detail + bank masters: ledger credit limit/days, '
+        'contact/address/bank details; bank_account with ledger link and '
+        'as-entered account/IFSC/UPI (GST details wait on G3)',
+    fileName: 'm014_ledger_bank.sql',
+  ),
+  Migration(
+    version: 15,
+    g0Id: 'M13',
+    description: 'Stock valuation method + layer books: item/item-group '
+        'cost_method (fifo/wa, item overrides group, default wa); '
+        'stock_cost_layer remaining balances with backfill (no revaluation)',
+    fileName: 'm015_stock_valuation.sql',
+  ),
 ];
 
 /// Highest approved schema version.
-const int kLatestVersion = 13;
+const int kLatestVersion = 15;

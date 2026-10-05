@@ -11,11 +11,13 @@
 
 import '../application/queries/ledger.dart';
 import '../application/queries/master_search.dart';
+import '../application/queries/outstanding.dart';
 import '../application/queries/stock_levels.dart';
 import '../application/services/document_flow.dart';
 import '../application/services/numbering.dart';
 import '../application/services/voucher_engine.dart';
 import '../core/clock.dart';
+import '../core/value_objects/niav_date.dart';
 import '../data/db/niav_database.dart';
 import '../data/migrations/migration_runner.dart';
 import '../data/repositories/alias_repository.dart';
@@ -29,10 +31,13 @@ import '../data/repositories/layout_profile_repository.dart';
 import '../data/repositories/ledger_masters.dart';
 import '../data/repositories/operation_log.dart';
 import '../data/repositories/party_repository.dart';
+import '../data/repositories/period_lock.dart';
 import '../data/repositories/repository.dart';
 import '../data/repositories/unit_group_repository.dart';
 import '../data/repositories/voucher_repository.dart';
 import '../data/repositories/voucher_type_repository.dart';
+import '../presentation/shared/company_scope.dart';
+import '../presentation/shared/screen_wiring.dart';
 
 /// Static application configuration (no secrets, no business state).
 class AppConfig {
@@ -87,6 +92,8 @@ class CompositionRoot {
         DocumentLinkRepository(ctx, ops: ops, audit: audit);
     final BillAllocationRepository allocationRepo =
         BillAllocationRepository(ctx, ops: ops, audit: audit);
+    final BankAccountRepository bankRepo =
+        BankAccountRepository(ctx, ops: ops, audit: audit);
     return BackendBundle(
       database: database,
       ops: ops,
@@ -96,7 +103,10 @@ class CompositionRoot {
       accountGroups:
           AccountGroupRepository(ctx, ops: ops, audit: audit),
       ledgers: LedgerRepository(ctx, ops: ops, audit: audit),
+      banks: bankRepo,
       allocations: allocationRepo,
+      periodLocks:
+          PeriodLockRepository(ctx, ops: ops, audit: audit),
       parties: PartyRepository(ctx, ops: ops, audit: audit),
       items: ItemRepository(ctx, ops: ops, audit: audit),
       units: UnitRepository(ctx, ops: ops, audit: audit),
@@ -110,6 +120,7 @@ class CompositionRoot {
       search: MasterSearch(database),
       stock: StockLevels(database),
       books: LedgerBooks(database),
+      outstanding: OutstandingReport(database),
       numbering: SeriesNumbering(database),
       engine: VoucherEngine(
         ctx,
@@ -141,7 +152,9 @@ class BackendBundle {
     required this.fyYears,
     required this.accountGroups,
     required this.ledgers,
+    required this.banks,
     required this.allocations,
+    required this.periodLocks,
     required this.parties,
     required this.items,
     required this.units,
@@ -155,6 +168,7 @@ class BackendBundle {
     required this.search,
     required this.stock,
     required this.books,
+    required this.outstanding,
     required this.numbering,
     required this.engine,
     required this.flow,
@@ -167,7 +181,9 @@ class BackendBundle {
   final FinancialYearRepository fyYears;
   final AccountGroupRepository accountGroups;
   final LedgerRepository ledgers;
+  final BankAccountRepository banks;
   final BillAllocationRepository allocations;
+  final PeriodLockRepository periodLocks;
   final PartyRepository parties;
   final ItemRepository items;
   final UnitRepository units;
@@ -181,7 +197,34 @@ class BackendBundle {
   final MasterSearch search;
   final StockLevels stock;
   final LedgerBooks books;
+  final OutstandingReport outstanding;
   final SeriesNumbering numbering;
   final VoucherEngine engine;
   final DocumentFlow flow;
+}
+
+/// Map a wired backend to the tab scope: the repositories/queries the five
+/// destinations need, plus the caller-supplied write identity and report
+/// date. Pure mapping — no business logic.
+CompanyScope scopeOfBackend(
+  BackendBundle backend, {
+  required WriteContext write,
+  required NiavDate today,
+}) {
+  return CompanyScope(
+    companies: backend.companies,
+    parties: backend.parties,
+    items: backend.items,
+    aliases: backend.aliases,
+    search: backend.search,
+    godowns: backend.godowns,
+    stock: backend.stock,
+    outstanding: backend.outstanding,
+    vouchers: backend.vouchers,
+    types: backend.types,
+    numbering: backend.numbering,
+    engine: backend.engine,
+    write: write,
+    today: today,
+  );
 }

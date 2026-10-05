@@ -53,6 +53,47 @@ class BillAllocationRepository {
     ];
   }
 
+  /// Active allocations consuming one settlement line, oldest first
+  /// (the settlement-side mirror of [activeForSource]: what a payer/payee
+  /// line has already settled).
+  List<AllocationView> activeForSettlement(
+    CompanyId companyId,
+    EntityId settlementLineId,
+  ) {
+    final List<Map<String, Object?>> rows = _db.queryArgs(
+      'SELECT allocation_id, source_voucher_line_id, '
+      'settlement_voucher_line_id, allocated_amount_paise, status, '
+      'operation_id FROM bill_allocation WHERE company_id = ? '
+      "AND settlement_voucher_line_id = ? AND status = 'active' "
+      'ORDER BY created_at',
+      <Object?>[companyId.value, settlementLineId.value],
+    );
+    return <AllocationView>[
+      for (final Map<String, Object?> r in rows)
+        AllocationView(
+          allocationId: r['allocation_id'] as String,
+          sourceLineId: r['source_voucher_line_id'] as String,
+          settlementLineId: r['settlement_voucher_line_id'] as String,
+          amountPaise: r['allocated_amount_paise'] as int,
+          status: r['status'] as String,
+          operationId: r['operation_id'] as String,
+        ),
+    ];
+  }
+
+  /// Sum of active allocations consuming one settlement line.
+  int allocatedAgainstSettlement(
+    CompanyId companyId,
+    EntityId settlementLineId,
+  ) {
+    int total = 0;
+    for (final AllocationView a
+        in activeForSettlement(companyId, settlementLineId)) {
+      total += a.amountPaise;
+    }
+    return total;
+  }
+
   int? _lineAmount(CompanyId companyId, EntityId lineId) {
     final List<Map<String, Object?>> rows = _db.queryArgs(
       'SELECT amount_paise FROM voucher_line '

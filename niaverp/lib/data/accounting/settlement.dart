@@ -90,3 +90,29 @@ List<String> checkReversible(AllocationView? target) {
   }
   return <String>[];
 }
+
+/// Guard the settlement side of one settlement line (FR-M06-001/002):
+/// pre-existing active allocations against the line plus the new specs in
+/// this post must fit the line's permitted amount (|line total| — the
+/// payer/payee line caps what it can settle). Any remainder is the caller's
+/// advance/unallocated amount, never silently absorbed. Returns error
+/// strings; empty means reconcilable.
+List<String> checkSettlementCap({
+  required String settlementLineId,
+  required int lineTotalPaise,
+  required int preAllocatedPaise,
+  required int newAllocationsPaise,
+}) {
+  final int permitted = lineTotalPaise.abs();
+  final int wanted = preAllocatedPaise + newAllocationsPaise;
+  if (wanted < 0) {
+    return <String>['settlement $settlementLineId has impossible history'];
+  }
+  if (wanted > permitted) {
+    return <String>[
+      'over-allocation: $wanted exceeds permitted $permitted '
+      'on settlement line $settlementLineId'
+    ];
+  }
+  return <String>[];
+}

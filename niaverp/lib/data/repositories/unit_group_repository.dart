@@ -56,6 +56,7 @@ class ItemGroup {
     required this.companyId,
     this.parentId,
     required this.name,
+    this.costMethod,
     required this.createdAt,
   });
 
@@ -63,6 +64,9 @@ class ItemGroup {
   final CompanyId companyId;
   final EntityId? parentId;
   final String name;
+
+  /// Group valuation default ('fifo'/'wa'/null = unset, D-M5).
+  final String? costMethod;
   final int createdAt;
 
   static ItemGroup fromRow(Map<String, Object?> r) => ItemGroup(
@@ -72,6 +76,9 @@ class ItemGroup {
             ? null
             : EntityId(r['parent_id'] as String),
         name: r['name'] as String,
+        costMethod: r.containsKey('cost_method')
+            ? r['cost_method'] as String?
+            : null,
         createdAt: r['created_at'] as int,
       );
 }
@@ -206,7 +213,7 @@ class ItemGroupRepository {
   MigrationDb get _db => ctx.db;
 
   static const String _cols =
-      'group_id, company_id, parent_id, name, created_at';
+      'group_id, company_id, parent_id, name, cost_method, created_at';
 
   /// Maximum ancestor hops followed when validating a parent link. Bounds
   /// the walk so a corrupt pre-existing chain can never hang creation.
@@ -229,6 +236,7 @@ class ItemGroupRepository {
     required CompanyId companyId,
     EntityId? parentId,
     required String name,
+    String? costMethod,
     required String deviceId,
     required String opId,
     required String eventId,
@@ -236,6 +244,9 @@ class ItemGroupRepository {
   }) {
     if (name.isEmpty || deviceId.isEmpty) {
       return err('validation', 'group name and device id must not be empty');
+    }
+    if (costMethod != null && costMethod != 'fifo' && costMethod != 'wa') {
+      return err('validation', 'cost method must be fifo or wa');
     }
     if (parentId != null) {
       // No circular hierarchy (FR-M03-001): a group must not be its own
@@ -273,12 +284,13 @@ class ItemGroupRepository {
         final int now = ctx.clock.nowMs();
         _db.executeArgs(
           'INSERT INTO item_group (group_id, company_id, parent_id, name, '
-          'created_at) VALUES (?, ?, ?, ?, ?)',
+          'cost_method, created_at) VALUES (?, ?, ?, ?, ?, ?)',
           <Object?>[
             id.value,
             companyId.value,
             parentId?.value,
             name,
+            costMethod,
             now,
           ],
         );
@@ -317,6 +329,7 @@ class ItemGroupRepository {
           companyId: companyId,
           parentId: parentId,
           name: name,
+          costMethod: costMethod,
           createdAt: now,
         );
       });

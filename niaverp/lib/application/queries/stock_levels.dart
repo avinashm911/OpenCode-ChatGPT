@@ -28,6 +28,23 @@ class StockBalance {
   final int qtyQ4;
 }
 
+/// Live book valuation of one item in one godown: movement-derived
+/// quantity plus remaining-layer value (paise). The report consequence of
+/// posted receipts, issues, returns, adjustments and transfers.
+class StockValuation {
+  const StockValuation({
+    required this.itemId,
+    required this.godownId,
+    required this.qtyQ4,
+    required this.valuePaise,
+  });
+
+  final EntityId itemId;
+  final EntityId godownId;
+  final int qtyQ4;
+  final int valuePaise;
+}
+
 /// One persisted stock movement, newest-last in listings.
 class StockMovementView {
   const StockMovementView({
@@ -125,17 +142,41 @@ class StockLevels {
     ];
   }
 
-  /// Total layer value (paise) held for one item in one godown.
+  /// Total live layer value (paise) held for one item in one godown:
+  /// remaining balances after posted consumption (COALESCE keeps
+  /// raw-seeded pre-v15 layers readable).
   int layerValuePaise(
     CompanyId companyId,
     EntityId itemId,
     EntityId godownId,
   ) {
     final List<Map<String, Object?>> rows = _db.queryArgs(
-      'SELECT SUM(value_paise) AS v FROM stock_cost_layer '
+      'SELECT SUM(COALESCE(remaining_value_paise, value_paise)) AS v '
+      'FROM stock_cost_layer '
       'WHERE company_id = ? AND item_id = ? AND godown_id = ?',
       <Object?>[companyId.value, itemId.value, godownId.value],
     );
     return (rows.first['v'] as int?) ?? 0;
+  }
+
+  /// Valuation per (item, godown) with live book value: every balance from
+  /// [balances] joined with its remaining-layer value. Optional item/godown
+  /// filters narrow the report; scope is always the company.
+  List<StockValuation> valuation(
+    CompanyId companyId, {
+    EntityId? itemId,
+    EntityId? godownId,
+  }) {
+    final List<StockBalance> held =
+        balances(companyId, itemId: itemId, godownId: godownId);
+    return <StockValuation>[
+      for (final StockBalance b in held)
+        StockValuation(
+          itemId: b.itemId,
+          godownId: b.godownId,
+          qtyQ4: b.qtyQ4,
+          valuePaise: layerValuePaise(companyId, b.itemId, b.godownId),
+        ),
+    ];
   }
 }

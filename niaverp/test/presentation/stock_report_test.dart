@@ -125,8 +125,8 @@ void main() {
           findsOneWidget);
       expect(find.text('Screw'), findsOneWidget);
       expect(find.text('Main'), findsOneWidget);
-      // 50000 − 20000 = 30000 ×10⁻⁴ → 3.0000.
-      expect(find.text('3.0000'), findsOneWidget);
+      // 50000 − 20000 = 30000 ×10⁻⁴ → 3.0000; no layers seeded → ₹0.00.
+      expect(find.text('3.0000 · ₹0.00'), findsOneWidget);
     });
 
     testWidgets('closed database shows recoverable error with retry',

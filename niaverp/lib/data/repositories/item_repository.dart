@@ -14,7 +14,8 @@ import 'operation_log.dart';
 import 'repository.dart';
 
 /// One item row (minimal m001 shape).
-/// One item row: m001 base plus the nullable M03.8 master columns (v9).
+/// One item row: m001 base plus the nullable M03.8 master columns (v9) and
+/// the valuation-method override (v15, D-M5: item wins over group default).
 /// Price/stock-level/opening columns belong to Slice 4 and are absent here.
 class Item {
   const Item({
@@ -30,6 +31,7 @@ class Item {
     this.taxRateId,
     this.groupId,
     this.unitId,
+    this.costMethod,
   });
 
   final EntityId id;
@@ -49,6 +51,9 @@ class Item {
   final EntityId? groupId;
   final EntityId? unitId;
 
+  /// Valuation-method override ('fifo'/'wa'/null = group default, D-M5).
+  final String? costMethod;
+
   static Item fromRow(Map<String, Object?> r) => Item(
         id: EntityId(r['item_id'] as String),
         companyId: CompanyId(r['company_id'] as String),
@@ -66,6 +71,9 @@ class Item {
         unitId: r['unit_id'] == null
             ? null
             : EntityId(r['unit_id'] as String),
+        costMethod: r.containsKey('cost_method')
+            ? r['cost_method'] as String?
+            : null,
       );
 }
 
@@ -155,7 +163,7 @@ class ItemRepository {
 
   static const String _cols =
       'item_id, company_id, name, unit, created_at, code, barcode, hsn_code, '
-      'gst_rate_bps, tax_rate_id, group_id, unit_id';
+      'gst_rate_bps, tax_rate_id, group_id, unit_id, cost_method';
 
   /// Fetch one item within its company (null when absent or foreign).
   Item? get(CompanyId companyId, EntityId id) {
@@ -253,6 +261,9 @@ class ItemRepository {
   /// Set the M03.8 master columns (full replacement of the nullable set)
   /// with old/new audit lineage. Group/unit/tax links must reference rows
   /// in this company (DB FKs enforce; violations return 'foreign-key').
+  /// [costMethod] is the D-M5 valuation override ('fifo'/'wa'/null); it is
+  /// rejected when it would change the effective method of an item whose
+  /// valuation is already locked by posted layer-priced movements.
   Result<Item> updateMaster({
     required CompanyId companyId,
     required EntityId id,
@@ -263,6 +274,7 @@ class ItemRepository {
     String? taxRateId,
     EntityId? groupId,
     EntityId? unitId,
+    String? costMethod,
     required String deviceId,
     required String opId,
     required String eventId,
@@ -274,9 +286,35 @@ class ItemRepository {
     if (gstRateBps != null && (gstRateBps < 0 || gstRateBps > 10000)) {
       return err('validation', 'gst rate must be within 0..10000 bps');
     }
+    if (costMethod != null &&
+        costMethod != 'fifo' &&
+        costMethod != 'wa') {
+      return err('validation', 'cost method must be fifo or wa');
+    }
     final Item? before = get(companyId, id);
     if (before == null) {
       return err('not-found', 'item is absent in this company');
+    }
+    // Method lock (D-M5): the effective method (item override over group
+    // default, else wa) cannot change once layer-priced movements exist for
+    // the item — that would demand retro revaluation, which V1 forbids.
+    final String? locked = _lockedMethod(companyId, id);
+    if (locked != null) {
+      String? groupMethod;
+      final EntityId? newGroup = groupId;
+      if (newGroup != null) {
+        final List<Map<String, Object?>> g = _db.queryArgs(
+          'SELECT cost_method FROM item_group '
+          'WHERE company_id = ? AND group_id = ?',
+          <Object?>[companyId.value, newGroup.value],
+        );
+        if (g.isNotEmpty) groupMethod = g.first['cost_method'] as String?;
+      }
+      final String effective = costMethod ?? groupMethod ?? 'wa';
+      if (effective != locked) {
+        return err('validation',
+            'valuation method is locked by posted stock movements');
+      }
     }
     Item? done;
     AppError? txFailure;
@@ -284,8 +322,8 @@ class ItemRepository {
       _db.runInTransaction(() {
         _db.executeArgs(
           'UPDATE item SET code = ?, barcode = ?, hsn_code = ?, '
-          'gst_rate_bps = ?, tax_rate_id = ?, group_id = ?, unit_id = ? '
-          'WHERE company_id = ? AND item_id = ?',
+          'gst_rate_bps = ?, tax_rate_id = ?, group_id = ?, unit_id = ?, '
+          'cost_method = ? WHERE company_id = ? AND item_id = ?',
           <Object?>[
             code,
             barcode,
@@ -294,6 +332,7 @@ class ItemRepository {
             taxRateId,
             groupId?.value,
             unitId?.value,
+            costMethod,
             companyId.value,
             id.value,
           ],
@@ -308,6 +347,7 @@ class ItemRepository {
           if (code case final String c) 'code': c,
           if (hsnCode case final String h) 'hsn_code': h,
           if (gstRateBps case final int b) 'gst_rate_bps': b,
+          if (costMethod case final String m) 'cost_method': m,
         };
         final Result<OperationRecord> op = ops.append(
           opId: opId,
@@ -345,5 +385,22 @@ class ItemRepository {
       final AppError be = dbError(e, 'item-master-update');
       return err(be.code, be.message);
     }
+  }
+
+  /// Effective locked method for [id], or null when no layer-priced
+  /// outbound movement exists yet (D-M5 lock binds at first priced issue,
+  /// not at receipt — receipts are method-agnostic). Latest priced movement
+  /// wins so pre-lock legacy data degrades gracefully.
+  String? _lockedMethod(CompanyId companyId, EntityId id) {
+    final List<Map<String, Object?>> rows = _db.queryArgs(
+      'SELECT cost_source FROM stock_movement '
+      'WHERE company_id = ? AND item_id = ? '
+      "AND cost_source IN ('average', 'fifo', 'fifo-fallback') "
+      'ORDER BY created_at DESC, movement_id DESC LIMIT 1',
+      <Object?>[companyId.value, id.value],
+    );
+    if (rows.isEmpty) return null;
+    final String source = rows.first['cost_source'] as String;
+    return source == 'average' ? 'wa' : 'fifo';
   }
 }
