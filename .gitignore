@@ -16,6 +16,9 @@ niaverp/.flutter-plugins-dependencies
 .dart_tool/
 build/
 
+# Local SDK/tool downloads
+tools/flutter/
+
 # IDE
 .idea/
 .vscode/

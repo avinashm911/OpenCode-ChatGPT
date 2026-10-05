@@ -1,1 +1,0 @@
-import fs from 'node:fs/promises'; const f='NiAv_UI_UX_Specification_Document_v0.1.html'; let h=await fs.readFile(f,'utf8'); h=h.replace('<strong>Version:</strong> v0.6','<strong>Version:</strong> v0.5'); await fs.writeFile(f,h,'utf8'); console.log('UIUX header aligned');
