@@ -1,0 +1,480 @@
+{
+  "source": "E:/NiavERP v2 OpenAI/outputs/01a0f1dd-b8a2-7ba3-9346-01abef17f993/NiAv_G0_Exception_Register_v0.1.xlsx",
+  "date": "2026-10-01",
+  "documents": [
+    {
+      "key": "REG",
+      "file": "NiAv_ Modules & Sub-Modules Register v0.4.html",
+      "version": "v0.6",
+      "rows": 9
+    },
+    {
+      "key": "SEC",
+      "file": "NiAv_ Security & Anti-Exploitation Plan (V1) v0.4.html",
+      "version": "v0.6",
+      "rows": 8
+    },
+    {
+      "key": "MPL",
+      "file": "NiAv_ Universal Master Plan v0.2.html",
+      "version": "v0.4",
+      "rows": 12
+    },
+    {
+      "key": "ZCP",
+      "file": "NiAv_ Zero-Cost Strategy Plan (V1) v0.5.html",
+      "version": "v0.7",
+      "rows": 10
+    },
+    {
+      "key": "DSS",
+      "file": "NiAv_Data_Schema_Specification_v0.1.html",
+      "version": "v0.3",
+      "rows": 13
+    },
+    {
+      "key": "DB",
+      "file": "NiAv_Database_Schema_Document_v0.1.html",
+      "version": "v0.3",
+      "rows": 12
+    },
+    {
+      "key": "FGA",
+      "file": "NiAv_Fit-Gap_Analysis_Workaround_Register_v0.1.html",
+      "version": "v0.3",
+      "rows": 10
+    },
+    {
+      "key": "FDD",
+      "file": "NiAv_Functional_Design_Document_v0.1.html",
+      "version": "v0.3",
+      "rows": 9
+    },
+    {
+      "key": "FRD",
+      "file": "NiAv_Functional_Requirements_Input_Data_v0.1.html",
+      "version": "v0.3",
+      "rows": 15
+    },
+    {
+      "key": "RSP",
+      "file": "NiAv_Release_and_Support_Playbook_v0.1.html",
+      "version": "v0.3",
+      "rows": 4
+    },
+    {
+      "key": "RTM",
+      "file": "NiAv_Requirements_Traceability_Matrix_v0.1.html",
+      "version": "v0.3",
+      "rows": 10
+    },
+    {
+      "key": "SYNC",
+      "file": "NiAv_Sync_Protocol_Specification_v0.1.html",
+      "version": "v0.3",
+      "rows": 2
+    },
+    {
+      "key": "TEST",
+      "file": "NiAv_Test_Plan_and_Test_Data_Plan_v0.1.html",
+      "version": "v0.3",
+      "rows": 13
+    },
+    {
+      "key": "UIUX",
+      "file": "NiAv_UI_UX_Specification_Document_v0.1.html",
+      "version": "v0.3",
+      "rows": 6
+    },
+    {
+      "key": "UX",
+      "file": "NiAv_UX_Specification_v0.2.html",
+      "version": "v0.4",
+      "rows": 9
+    }
+  ],
+  "rows": [
+    {
+      "id": "G0-OWN-001",
+      "category": "Owner action required",
+      "source": "D-12",
+      "topic": "Single APK vs flavours",
+      "effective": "Confirm single APK with runtime edition gating, or override with the approved flavour model.",
+      "status": "Decided",
+      "gate": "G5",
+      "notes": "",
+      "affected": "SEC §16; workbook Decisions row D-12",
+      "matchIds": [
+        "G0-OWN-001",
+        "D-12"
+      ]
+    },
+    {
+      "id": "G0-OWN-002",
+      "category": "Owner action required",
+      "source": "OD-UI-003 / FR-M02-002",
+      "topic": "Voice input feasibility",
+      "effective": "Rejected",
+      "status": "Rejected",
+      "gate": "R3",
+      "notes": "",
+      "affected": "FRD; UIUX; UX",
+      "matchIds": [
+        "G0-OWN-002",
+        "OD-UI-003",
+        "FR-M02-002"
+      ]
+    },
+    {
+      "id": "G0-DEF-001",
+      "category": "Deferred item",
+      "source": "O-FG-006 / A-FG-006 / O-13",
+      "topic": "Tally/Busy native adapters",
+      "effective": "Owner confirmed deferment: Confirm the R3 feasibility gate and evidence required.",
+      "status": "Deferred — R3",
+      "gate": "R3",
+      "notes": "",
+      "affected": "FGA; FDD; FRD; REG",
+      "matchIds": [
+        "G0-DEF-001",
+        "O-FG-006",
+        "A-FG-006",
+        "O-13"
+      ]
+    },
+    {
+      "id": "G0-DEF-002",
+      "category": "Deferred item",
+      "source": "O-FG-007 / O-FG-008",
+      "topic": "TDS/TCS and PF/ESI",
+      "effective": "Owner confirmed deferment: Confirm the later-release gate for TDS/TCS and removal from V1 traceability.",
+      "status": "Deferred — Later release",
+      "gate": "Later release",
+      "notes": "",
+      "affected": "REG; MPL; ZCP; FRD; RTM",
+      "matchIds": [
+        "G0-DEF-002",
+        "O-FG-007",
+        "O-FG-008"
+      ]
+    },
+    {
+      "id": "G0-DEF-003",
+      "category": "Deferred item",
+      "source": "O-M08",
+      "topic": "Automatic cross-script transliteration",
+      "effective": "Owner confirmed deferment: Confirm the R2 gate and keep automatic transliteration out of V1 acceptance criteria.",
+      "status": "Deferred — R2",
+      "gate": "R2",
+      "notes": "",
+      "affected": "MPL; UX",
+      "matchIds": [
+        "G0-DEF-003",
+        "O-M08"
+      ]
+    },
+    {
+      "id": "G0-VER-001",
+      "category": "Verification evidence missing",
+      "source": "V-FG-001 / D-06",
+      "topic": "Encrypted SQLite library for Drift on Android 8+",
+      "effective": "Owner confirmed: Attach official library/version/licence and Android 8 compatibility evidence.",
+      "status": "Evidence still required — owner confirmed action",
+      "gate": "G0",
+      "notes": "",
+      "affected": "ZCP; SEC; FGA",
+      "matchIds": [
+        "G0-VER-001",
+        "V-FG-001",
+        "D-06"
+      ]
+    },
+    {
+      "id": "G0-VER-002",
+      "category": "Verification evidence missing",
+      "source": "GST rounding / D-M4",
+      "topic": "GST rounding rules",
+      "effective": "Owner confirmed: Attach the rule source and a passing golden rounding fixture.",
+      "status": "Evidence still required — owner confirmed action",
+      "gate": "G0",
+      "notes": "",
+      "affected": "MPL; DSS; DB; TEST",
+      "matchIds": [
+        "G0-VER-002",
+        "D-M4"
+      ]
+    },
+    {
+      "id": "G0-VER-003",
+      "category": "Verification evidence missing",
+      "source": "V-FG-001 / O-FG-002/O-FG-003",
+      "topic": "GST, e-invoice and e-way schemas",
+      "effective": "Owner confirmed: Attach official schema/version evidence and update verification logs.",
+      "status": "Evidence still required — owner confirmed action",
+      "gate": "G3",
+      "notes": "",
+      "affected": "FGA; REG; ZCP; TEST",
+      "matchIds": [
+        "G0-VER-003",
+        "V-FG-001",
+        "O-FG-002",
+        "O-FG-003"
+      ]
+    },
+    {
+      "id": "G0-VER-004",
+      "category": "Verification evidence missing",
+      "source": "R-04",
+      "topic": "WhatsApp/email APK delivery limits",
+      "effective": "Owner confirmed: Attach channel limits and a successful APK/ZIP/checksum delivery test.",
+      "status": "Evidence still required — owner confirmed action",
+      "gate": "G5",
+      "notes": "",
+      "affected": "ZCP; RSP; FGA",
+      "matchIds": [
+        "G0-VER-004",
+        "R-04"
+      ]
+    },
+    {
+      "id": "G0-VER-005",
+      "category": "Verification evidence missing",
+      "source": "D-06 / SEC §5",
+      "topic": "Android Keystore behaviour on Android 8",
+      "effective": "Owner confirmed: Attach Android 8 Keystore test result and key-wrap behaviour.",
+      "status": "Evidence still required — owner confirmed action",
+      "gate": "G0",
+      "notes": "",
+      "affected": "SEC; ZCP; TEST",
+      "matchIds": [
+        "G0-VER-005",
+        "D-06"
+      ]
+    },
+    {
+      "id": "G0-VER-006",
+      "category": "Verification evidence missing",
+      "source": "O-M07 / OD-008",
+      "topic": "Printer compatibility",
+      "effective": "Owner confirmed: Attach results for the supported ESC/POS/PDF printer matrix.",
+      "status": "Evidence still required — owner confirmed action",
+      "gate": "G5",
+      "notes": "",
+      "affected": "REG; FRD; TEST; UIUX",
+      "matchIds": [
+        "G0-VER-006",
+        "O-M07"
+      ]
+    },
+    {
+      "id": "G0-VER-007",
+      "category": "Verification evidence missing",
+      "source": "O-14 / R-13",
+      "topic": "Indian data-protection obligations",
+      "effective": "Owner confirmed: Attach the reviewed source and the resulting local-only/minimal-collection control mapping.",
+      "status": "Evidence still required — owner confirmed action",
+      "gate": "G5",
+      "notes": "",
+      "affected": "ZCP; REG; SEC",
+      "matchIds": [
+        "G0-VER-007",
+        "O-14",
+        "R-13"
+      ]
+    },
+    {
+      "id": "G0-VER-008",
+      "category": "Verification evidence missing",
+      "source": "V-FG-003",
+      "topic": "Android file-provider/share/restore",
+      "effective": "Owner confirmed: Attach target Android test results for backup, restore, share and file-provider behaviour.",
+      "status": "Evidence still required — owner confirmed action",
+      "gate": "G5",
+      "notes": "",
+      "affected": "FGA; SEC; RSP; TEST",
+      "matchIds": [
+        "G0-VER-008",
+        "V-FG-003"
+      ]
+    },
+    {
+      "id": "G0-CON-001",
+      "category": "Body contradiction",
+      "source": "O-FG-007 / O-FG-008",
+      "topic": "Statutory scope wording",
+      "effective": "Make V1 text authoritative: TDS/TCS later release; PF/ESI/payroll out of scope.",
+      "status": "Decided",
+      "gate": "G0",
+      "notes": "",
+      "affected": "MPL; ZCP; REG; FRD; RTM",
+      "matchIds": [
+        "G0-CON-001",
+        "O-FG-007",
+        "O-FG-008"
+      ]
+    },
+    {
+      "id": "G0-CON-002",
+      "category": "Body contradiction",
+      "source": "O-FG-006 / A-FG-006",
+      "topic": "Tally/Busy import wording",
+      "effective": "Replace V1 native-import promise with the Excel-template boundary.",
+      "status": "Decided",
+      "gate": "G0",
+      "notes": "",
+      "affected": "REG; FDD; FRD; FGA; RTM",
+      "matchIds": [
+        "G0-CON-002",
+        "O-FG-006",
+        "A-FG-006"
+      ]
+    },
+    {
+      "id": "G0-CON-003",
+      "category": "Body contradiction",
+      "source": "RSP 5 / DSS-C-007",
+      "topic": "Rollback procedure",
+      "effective": "Retain one authoritative rollback procedure and cross-link all references.",
+      "status": "Decided",
+      "gate": "G5",
+      "notes": "",
+      "affected": "RSP; DSS; TEST",
+      "matchIds": [
+        "G0-CON-003"
+      ]
+    },
+    {
+      "id": "G0-CON-004",
+      "category": "Body contradiction",
+      "source": "SYNC 6 / OD-DB-006",
+      "topic": "Master-data conflict rule",
+      "effective": "Rewrite the body rule once and remove the contradictory alternative.",
+      "status": "Decided",
+      "gate": "S1",
+      "notes": "",
+      "affected": "SYNC; DSS; DB; UX",
+      "matchIds": [
+        "G0-CON-004",
+        "OD-DB-006"
+      ]
+    },
+    {
+      "id": "G0-CON-005",
+      "category": "Body contradiction",
+      "source": "OD-UI-001",
+      "topic": "Navigation hierarchy",
+      "effective": "Retire the superseded navigation variants in body sections and keep one five-item model.",
+      "status": "Decided",
+      "gate": "G0",
+      "notes": "",
+      "affected": "MPL; UIUX; UX; RTM; TEST",
+      "matchIds": [
+        "G0-CON-005",
+        "OD-UI-001"
+      ]
+    },
+    {
+      "id": "G0-SCH-001",
+      "category": "Schema design gap",
+      "source": "D-M5 / D-08 / OD-DB-002",
+      "topic": "FIFO cost layers and negative-stock costing",
+      "effective": "Approved: Add cost-layer and stock-movement structures plus negative-stock costing/reconciliation rules.",
+      "status": "Approved design change — implementation required",
+      "gate": "G1",
+      "notes": "",
+      "affected": "DB; DSS; FRD; TEST",
+      "matchIds": [
+        "G0-SCH-001",
+        "D-M5",
+        "D-08",
+        "OD-DB-002"
+      ]
+    },
+    {
+      "id": "G0-SCH-002",
+      "category": "Schema design gap",
+      "source": "D-M5",
+      "topic": "Period locks",
+      "effective": "Approved: Add period-lock entity, rights, unlock reason and audit linkage.",
+      "status": "Approved design change — implementation required",
+      "gate": "G1",
+      "notes": "",
+      "affected": "DB; DSS; FDD; UIUX; TEST",
+      "matchIds": [
+        "G0-SCH-002",
+        "D-M5"
+      ]
+    },
+    {
+      "id": "G0-SCH-003",
+      "category": "Schema design gap",
+      "source": "FR-M06",
+      "topic": "Bill-wise settlement",
+      "effective": "Approved: Add bill_allocation and settlement lineage fields and tests.",
+      "status": "Approved design change — implementation required",
+      "gate": "G1",
+      "notes": "",
+      "affected": "DB; DSS; FRD; TEST",
+      "matchIds": [
+        "G0-SCH-003",
+        "FR-M06"
+      ]
+    },
+    {
+      "id": "G0-SCH-004",
+      "category": "Schema design gap",
+      "source": "MPL 7.4 / profiles",
+      "topic": "Tax, HSN and layout profiles",
+      "effective": "Approved: Add effective-dated tax/HSN and synced/backed-up layout-profile structures.",
+      "status": "Approved design change — implementation required",
+      "gate": "G1",
+      "notes": "",
+      "affected": "DB; DSS; MPL; FRD; UIUX",
+      "matchIds": [
+        "G0-SCH-004"
+      ]
+    },
+    {
+      "id": "G0-SCH-005",
+      "category": "Schema design gap",
+      "source": "SYNC 3/6",
+      "topic": "Record and operation versioning",
+      "effective": "Approved: Add record version, operation.base_version and operation.dependencies consistently.",
+      "status": "Approved design change — implementation required",
+      "gate": "S1",
+      "notes": "",
+      "affected": "DB; DSS; SYNC; TEST",
+      "matchIds": [
+        "G0-SCH-005"
+      ]
+    },
+    {
+      "id": "G0-SCH-006",
+      "category": "Schema design gap",
+      "source": "SEC licence controls",
+      "topic": "Trial anchor and denylist storage",
+      "effective": "Approved: Add storage and lifecycle rules for trial anchor, denylist and audit evidence.",
+      "status": "Approved design change — implementation required",
+      "gate": "G0",
+      "notes": "",
+      "affected": "DB; DSS; SEC; TEST",
+      "matchIds": [
+        "G0-SCH-006"
+      ]
+    },
+    {
+      "id": "G0-SCH-007",
+      "category": "Schema design gap",
+      "source": "FRD voucher lines",
+      "topic": "Voucher-line discount",
+      "effective": "Approved: Add discount fields, calculation rules and golden voucher tests.",
+      "status": "Approved design change — implementation required",
+      "gate": "G1",
+      "notes": "",
+      "affected": "DB; DSS; FRD; UX; TEST",
+      "matchIds": [
+        "G0-SCH-007"
+      ]
+    }
+  ]
+}

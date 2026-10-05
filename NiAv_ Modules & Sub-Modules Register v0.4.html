@@ -1,0 +1,2196 @@
+﻿<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}</style><style>:root{color-scheme:light dark;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}}:root[data-theme="dark"]{color-scheme:dark;--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}:root[data-theme="light"]{color-scheme:light}@media print{:root,:root[data-theme="dark"]{color-scheme:light;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}}body{background:var(--md-bg);color:var(--md-text);max-width:720px;margin:0 auto;padding:32px;display:flex;flex-direction:column;gap:10px;font:14px/1.55 -apple-system,BlinkMacSystemFont,'SF Pro','Segoe UI',sans-serif;overflow-wrap:break-word}body>:first-child{margin-top:0}h1,h2,h3,h4,h5,h6{margin:6px 0 0;line-height:1.25;font-weight:600;text-wrap:balance}h1{font-size:1.35em}h2{font-size:1.15em;color:var(--md-muted)}h3,h4,h5,h6{font-size:1em}p,ul,ol,blockquote,table,pre,hr{margin:0}strong{font-weight:600}a{color:var(--md-link);text-decoration:none}a:hover{text-decoration:underline}ul,ol{display:flex;flex-direction:column;gap:6px;padding-left:22px}ul{list-style:disc}ol{list-style:decimal}:is(li,td,th)>*+:is(p,ul,ol,blockquote){margin-top:6px}blockquote{display:flex;flex-direction:column;gap:10px;border-left:2px solid var(--md-rule);padding-left:10px;color:var(--md-muted)}:not(pre)>code{background:var(--md-fill);padding:1px 3px;border-radius:4px;font:.92em 'SF Mono',ui-monospace,Menlo,Consolas,monospace}a>code{background:none;color:inherit}pre{background:var(--md-fill);padding:10px 12px;border-radius:6px;overflow-x:auto;font:12px/1.5 'SF Mono',ui-monospace,Menlo,Consolas,monospace;margin-block:4px}pre code{background:none;padding:0;font:inherit}table{width:100%;border-collapse:separate;border-spacing:2px;font:inherit}th,td{padding:6px 8px;border-radius:3px;text-align:left;vertical-align:top}th{background:var(--md-fill-strong);font-weight:600}td{background:var(--md-fill)}:is(th,td) :not(pre)>code{background:transparent}hr{border:0;border-top:1px solid var(--md-rule-strong);margin-block:10px}img{max-width:100%;height:auto;border-radius:4px}</style>
+</head><body><section id="niav-g0-final-cleanup-v5"><h2>G0 Final Cleanup — 2026-10-03</h2><p>Voice input is rejected for V1. The owner-approved navigation model is Home, Billing, Parties &amp; Items, Reports, More. Source-baseline tables are frozen snapshots of versions at authoring time.</p><table><tr><th>Version</th><th>Date</th><th>Change</th></tr><tr><td>v0.9</td><td>2026-10-03</td><td>Final voice/navigation cleanup, header alignment and source-baseline snapshot clarification.</td></tr></table></section><section id="niav-g0-nav-voice-v3"><h2>G0 Navigation and Voice Correction — 2026-10-03</h2><p>Navigation is Home, Billing, Parties &amp; Items, Reports, More. Voice input is rejected and is not a V1 capability or conditional UI affordance. Source-baseline references and historical rows were repaired without global version replacement.</p><table><tr><th>Version</th><th>Date</th><th>Change</th></tr><tr><td>v0.9</td><td>2026-10-03</td><td>Corrected navigation variants, rejected voice-input wording and affected cross-document version references.</td></tr></table></section><section id="niav-g0-correction-v2"><h2>G0 Correction Update — 2026-10-03</h2><p>Active body text corrected after the independent audit. Historical records are retained as history; the active requirements are the corrected statements.</p><table><tr><th>Version</th><th>Date</th><th>Change</th></tr><tr><td>v0.8</td><td>2026-10-03</td><td>Corrected audited body-text residue for G0-CON-001 through G0-CON-005; corrected voice-input rejection and added explicit active change log.</td></tr></table></section><section id="niav-g0-body-corrections"><h2>G0 Body-Text Corrections — 2026-10-03</h2><p>Authoritative corrections applied for G0-CON-001 through G0-CON-005. These corrections supersede contradictory historical wording in the active body. Historical change logs remain historical records.</p><ul><li>CON-001: TDS/TCS is later-release; PF/ESI and payroll are out of scope for V1.</li><li>CON-002: Tally/Busy native import is R3 feasibility only; V1 uses approved Excel templates.</li><li>CON-003: rollback is uninstall current APK, install previous APK, restore external backup; in-place downgrade is unsupported.</li><li>CON-004: master-data sync uses field merge; host arrival wins on same-field clash and the loser is logged.</li><li>CON-005: navigation label is Billing.</li></ul></section><section id="niav-g0-verification-evidence"><h2>G0 Verification Evidence — 2026-10-01</h2><p>Eight verification records are attached in <code>NiAv_G0_Verification_Evidence_Register_v0.1.xlsx</code>. Documentary sources are recorded where available. No execution result is represented as passed until the named fixture, device, adapter or physical test is attached.</p><table><thead><tr><th>Record</th><th>Subject</th><th>Disposition</th></tr></thead><tbody><tr><td>V-FG-001</td><td>SQLCipher/Drift Android 8+</td><td>Documentary source attached; Android 8 smoke test pending</td></tr><tr><td>GST-RND-001</td><td>GST rounding</td><td>Official rule attached; golden fixture pending</td></tr><tr><td>V-FG-003</td><td>GST/e-invoice/e-way schemas</td><td>Official e-way API/schema sources attached; adapter test pending</td></tr><tr><td>R-04</td><td>WhatsApp/email delivery</td><td>Official channel limits attached; delivery/checksum test pending</td></tr><tr><td>D-06</td><td>Android Keystore Android 8</td><td>Official API source attached; device test pending</td></tr><tr><td>O-M07</td><td>Printer compatibility</td><td>Three-printer physical test required</td></tr><tr><td>O-14/R-13</td><td>DPDP obligations</td><td>Official Act source attached; control/legal review pending</td></tr><tr><td>V-FG-003</td><td>File-provider/share/restore</td><td>Platform test required</td></tr></tbody></table></section><section id="niav-g0-final-signoff"><h2>Final G0 Sign-off — Conditional</h2><p><strong>Decision:</strong> Conditional G0 acceptance of the reconciled design baseline on 2026-10-01. Owner decisions and deferred gates are recorded, the seven schema changes are approved for implementation, and the eight verification records are registered with sources or explicit execution requirements.</p><p><strong>Not yet production-release accepted:</strong> device/printer/adapter/fixture evidence, schema migrations and the resulting regression execution remain open. Final unconditional sign-off requires those records to be attached and the RTM/test plan rerun with passing results.</p></section><section id="niav-g0-final-reconciliation" data-generated-by="niav_apply_g0_register.mjs"><h2>G0 Final Reconciliation — v0.9</h2><p>Source: NiAv G0 Exception Register v0.1.xlsx, owner inputs applied on 2026-10-01. Confirmed verification actions remain evidence-required; approved schema gaps remain implementation/design work. This section is authoritative for the current G0 disposition while prior history is retained.</p><table class="niav-g0-final-table"><thead><tr><th>Exception</th><th>Category</th><th>Source</th><th>Final status</th><th>Applied value/action</th><th>Gate</th><th>Owner notes</th></tr></thead><tbody><tr><td><code>G0-DEF-001</code></td><td>Deferred item</td><td>O-FG-006 / A-FG-006 / O-13</td><td>Deferred — R3</td><td>Owner confirmed deferment: Confirm the R3 feasibility gate and evidence required.</td><td>R3</td><td></td></tr><tr><td><code>G0-DEF-002</code></td><td>Deferred item</td><td>O-FG-007 / O-FG-008</td><td>Deferred — Later release</td><td>Owner confirmed deferment: Confirm the later-release gate for TDS/TCS and removal from V1 traceability.</td><td>Later release</td><td></td></tr><tr><td><code>G0-VER-003</code></td><td>Verification evidence missing</td><td>V-FG-001 / O-FG-002/O-FG-003</td><td>Evidence still required — owner confirmed action</td><td>Owner confirmed: Attach official schema/version evidence and update verification logs.</td><td>G3</td><td></td></tr><tr><td><code>G0-VER-006</code></td><td>Verification evidence missing</td><td>O-M07 / OD-008</td><td>Evidence still required — owner confirmed action</td><td>Owner confirmed: Attach results for the supported ESC/POS/PDF printer matrix.</td><td>G5</td><td></td></tr><tr><td><code>G0-VER-007</code></td><td>Verification evidence missing</td><td>O-14 / R-13</td><td>Evidence still required — owner confirmed action</td><td>Owner confirmed: Attach the reviewed source and the resulting local-only/minimal-collection control mapping.</td><td>G5</td><td></td></tr><tr><td><code>G0-CON-001</code></td><td>Body contradiction</td><td>O-FG-007 / O-FG-008</td><td>Decided</td><td>Make V1 text authoritative: TDS/TCS later release; PF/ESI/payroll out of scope.</td><td>G0</td><td></td></tr><tr><td><code>G0-CON-002</code></td><td>Body contradiction</td><td>O-FG-006 / A-FG-006</td><td>Decided</td><td>Replace V1 native-import promise with the Excel-template boundary.</td><td>G0</td><td></td></tr><tr><td><code>G0-SCH-001</code></td><td>Schema design gap</td><td>D-M5 / D-08 / OD-DB-002</td><td>Approved design change — implementation required</td><td>Approved: Add cost-layer and stock-movement structures plus negative-stock costing/reconciliation rules.</td><td>G1</td><td></td></tr><tr><td><code>G0-SCH-002</code></td><td>Schema design gap</td><td>D-M5</td><td>Approved design change — implementation required</td><td>Approved: Add period-lock entity, rights, unlock reason and audit linkage.</td><td>G1</td><td></td></tr></tbody></table></section>
+<section id="niav-workbook-reconciliation" data-generated-by="niav_reconcile_workbook.mjs"><h2>Workbook Reconciliation — v0.9</h2><p>Source: NiAv_Decisions_Workbook_v0.1.xlsx Decisions sheet. Effective value and final status are authoritative for this reconciliation. Original history is retained; deferred and verification-dependent items are not represented as closed.</p><h3>Workbook-authoritative decision integration</h3><table class="niav-reconciliation-table"><thead><tr><th>ID(s)</th><th>Topic</th><th>Effective value</th><th>Final status</th><th>Gate</th></tr></thead><tbody><tr><td><code>D-09 / O-03 / O-M03</code></td><td>10-second bill benchmark</td><td>From New Bill to Pay &amp; Finish (cash): &lt;=10 s and &lt;=10 touch interactions; scripted harness + 3 volunteer timings; fixture TD-PERF-01 (5,000 items, 500 parties, 20,000 vouchers)</td><td>Decided: proposed value</td><td>G2</td></tr><tr><td><code>O-M03</code></td><td>Search latency target</td><td>p95 &lt;=200 ms keystroke-to-results on 5,000-item fixture (Android 12-13); &lt;=400 ms on reference low-end device</td><td>Decided: proposed value</td><td>G2</td></tr><tr><td><code>D-05 / D-R5</code></td><td>Android-only V1</td><td>Accepted: Android-only V1</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>D-R7</code></td><td>Priority-driven phasing</td><td>P1/P2/P3 govern phasing; features may slip to R2 if a gate fails</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>O-14</code></td><td>Data hosting / privacy</td><td>Local-only storage; minimal data collection; no telemetry; Indian data-protection obligations to be checked</td><td>Decided: proposed value</td><td>G5</td><div class="niav-g0-applied" data-g0-applied="G0-VER-007"><strong>G0 Evidence still required — owner confirmed action:</strong> Owner confirmed: Attach the reviewed source and the resulting local-only/minimal-collection control mapping.</div></tr><tr><td><code>D-M5 / D-08 / D-FG-013 / O-09 / OD-004 / OD-FD-001</code></td><td>Valuation policy</td><td>(1) Methods: Weighted Average and FIFO only. (2) Item overrides group; default Weighted Average. (3) Method locked after first posted stock movement; no change in V1. (4) Negative stock allowed with warning; no-layer issues costed at last known cost; no retro revaluation in V1. (5) Period lock by date; unlock needs right + reason + audit. (6) Orders never reserve stock (D-M6 = No). (7) Golden ledgers: opening, purchase, sale, returns, adjustment, negative-stock sale, lock/unlock</td><td>Decided: proposed value</td><td>G1</td><div class="niav-g0-applied" data-g0-applied="G0-SCH-001"><strong>G0 Approved design change — implementation required:</strong> Approved: Add cost-layer and stock-movement structures plus negative-stock costing/reconciliation rules.</div><div class="niav-g0-applied" data-g0-applied="G0-SCH-002"><strong>G0 Approved design change — implementation required:</strong> Approved: Add period-lock entity, rights, unlock reason and audit linkage.</div></tr><tr><td><code>OD-001 / O-08</code></td><td>Voucher series scope and gap policy</td><td>Invoice will have limited series, as CA advice on keeping number of invoice series to be minimum</td><td>Decided: owner value</td><td>G1</td></tr><tr><td><code>O-FG-005</code></td><td>Matching tolerance</td><td>Auto-match only if amount exact (0 paise) AND reference unique; otherwise suggestions with date window +/-3 days (cheques +/-7); user always confirms; CSV/XLSX first, PDF later</td><td>Decided: proposed value</td><td>R2</td></tr><tr><td><code>D-04 / O-05 / D-FG-014</code></td><td>Post-expiry behaviour and entitlement matrix</td><td>10-day grace with full function + daily reminder, then read-only + export + backup; data never deleted; entitlements.json (edition x term x trial x grace x limits) is single source for gates and tests</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>D-11 / D-13 / A-R2</code></td><td>Trial edition</td><td>Trial 3 months, full feature set of installed release (R1a = Simple features; R1b+ = Advanced). On trial end buying Simple keeps Advanced data read-only/exportable</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>D-10 / O-06 / O-15 / OD-007</code></td><td>Simple vs Advanced boundary</td><td>Simple (R1a): masters, P1 dual+accounting vouchers, Delivery Note, Stock Transfer/Journal, basic quotation/order, Quick Bill, search, core reports, GST reports, Excel import/export, backup, en/hi/gu, 1 device. Advanced (R1b+): all Simple + multi-user/roles, approvals, document-flow automation, Material Issue/Receive, batch/expiry, price lists, multi-godown reports, LAN/hotspot + file sync, audit/admin tools</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>O-15 / OD-007</code></td><td>Device and user limits</td><td>Advanced: up to 5 devices and 10 users per company; Simple: 1 device, up to 3 users. S3 only tests 3 devices: certify 5 until larger fleet tested.</td><td>Decided: owner value</td><td>S3</td></tr><tr><td><code>D-14</code></td><td>Monthly licence model</td><td>Prepaid keys carrying an expiry date (1/3/6/12 months or lifetime); no monthly re-issue</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>D-15 / D-R2 / O-04</code></td><td>Meaning of 'Lifetime'</td><td>yes V1.x patches count as upgrades</td><td>Decided: owner value</td><td>Go-live</td></tr><tr><td><code>D-FG-012</code></td><td>External payment to signed licence</td><td>reissue limit - 20</td><td>Decided: owner value</td><td>Go-live</td></tr><tr><td><code>O-10 / O-FG-002 / O-FG-003</code></td><td>E-invoice / e-way bill</td><td>Stay in R3 as JSON export/manual upload (Level 0-4); capture IRN/ack/e-way fields in data model from R1a; GST return JSON stays R1a</td><td>Decided: proposed value</td><td>G3</td><div class="niav-g0-applied" data-g0-applied="G0-VER-003"><strong>G0 Evidence still required — owner confirmed action:</strong> Owner confirmed: Attach official schema/version evidence and update verification logs.</div></tr><tr><td><code>O-FG-007 / O-FG-008</code></td><td>TDS/TCS and PF/ESI</td><td>TDS/TCS deferred to later release; PF/ESI and payroll out of scope; remove from V1 scope text and RTM</td><td>Decided: proposed value</td><td>G0</td><div class="niav-g0-applied" data-g0-applied="G0-DEF-002"><strong>G0 Deferred — Later release:</strong> Owner confirmed deferment: Confirm the later-release gate for TDS/TCS and removal from V1 traceability.</div><div class="niav-g0-applied" data-g0-applied="G0-CON-001"><strong>G0 Decided:</strong> Make V1 text authoritative: TDS/TCS later release; PF/ESI/payroll out of scope.</div></tr><tr><td><code>O-FG-006 / A-FG-006 / O-13</code></td><td>Tally/Busy native import</td><td>V1/R2: Excel import with documented templates; native adapters = R3 feasibility; FG-006 marked Deferred</td><td>Decided: proposed value</td><td>G4</td><div class="niav-g0-applied" data-g0-applied="G0-DEF-001"><strong>G0 Deferred — R3:</strong> Owner confirmed deferment: Confirm the R3 feasibility gate and evidence required.</div><div class="niav-g0-applied" data-g0-applied="G0-CON-002"><strong>G0 Decided:</strong> Replace V1 native-import promise with the Excel-template boundary.</div></tr><tr><td><code>O-12 / O-M07 / OD-008</code></td><td>Printing hardware</td><td>Bluetooth ESC/POS thermal 58 mm and 80 mm + PDF via Android print/share for A4/A5; Indic text rendered as raster image; USB/Wi-Fi printers later; test on &gt;=3 printers; failures visible</td><td>Decided: proposed value</td><td>G5</td><div class="niav-g0-applied" data-g0-applied="G0-VER-006"><strong>G0 Evidence still required — owner confirmed action:</strong> Owner confirmed: Attach results for the supported ESC/POS/PDF printer matrix.</div></tr><tr><td><code>O-07 / OD-FD-004 / OD-UI-004</code></td><td>Approval scope</td><td>Single-level approval by amount threshold and voucher type; no parallel; maker may recall before action; dashboard badge + inbox; no push notifications in V1; approval never bypasses posting validation</td><td>Decided: proposed value</td><td>R1b</td></tr><tr><td><code>O-06</code></td><td>Admin module scope</td><td>R1b admin = users, roles/rights, audit viewer, voucher controls, period locks, device/pairing management, rebuild utility</td><td>Decided: proposed value</td><td>R1b</td></tr><tr><td><code>O-11</code></td><td>Industry presets</td><td>In scope; delivered in R2</td><td>Decided: proposed value</td><td>R2</td></tr><tr><td><code>O-FG-011</code></td><td>Payment reminders</td><td>Prepare -&gt; preview -&gt; user-initiated share; status Prepared / Sent-by-user / Not-sent per item</td><td>Decided: proposed value</td><td>R1b</td></tr><tr><td><code>Gates</code></td><td>Gate definitions</td><td>MPL 11.4 authoritative; rewrite TEST 6 with MPL gate numbers and add G4, G5, G6</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>R-XX / WP-XX / O-XX / D-XX / A-XX</code></td><td>Placeholder closures</td><td>Withdraw: not real IDs; remove from all ledgers</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>FG-002 / 003 / 004</code></td><td>Statutory schema verification</td><td>Verify GST/e-invoice/e-way schemas from official sources; record in verification logs</td><td>Decided: owner value</td><td>G1</td></tr><tr><td><code>COMMERCIAL</code></td><td>Pricing, AMC price and content, reissue limit</td><td>Decide before go-live</td><td>Decided: owner value</td><td>Go-live</td></tr></tbody></table></section>
+<h1>NiAv: Modules &amp; Sub-Modules Register</h1>
+<p><strong>Product:</strong> NiAv, a mobile-first accounting, inventory and billing app for local Indian shopkeepers
+<strong>Document type:</strong> Functional modules register (v0.9, living document)
+<strong>Reference products:</strong> Tally (Prime/ERP 9) and Busy Accounting Software (functional parity target)</p>
+<h2>0. How to read this document</h2>
+<ul>
+<li><strong>Scope basis:</strong> The register is built from your 11 stated USPs and the voucher classification you provided. Module names and report lists follow the commonly known structure of Tally and Busy. I have <strong>not</strong> claimed exact menu paths or screen names from either product; parity should be validated against your licensed copies.</li>
+<li><strong>Priority tags:</strong> <strong>P1</strong> = MVP / launch, <strong>P2</strong> = Phase 2, <strong>P3</strong> = Phase 3 / later. These are my proposed defaults for you to confirm.</li>
+<li><strong>USP tags:</strong> <code>[U1]</code> to <code>[U11]</code> refer to your numbered USPs.</li>
+<li><strong>Items marked &quot;TBC&quot;</strong> depend on details you said you will share later (tracked as O-xx in Section 30).<div class="niav-applied-resolution" data-niav-applied="R-XX"><strong>Resolved:</strong> Withdraw: not real IDs; remove from all ledgers <span class="niav-resolution-status">(Decided: proposed value)</span></div></li>
+<li><strong>Status of this document:</strong> living document; every change follows the protocol above, is logged in Section 33, and decisions/assumptions/open items are tracked with IDs in Sections 29 to 31.</li>
+</ul>
+<h2>Document control &amp; living-document protocol (common to all four NiAv documents)</h2>
+<p><strong>This document:</strong> NIAV-REG · NiAv Modules &amp; Sub-Modules Register · v0.9 · Status: <strong>Draft</strong> (statuses: Draft → Reviewed → Baselined; 1.0 = baseline approved by the owner) · Owner: Product owner / sole developer · Last updated: 30 Sep 2026</p>
+<p><strong>Document set</strong></p>
+<table>
+<thead>
+<tr>
+<th>Doc ID</th>
+<th>Title</th>
+<th>Version</th>
+<th>Role</th>
+<th>Link</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NIAV-REG</td>
+<td>NiAv Modules &amp; Sub-Modules Register <strong>(this document)</strong></td>
+<td>v0.3</td>
+<td>Scope: what the product does (modules, vouchers, reports)</td>
+<td><a href="https://claude.ai/artifact/3s6wNgMF14n3zVjA7AfVB6">Open link</a></td>
+</tr>
+<tr>
+<td>NIAV-MPL</td>
+<td>NiAv Universal Master Plan</td>
+<td>v0.1</td>
+<td>Apex plan: design, architecture and implementation schedule</td>
+<td><a href="https://claude.ai/artifact/7FsXFaPSNkhfz32T66B2RG">Open link</a></td>
+</tr>
+<tr>
+<td>NIAV-ZCP</td>
+<td>NiAv Zero-Cost Strategy Plan</td>
+<td>v0.8</td>
+<td>₹0 rules: stack, sync, distribution, costs, risks</td>
+<td><a href="https://claude.ai/artifact/QqMMUvmQJhJTCzFPKpxka3">Open link</a></td>
+</tr>
+<tr>
+<td>NIAV-SEC</td>
+<td>NiAv Security &amp; Anti-Exploitation Plan</td>
+<td>v0.3</td>
+<td>Security controls: licence, trial, data, sync, fraud</td>
+<td><a href="https://claude.ai/artifact/M16Qr4CTsrqz7B965ARKVf">Open link</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Precedence when documents disagree:</strong> (1) the ₹0 rules (ZCP §1) and the security controls (SEC) can <strong>veto</strong> any feature, tool or schedule item; (2) REG defines scope; (3) MPL defines architecture and schedule; (4) the owner arbitrates and records the outcome as a decision.</p>
+<p><strong>Update protocol (follow in this order every time something changes)</strong></p>
+<ol>
+<li><strong>Identify the trigger</strong> (new requirement, decision, incident, verified fact, estimate variance or pilot feedback) and record it in the change log of every document you touch.</li>
+<li><strong>Update in this order:</strong> Register (what) → Master Plan (design, architecture, schedule) → Strategy Plan (₹0 how) → Security Plan (protection), using the impact matrix below.</li>
+<li><strong>Bump the version:</strong> minor (0.x → 0.x+1) for content changes; major only when the owner baselines (1.0, 2.0).</li>
+<li><strong>Update IDs, don't delete:</strong> decisions (D-xx), assumptions (A-xx), risks (R-xx), open items (O-xx), work packages (WP-xx) change <strong>status</strong>; superseded rows stay for history.</li>
+<li><strong>Resolve [VERIFY] flags</strong> by checking the official source and adding a row to the Verification log at the end of the document.</li>
+<li><strong>Re-publish to the same artifact link</strong> and keep the <code>.md</code> files in Git so history is retained.</li>
+</ol>
+<p><strong>Change-impact matrix</strong></p>
+<table>
+<thead>
+<tr>
+<th>Trigger</th>
+<th>Update first</th>
+<th>Then check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>New/changed module, voucher, report or edition boundary</td>
+<td>REG</td>
+<td>MPL §5, §11 (schedule); ZCP §5, §7.3; SEC §3.7, §13</td>
+</tr>
+<tr>
+<td>Architecture or design change</td>
+<td>MPL §6 to §9</td>
+<td>ZCP §3, §4; SEC §1 (threats); REG if scope changes</td>
+</tr>
+<tr>
+<td>Estimate variance, slippage or re-baseline</td>
+<td>MPL §11</td>
+<td>ZCP §15 (phases); REG §28 (phasing)</td>
+</tr>
+<tr>
+<td>Language added</td>
+<td>REG M02</td>
+<td>MPL §6.7; ZCP §4, §8</td>
+</tr>
+<tr>
+<td>Change to a ₹0 rule, tool or library</td>
+<td>ZCP §1, §4, §17</td>
+<td>MPL §7, §10; SEC §9</td>
+</tr>
+<tr>
+<td>Licence / trial / pricing model change</td>
+<td>REG M20</td>
+<td>MPL §7.8; ZCP §7; SEC §3</td>
+</tr>
+<tr>
+<td>Multi-user / sync change</td>
+<td>REG M19, M22</td>
+<td>MPL §7.7, §11; ZCP §6; SEC §6</td>
+</tr>
+<tr>
+<td>Security incident or new threat</td>
+<td>SEC §1, §10, §14</td>
+<td>MPL §13 (risks); ZCP §18</td>
+</tr>
+<tr>
+<td>A [VERIFY] item is checked</td>
+<td>Document holding the item + its Verification log</td>
+<td>Any document repeating the fact</td>
+</tr>
+<tr>
+<td>Pilot/customer feedback</td>
+<td>REG (scope)</td>
+<td>MPL (backlog, schedule), SEC (abuse cases)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Conventions:</strong> IDs are unique per document (REG: M-codes, D-R, A-R, O-; MPL: WP-, G-, D-M, A-M, R-M, O-M; ZCP: D-, A-, R-, C-; SEC: T-, RR-, D-, A-S). Cross-references cite the document ID and section, e.g. &quot;ZCP §6&quot;.</p>
+<hr>
+<hr>
+<h2>1. Module map (overview)</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Module</th>
+<th>Priority</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M01</td>
+<td>Onboarding, Company &amp; Configuration</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M02</td>
+<td>Language &amp; Localisation <code>[U1]</code></td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M03</td>
+<td>Masters (Accounts, Inventory, Others)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M04</td>
+<td>Voucher Engine &amp; Multi-Series Numbering <code>[U2][U7]</code></td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M05</td>
+<td>Dual Vouchers (Accounting + Inventory)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M06</td>
+<td>Accounting Vouchers</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M07</td>
+<td>Inventory Vouchers</td>
+<td>P1/P2</td>
+</tr>
+<tr>
+<td>M08</td>
+<td>Order &amp; Quotation Processing <code>[U11]</code></td>
+<td>P1/P2</td>
+</tr>
+<tr>
+<td>M09</td>
+<td>Document Flow / Conversion Engine <code>[U11]</code></td>
+<td>P1/P2</td>
+</tr>
+<tr>
+<td>M10</td>
+<td>Approval Matrix &amp; Workflows <code>[U10]</code></td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M11</td>
+<td>Fast Billing / Mobile Counter <code>[U3]</code></td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M12</td>
+<td>Universal Search <code>[U6]</code></td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M13</td>
+<td>Inventory Management (stock features)</td>
+<td>P1/P2</td>
+</tr>
+<tr>
+<td>M14</td>
+<td>Accounting Books &amp; Financial Reports</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M15</td>
+<td>Inventory Reports</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M16</td>
+<td>GST &amp; Statutory (India)</td>
+<td>P1/P2</td>
+</tr>
+<tr>
+<td>M17</td>
+<td>Data Import / Migration (Excel) <code>[U4][U5]</code></td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M18</td>
+<td>Admin Module (Super User) <code>[U8]</code></td>
+<td>P1/P2</td>
+</tr>
+<tr>
+<td>M19</td>
+<td>Users, Roles &amp; Multi-user <code>[U9]</code></td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M20</td>
+<td>Licensing &amp; Trial <code>[U9]</code></td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M21</td>
+<td>Printing, Sharing &amp; Communication</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M22</td>
+<td>Backup, Sync, Security &amp; Audit</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M23</td>
+<td>UI Customisation Framework <code>[U3]</code></td>
+<td>P1/P2</td>
+</tr>
+<tr>
+<td>M24</td>
+<td>Utilities &amp; Support</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>2. M01: Onboarding, Company &amp; Configuration</h2>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M01.1 Company creation</td>
+<td>Name, address, state, PIN, contact, GSTIN, PAN, financial year start, books-begin date, base currency (INR)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M01.2 Multi-company</td>
+<td>Create/open/switch multiple companies under one login</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M01.3 Financial year management</td>
+<td>Create next year, year-end closing, carry-forward of balances and stock</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M01.4 Company features</td>
+<td>Toggles to enable/disable: inventory, GST, batch, expiry, serial no., multi-godown, multi-currency (TBC), cost centres, bill-wise, approvals</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M01.5 Voucher configuration</td>
+<td>Per voucher type/series: numbering, print format, mandatory fields, narration, default ledgers</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M01.6 Business-type presets</td>
+<td>Starter presets (e.g., kirana, garments, pharmacy, hardware: exact list TBC) that switch on relevant features</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M01.7 Security setup</td>
+<td>Company-level password, data-lock date, edit/delete lock</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M01.8 Branches / locations</td>
+<td>Branch master and branch-wise data</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table>
+<h2>3. M02: Language &amp; Localisation <code>[U1]</code></h2>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M02.1 Language switch</td>
+<td>Runtime switch between English and native Indian languages, without reinstall</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M02.2 Language pack framework</td>
+<td>Externalised string resources for all screens, messages, reports, print formats</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M02.3 Launch language list</td>
+<td><strong>English, Hindi, Gujarati (decided, D-R1).</strong> Other Indian languages added later through the language-pack framework (M02.2) with no code change</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M02.4 Native-script data entry</td>
+<td>Enter party/item names in native script; transliteration typing aid (TBC)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M02.5 Voice input — rejected; not in V1</td>
+<td>Voice input rejected; no voice-to-text capability in V1</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>M02.6 Numerals and formats</td>
+<td>Indian number system (lakh/crore), date formats, ₹ symbol</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M02.7 Bilingual printing</td>
+<td>Invoice printing in English, native language, or both</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M02.8 Simplified terminology mode</td>
+<td>Shopkeeper-friendly labels (e.g., &quot;Udhaar/Baaki&quot; style wording) alongside accounting terms; wording TBC per language</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table>
+<h2>4. M03: Masters</h2>
+<h3>4.1 Accounting masters</h3>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M03.1 Account Groups</td>
+<td>Predefined primary groups (Capital, Reserves, Loans, Current Assets/Liabilities, Fixed Assets, Investments, Sales, Purchases, Direct/Indirect Income/Expenses, Sundry Debtors/Creditors, Bank, Cash-in-hand, Duties &amp; Taxes, etc.); user-defined sub-groups</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M03.2 Account Ledgers</td>
+<td>Create/alter/delete; group, opening balance (Dr/Cr), bill-wise flag, credit limit and days, GST details, contact, address, bank details</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M03.3 Party master (customer/supplier)</td>
+<td>Ledger + GSTIN, state, price list, salesperson, credit terms, multiple addresses</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M03.4 Bank accounts</td>
+<td>Bank ledgers with account no., IFSC, UPI ID</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M03.5 Cost centres / categories</td>
+<td>Optional cost tracking</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>M03.6 Currencies</td>
+<td>Multi-currency support (TBC whether needed for target users)</td>
+<td>P3</td>
+</tr>
+</tbody>
+</table>
+<h3>4.2 Inventory masters</h3>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M03.7 Item Groups</td>
+<td>Hierarchical grouping</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M03.8 Item master</td>
+<td>Name, alias, code, barcode, group, unit, HSN/SAC, GST rate, MRP, sale/purchase price, min/max stock, reorder level, opening qty/rate/value</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M03.9 Units of Measure</td>
+<td>Simple and compound units (e.g., Box = 12 Nos), conversion factors</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M03.10 Godowns / Locations</td>
+<td>Multi-godown with opening stock per godown</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M03.11 Batch / Expiry</td>
+<td>Batch no., mfg/expiry date, batch-wise stock</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M03.12 Serial numbers</td>
+<td>Serial-wise tracking (TBC)</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>M03.13 Price Lists</td>
+<td>Multiple price lists (retail/wholesale/party-wise), effective-date pricing</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M03.14 Discount schemes</td>
+<td>Trade discount, item-level and party-level</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M03.15 Bill of Materials</td>
+<td>For manufacturing (TBC, only if in scope)</td>
+<td>P3</td>
+</tr>
+</tbody>
+</table>
+<h3>4.3 Other masters</h3>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M03.16 Voucher Types and Series</td>
+<td>See M04</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M03.17 Salespersons / Agents</td>
+<td>With commission (TBC)</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>M03.18 Narration templates</td>
+<td>Reusable narrations</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M03.19 Tax masters</td>
+<td>GST rates, tax classifications, HSN master</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M03.20 Master utilities</td>
+<td>Duplicate detection, merge, bulk edit, bulk delete (with usage checks)</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>5. M04: Voucher Engine &amp; Multi-Series Numbering <code>[U2][U7]</code></h2>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M04.1 Voucher type registry</td>
+<td>Predefined types (Sections 6 to 9) and user-created types derived from a base type</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M04.2 Multiple series per type</td>
+<td>Any number of series per voucher type (e.g., &quot;INV-A&quot;, &quot;INV-B&quot;, &quot;CASH&quot;, &quot;BR2/&quot;), each independently numbered</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M04.3 Numbering rules</td>
+<td>Prefix, suffix, start number, width/zero-padding, separator; restart cycle (never / yearly / monthly); manual or automatic; duplicate-number check</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M04.4 Series scoping</td>
+<td>Series can be bound to branch, godown, user or counter (which scopes: TBC)</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M04.5 Default series</td>
+<td>Default series per user / per screen / per counter</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M04.6 Series-wise settings</td>
+<td>Print format, default ledgers, mandatory fields, GST applicability, approval requirement per series</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M04.7 Gap and continuity control</td>
+<td>Rules for deleted numbers (reuse vs. retain), cancellation instead of deletion, gap report</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M04.8 GST-compliant numbering checks</td>
+<td>Invoice-number length and character constraints for GST documents (verify current rule text before implementation)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M04.9 Voucher common features</td>
+<td>Date, narration, attachments (photo/PDF), reference no., cancel/alter/delete, duplicate voucher, view audit trail, post-dated entry</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>6. M05: Dual Vouchers (Accounting + Inventory)</h2>
+<table>
+<thead>
+<tr>
+<th>Voucher</th>
+<th>Key functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M05.1 Sales Invoice</td>
+<td>Party, items, qty, rate, discount, taxes (CGST/SGST/IGST), additional charges, round-off, bill-wise reference, godown, e-way/e-invoice hooks, payment received at billing (cash/UPI/card/credit/split)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M05.2 Purchase Invoice</td>
+<td>Party, supplier invoice no./date, items, taxes, freight/other charges, RCM handling, landed cost (TBC)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M05.3 Sales Return (Credit Note with items)</td>
+<td>Link to original invoice, item return qty, tax reversal, stock in</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M05.4 Purchase Return (Debit Note with items)</td>
+<td>Link to original purchase, tax reversal, stock out</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<p>Common: B2B/B2C classification, place of supply, bill-wise allocation, print/share, quick-edit.</p>
+<h2>7. M06: Accounting Vouchers (Pure Financial)</h2>
+<table>
+<thead>
+<tr>
+<th>Voucher</th>
+<th>Key functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M06.1 Payment</td>
+<td>Single/multi-line; cash/bank/UPI; bill-wise settlement; cheque details</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M06.2 Receipt</td>
+<td>Same as above; advance receipt; against-reference allocation</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M06.3 Contra</td>
+<td>Cash↔bank and bank↔bank transfers</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M06.4 Journal</td>
+<td>Multi-line Dr/Cr adjustments, provisions, depreciation, registered B2B expense entries with GST</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M06.5 Debit Note (without items)</td>
+<td>Charges/penalties to parties; GST treatment</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M06.6 Credit Note (without items)</td>
+<td>Discounts, rate differences, rebates; GST treatment</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<h2>8. M07: Inventory Vouchers (Pure Inventory)</h2>
+<table>
+<thead>
+<tr>
+<th>Voucher</th>
+<th>Key functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M07.1 Delivery Note / Delivery Challan</td>
+<td>Outward goods before invoice; pending-to-bill tracking</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M07.2 Material Issue to Party</td>
+<td>Stock sent to job worker/sub-contractor; pending-return tracking</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M07.3 Material Receive from Party</td>
+<td>Receipt back / from party; links to issue</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M07.4 Stock Transfer</td>
+<td>Godown-to-godown and branch-to-branch; in-transit handling (TBC)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M07.5 Stock Journal</td>
+<td>Wastage, breakage, samples, physical stock reconciliation, conversion (transform)</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<p>Note: GST rules for job-work challans and inter-state transfer apply. Details go in M16.</p>
+<h2>9. M08: Order &amp; Quotation Processing <code>[U11]</code></h2>
+<table>
+<thead>
+<tr>
+<th>Voucher</th>
+<th>Key functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M08.1 Sales Quotation / Proforma Invoice</td>
+<td>Validity date, terms, print/share; convert to order/invoice</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M08.2 Purchase Quotation</td>
+<td>Record supplier quotes; compare quotes (P3)</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M08.3 Sales Order</td>
+<td>Pending order tracking, partial fulfilment, due dates</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M08.4 Purchase Order</td>
+<td>Pending PO tracking, partial receipt, due dates</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M08.5 Order status &amp; tracking</td>
+<td>Open / partially fulfilled / closed / cancelled, with manual close</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<h2>10. M09: Document Flow / Conversion Engine <code>[U11]</code></h2>
+<p><strong>Sales chain:</strong> Quotation → Sales Order → Delivery Note/Challan → Sales Invoice → Receipt
+<strong>Purchase chain:</strong> Purchase Order → Purchase Invoice → Payment</p>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M09.1 Manual conversion</td>
+<td>User picks a source document and converts to the next stage; pulls items/rates/party</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M09.2 Auto conversion rules</td>
+<td>Configurable per stage/series: auto-create next document on save/approval/delivery (e.g., auto-create Delivery Note on Order approval)</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M09.3 Partial and multiple conversion</td>
+<td>One order → many deliveries/invoices; many deliveries → one invoice</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M09.4 Skip-stage rules</td>
+<td>Allow direct Invoice without Order/Challan (configurable)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M09.5 Quantity/rate tracking</td>
+<td>Ordered vs. delivered vs. invoiced vs. pending, with variance flags</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M09.6 Receipt/Payment linking</td>
+<td>Allocate receipts/payments to invoices (bill-wise)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M09.7 Document lineage view</td>
+<td>Shows the full chain and status for any document</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M09.8 Reversal handling</td>
+<td>Behaviour when a downstream document is cancelled/altered (re-open upstream qty)</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<h2>11. M10: Approval Matrix &amp; Workflows <code>[U10]</code></h2>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M10.1 Approval matrix master</td>
+<td>Rules by document type, series, amount threshold, party, branch, user/role</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M10.2 Approval levels</td>
+<td>Single/multi-level, sequential or parallel (parallel TBC)</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M10.3 Approver assignment</td>
+<td>By user or role, with delegation/substitute during absence</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M10.4 Document states</td>
+<td>Draft → Submitted → Approved / Rejected / Sent back → Posted (state list to be confirmed)</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M10.5 Actions</td>
+<td>Approve, reject with remarks, send back, recall</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M10.6 Notifications</td>
+<td>In-app push and optionally SMS/WhatsApp (channel TBC)</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M10.7 Effect of approval</td>
+<td>Configurable whether unapproved documents affect stock/ledgers</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M10.8 Approval audit trail</td>
+<td>Who approved, when, remarks</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M10.9 Approval reports</td>
+<td>Pending approvals, turnaround time, rejected list</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M10.10 Non-voucher workflows</td>
+<td>Master creation/edit approval, credit-limit override, discount override, backdated entry, voucher deletion</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>12. M11: Fast Billing / Mobile Counter <code>[U3]</code></h2>
+<p>Target: create an invoice in about 10 seconds (to be defined as a measurable benchmark, e.g., taps and seconds for a standard 3-item cash bill, and validated by usability testing).</p>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M11.1 Quick bill screen</td>
+<td>Single-screen billing: item add, qty, total, payment mode, save &amp; share</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M11.2 Item entry shortcuts</td>
+<td>Barcode scan (camera / external scanner), item-code entry, favourite/frequent items grid, recent items, repeat last bill</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M11.3 Default party</td>
+<td>Walk-in/cash customer by default; quick-add party by mobile no.</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M11.4 Payment shortcuts</td>
+<td>One-tap Cash / UPI / Card / Credit / Split</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M11.5 Hold &amp; resume bills</td>
+<td>Park multiple in-progress bills</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M11.6 Auto price fetch</td>
+<td>Rate from item / price list / last-sold rate</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M11.7 Instant output</td>
+<td>Print (Bluetooth thermal, PDF), WhatsApp/SMS share, UPI QR on bill</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M11.8 Offline billing</td>
+<td>Work without internet, then sync (see M22)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M11.9 Counter mode</td>
+<td>Locked simplified UI for counter staff (limited menus), per-counter series</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M11.10 Return at counter</td>
+<td>Quick sales return</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M11.11 Day-end / cash close</td>
+<td>Counter-wise cash summary and closing</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table>
+<h2>13. M12: Universal Search <code>[U6]</code></h2>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M12.1 Global search</td>
+<td>One search box across items, parties, ledgers, vouchers, reports, and screens/menus</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M12.2 Instant results</td>
+<td>Type-ahead with results as you type; local index for speed, works offline</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M12.3 Match logic</td>
+<td>Match on name, alias, code, barcode, partial text, mobile no., voucher no., and in native script and transliteration (TBC)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M12.4 Fuzzy / typo tolerance</td>
+<td>Tolerates minor spelling errors</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M12.5 Filters and sorting</td>
+<td>By type, date, amount, status</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M12.6 Recent / favourites</td>
+<td>Recently opened and pinned items</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M12.7 In-form pickers</td>
+<td>Same fast search inside voucher fields (party, item, ledger)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M12.8 Performance target</td>
+<td>Numeric latency target to be set with you (TBC) and tested on low-end devices and large masters</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<h2>14. M13: Inventory Management</h2>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M13.1 Stock valuation methods</td>
+<td>Methods to support (e.g., weighted average, FIFO, last purchase, standard cost): final list TBC</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M13.2 Multi-godown stock</td>
+<td>Godown-wise stock and transfers</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M13.3 Negative stock control</td>
+<td>Allow / warn / block, configurable</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M13.4 Reorder management</td>
+<td>Min level alerts, reorder suggestions, auto-draft PO (P3)</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M13.5 Batch/expiry management</td>
+<td>Near-expiry alerts</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M13.6 Physical stock</td>
+<td>Count entry and variance posting via Stock Journal</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M13.7 Barcode/label</td>
+<td>Barcode generation and label printing</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M13.8 Multiple units</td>
+<td>Alternate unit sale/purchase</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<h2>15. M14: Accounting Books &amp; Financial Reports</h2>
+<p>Reports mirror what Tally/Busy provide in principle; exact layouts to be finalised in detailed design.</p>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Reports / functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M14.1 Books of accounts</td>
+<td>Cash Book, Bank Book, Ledger Account (with drill-down), Group Summary, Day Book / Voucher Register (type-wise, series-wise)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M14.2 Trial Balance</td>
+<td>Group-wise and ledger-wise, period selectable</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M14.3 Profit &amp; Loss Account</td>
+<td>With drill-down to ledgers/vouchers</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M14.4 Balance Sheet</td>
+<td>Standard Indian format, drill-down</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M14.5 Trading Account</td>
+<td>Gross profit view</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M14.6 Outstanding management</td>
+<td>Receivables/Payables: bill-wise, party-wise, ageing (e.g., 0 to 30/31 to 60/…), overdue, party statement</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M14.7 Payment reminders</td>
+<td>Share reminders via WhatsApp/SMS (channel TBC)</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M14.8 Bank reconciliation</td>
+<td>Import bank statements from supported CSV/Excel formats, map columns, match lines with entries (BRS); live bank feeds/API remain deferred</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M14.9 Cheque management</td>
+<td>Cheque register, post-dated cheques, cheque printing (TBC)</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>M14.10 Interest calculation</td>
+<td>On overdue balances (TBC)</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>M14.11 Budgets &amp; cost-centre reports</td>
+<td>Superseded by workbook reconciliation: Resolved</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>M14.12 Ratio analysis, cash flow, fund flow</td>
+<td>Standard statements</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>M14.13 Common report features</td>
+<td>Period selection, drill-down, filters, print/PDF/Excel export, share, saved views</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<h2>16. M15: Inventory Reports</h2>
+<table>
+<thead>
+<tr>
+<th>Report</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stock Summary (item-, group-, godown-wise)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Stock Ledger / Item Register (movement)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Stock Valuation</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Item-wise sales / purchase analysis</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Party-wise sales / purchase analysis</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Reorder / low-stock report</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Pending Sales Orders / Purchase Orders</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Pending Delivery Notes (unbilled)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>Quotation status</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>Batch-wise and expiry report</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>Stock ageing / slow-moving / dead stock</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>Godown-wise stock and transfer report</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>Material issue/receive pending (job work)</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>Gross profit (item / party / invoice-wise)</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>Price-list and discount reports</td>
+<td>P3</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>17. M16: GST &amp; Statutory (India)</h2>
+<p>Statutory rules change; each item below must be <strong>validated against current official GST notifications and portal specifications</strong> before build. Nothing here should be treated as final rule text.</p>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M16.1 GST setup</td>
+<td>GSTIN, registration type (regular/composition/unregistered, per your target users: TBC), state, HSN/SAC, tax rates</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M16.2 GST on vouchers</td>
+<td>CGST/SGST/IGST determination via place of supply; reverse charge; exempt/nil-rated/non-GST</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M16.3 GST reports</td>
+<td>GSTR-1 style sales summary, GSTR-3B style summary, purchase register, input tax credit summary, HSN summary, B2B/B2C splits, GSTR-2A/2B reconciliation</td>
+<td>P1/P2</td>
+</tr>
+<tr>
+<td>M16.4 Return data export</td>
+<td>JSON/Excel export in formats accepted by the GST portal (verify current format)</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M16.5 E-invoice</td>
+<td>IRN generation via authorised route; QR on invoice (applicability by turnover, verify)</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>M16.6 E-way bill</td>
+<td>Data/JSON generation and, if in scope, API integration</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>M16.7 Composition scheme support</td>
+<td>Bill of Supply and composition reports</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M16.8 TDS / TCS</td>
+<td>TDS/TCS is deferred to a later release; excluded from V1.</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>M16.9 Other statutory</td>
+<td>PF/ESI and payroll are out of scope for V1.</td>
+<td>P3</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>18. M17: Data Import / Migration (Excel) <code>[U4][U5]</code></h2>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M17.1 Standard Excel templates</td>
+<td>Published NiAv templates (versioned) for each master and transaction type, with instruction sheet</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M17.2 Masters bulk import</td>
+<td>Account groups, ledgers/parties, item groups, items, units, godowns, price lists, voucher series</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M17.3 Opening balances import</td>
+<td>Ledger opening balances (Dr/Cr), bill-wise outstanding, item opening stock (qty/rate/value, godown/batch)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M17.4 Legacy transaction import</td>
+<td>Excel exports from Tally/Busy mapped to the NiAv template; voucher types per Sections 6 to 9</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M17.5 Tally/Busy mapping guide</td>
+<td>Documentation and column-mapping for exporting data from Tally/Busy to NiAv's Excel format (users export from source in Excel, then map to the template)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M17.6 Validation</td>
+<td>Mandatory-field checks, duplicates, unknown group/ledger/item, unit mismatch, GSTIN format, date range, Dr = Cr totals</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M17.7 Preview and error report</td>
+<td>Dry-run preview, downloadable error file with row-level reasons, partial-accept option</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M17.8 Import modes</td>
+<td>Create-only, update-existing, skip-duplicates</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M17.9 Import log and rollback</td>
+<td>Batch ID for each import, undo of a whole import batch</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M17.10 Export</td>
+<td>Any master/report to Excel/CSV/PDF; full-data export</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M17.11 Tally/Busy native import — R3 feasibility only</td>
+<td>Direct read of Tally/Busy native formats is deferred to R3 feasibility; V1 uses documented Excel templates.</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>M17.12 Migration reconciliation</td>
+<td>Post-import trial balance and stock comparison against source totals</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>19. M18: Admin Module (Super User) <code>[U8]</code></h2>
+<p>Scope stated as &quot;similar to what Busy has&quot;; exact function list to be confirmed against Busy and your requirements.</p>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M18.1 Super User console</td>
+<td>Separate privileged area for the super user</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M18.2 Company administration</td>
+<td>Create/backup/restore/delete/lock companies</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M18.3 User administration</td>
+<td>Create/disable users, reset passwords, force logout, view active sessions</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M18.4 Role and rights matrix</td>
+<td>Menu-, master-, voucher-, report-level rights (view/create/edit/delete/print/export)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M18.5 Data-level restrictions</td>
+<td>Restrict by branch, godown, series, party group, date range</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M18.6 Voucher controls</td>
+<td>Backdate/future-date limits, edit/delete lock date, approval requirements</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M18.7 Configuration lock</td>
+<td>Control who can change company features and voucher settings</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M18.8 Audit trail and activity log</td>
+<td>Log of create/alter/delete/login with old vs. new values</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M18.9 Data utilities</td>
+<td>Data integrity check / re-index, rewrite/repair, financial-year split/carry-forward</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M18.10 Device and access control</td>
+<td>Trusted-device list, login restrictions (TBC)</td>
+<td>P3</td>
+</tr>
+<tr>
+<td>M18.11 Licence and subscription view</td>
+<td>See Section 21</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<h2>20. M19: Users, Roles &amp; Multi-user <code>[U9]</code></h2>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M19.1 Authentication</td>
+<td>Mobile no. + OTP and/or password, PIN/biometric unlock</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M19.2 Multi-user concurrency</td>
+<td>Multiple users/devices working offline-first, syncing through a host device over shop Wi-Fi/hotspot (ZCP §6); conflict handling via a Conflicts queue</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M19.3 Predefined roles</td>
+<td>Owner/Super User, Accountant, Salesperson/Biller, Storekeeper, Viewer (list to confirm)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M19.4 Custom roles</td>
+<td>Admin-defined roles</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M19.5 User-wise defaults</td>
+<td>Default series, godown, cash ledger, counter</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M19.6 Multi-device</td>
+<td>Same user on multiple devices with session control</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M19.7 Password policy</td>
+<td>Length, expiry, lockout</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table>
+<h2>21. M20: Licensing &amp; Trial <code>[U9]</code></h2>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M20.1 Free trial</td>
+<td>3 months from activation; countdown and expiry reminders</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M20.2 Trial rules</td>
+<td>3-month free trial from first launch; edition offered in trial TBC (suggest full Advanced); expiry behaviour per SEC §3.9</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M20.3 Paid licences</td>
+<td>Two editions (<strong>Simple</strong>, <strong>Advanced</strong>) × three terms (<strong>Monthly, Annual, Lifetime</strong>); user/device limits per edition; <strong>prices TBC</strong></td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M20.4 Licence activation</td>
+<td>Key or account-based activation; device/user binding</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M20.5 Renewal and payment</td>
+<td>In-app purchase or UPI/online payment (mechanism TBC), invoices/receipts to customer</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M20.6 Post-expiry behaviour</td>
+<td>Proposed: grace window then read-only/export-only, never data deletion (SEC §3.9); grace length TBC</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M20.7 Vendor-side licence admin</td>
+<td>Back-office for NiAv team: issue, extend, revoke licences, view usage</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table>
+<h2>22. M21: Printing, Sharing &amp; Communication</h2>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M21.1 Print formats</td>
+<td>A4/A5, thermal 2&quot;/3&quot; invoice formats, customisable header/footer, logo, terms</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M21.2 Print devices</td>
+<td>Bluetooth/USB/Wi-Fi printers; PDF generation</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M21.3 Share</td>
+<td>WhatsApp, SMS, email, PDF share for invoices, statements, reports</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M21.4 UPI QR</td>
+<td>Dynamic/static QR on invoices</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M21.5 Statement / reminder templates</td>
+<td>Editable templates</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M21.6 Bulk send</td>
+<td>Bulk reminders/statements</td>
+<td>P3</td>
+</tr>
+</tbody>
+</table>
+<h2>23. M22: Backup, Sync, Security &amp; Audit</h2>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M22.1 Offline-first storage</td>
+<td>Local database, works without internet</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M22.2 Device sync</td>
+<td>Offline-first LAN/hotspot sync via host device; file-based exchange as fallback. Internet/cloud relay deferred (ZCP §6, D-R6)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M22.3 Backup / restore</td>
+<td>Manual and scheduled, cloud and local file</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M22.4 Data security</td>
+<td>Encryption at rest and in transit, secure key handling</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M22.5 Audit trail</td>
+<td>See M18.8</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M22.6 Data privacy compliance</td>
+<td>Consent, retention, data export/delete requests (align with applicable Indian data-protection law: verify)</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M22.7 Platform support</td>
+<td>Android-only V1 (proposed, ZCP D-05); iOS and web/desktop companion deferred</td>
+<td>P1</td>
+<div class="niav-applied-resolution" data-niav-applied="D-05"><strong>Resolved:</strong> Accepted: Android-only V1 <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+</tbody>
+</table>
+<h2>24. M23: UI Customisation Framework <code>[U3]</code></h2>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M23.1 Screen visibility</td>
+<td>Show/hide modules and screens per user/role (&quot;only screens that are needed&quot;)</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M23.2 Home dashboard designer</td>
+<td>Choose tiles/shortcuts and their order</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M23.3 Voucher form customiser</td>
+<td>Show/hide/reorder fields, set defaults, mark fields mandatory/optional, rename labels</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M23.4 Simple vs. Advanced mode</td>
+<td>Preset UI profiles</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M23.5 Report customiser</td>
+<td>Choose columns, saved layouts</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M23.6 Theme and font size</td>
+<td>Light/dark, large-text accessibility</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M23.7 Shortcut/favourites bar</td>
+<td>User-defined quick actions</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<h2>25. M24: Utilities &amp; Support</h2>
+<table>
+<thead>
+<tr>
+<th>Sub-module</th>
+<th>Functions</th>
+<th>Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M24.1 Dashboard and insights</td>
+<td>Today's sales, receivables, payables, cash/bank, low stock, top items/parties</td>
+<td>P1</td>
+</tr>
+<tr>
+<td>M24.2 Notifications centre</td>
+<td>Due payments, approvals, licence, stock alerts</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M24.3 Help and onboarding</td>
+<td>In-app guides/videos in native languages, sample company</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M24.4 Support</td>
+<td>Ticket/chat/call-back (mechanism TBC)</td>
+<td>P2</td>
+</tr>
+<tr>
+<td>M24.5 Reminders and to-do</td>
+<td>Simple task reminders</td>
+<td>P3</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>26. Voucher master matrix (from your classification)</h2>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Voucher type</th>
+<th style="text-align:center">Accounts</th>
+<th style="text-align:center">Stock</th>
+<th style="text-align:center">Multi-series</th>
+<th style="text-align:center">Approval-capable</th>
+<th>In document chain</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dual</td>
+<td>Sales Invoice</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td>Sales chain</td>
+</tr>
+<tr>
+<td>Dual</td>
+<td>Purchase Invoice</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td>Purchase chain</td>
+</tr>
+<tr>
+<td>Dual</td>
+<td>Sales Return (Credit Note w/ items)</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td>Linked to Sales Invoice</td>
+</tr>
+<tr>
+<td>Dual</td>
+<td>Purchase Return (Debit Note w/ items)</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td>Linked to Purchase Invoice</td>
+</tr>
+<tr>
+<td>Accounting</td>
+<td>Payment</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td>Purchase chain (end)</td>
+</tr>
+<tr>
+<td>Accounting</td>
+<td>Receipt</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td>Sales chain (end)</td>
+</tr>
+<tr>
+<td>Accounting</td>
+<td>Contra</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Accounting</td>
+<td>Journal</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Accounting</td>
+<td>Debit Note (no items)</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td>optional link</td>
+</tr>
+<tr>
+<td>Accounting</td>
+<td>Credit Note (no items)</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td>optional link</td>
+</tr>
+<tr>
+<td>Inventory</td>
+<td>Delivery Note / Challan</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td>Sales chain</td>
+</tr>
+<tr>
+<td>Inventory</td>
+<td>Material Issue to Party</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td>Job-work pair</td>
+</tr>
+<tr>
+<td>Inventory</td>
+<td>Material Receive from Party</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td>Job-work pair</td>
+</tr>
+<tr>
+<td>Inventory</td>
+<td>Stock Transfer</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Inventory</td>
+<td>Stock Journal</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Operational</td>
+<td>Sales Quotation / Proforma</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td>Sales chain (start)</td>
+</tr>
+<tr>
+<td>Operational</td>
+<td>Purchase Quotation</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td>Purchase chain (start, optional)</td>
+</tr>
+<tr>
+<td>Operational</td>
+<td>Sales Order</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘ (reserves qty: TBC)</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td>Sales chain</td>
+</tr>
+<tr>
+<td>Operational</td>
+<td>Purchase Order</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center">✔</td>
+<td>Purchase chain</td>
+</tr>
+</tbody>
+</table>
+<p>Notes:</p>
+<ul>
+<li>&quot;Multi-series&quot; reflects your requirement that every voucher type supports multiple numbering series.</li>
+<li>Whether Sales Order reserves stock (a soft allocation) is not stated; marked TBC.</li>
+</ul>
+<h2>27. Master report catalogue (consolidated index)</h2>
+<p>Accounting: Day Book, Cash Book, Bank Book, Ledger, Group Summary, Trial Balance, P&amp;L, Trading, Balance Sheet, Outstanding (Receivable/Payable), Ageing, Party Statement, Bank Reconciliation, Cheque Register, Cash Flow, Ratios.
+Inventory: Stock Summary, Stock Ledger, Valuation, Item/Party analysis, Reorder, Batch/Expiry, Ageing, Godown-wise, Gross Profit.
+Orders &amp; Documents: Pending SO/PO, Pending Delivery Notes, Quotation status, Conversion/lineage report, Job-work pending.
+GST: Sales/Purchase register, GSTR-1 &amp; 3B summaries, HSN summary, ITC, 2A/2B reconciliation.
+Admin: Audit log, User activity, Approval reports, Voucher-series gap report, Import log, Licence status.</p>
+<h2>28. Suggested release phasing (for discussion)</h2>
+<table>
+<thead>
+<tr>
+<th>Release</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>R1 (MVP)</strong></td>
+<td>M01 to M07 (core vouchers), M04, M11, M12, M14/M15 core reports, M16 GST basics, M17 imports, M18/M19 basics, M20 trial and licence, M21, M22, M23 basics, M02 (launch languages)</td>
+</tr>
+<tr>
+<td><strong>R2</strong></td>
+<td>M08/M09 automation, M10 approvals, batch/expiry, price lists, bank reconciliation, deeper reports, job-work vouchers</td>
+</tr>
+<tr>
+<td><strong>R3</strong></td>
+<td>E-invoice/e-way, cost centres, TDS/TCS, PF/ESI/payroll and direct native-file import are excluded or deferred; voice input is rejected; advanced analytics</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>29. Assumptions (status-tracked)</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Assumption</th>
+<th>Status</th>
+<th>Affects</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A-R1</td>
+<td>Target users are small retailers/traders; Android-first user base</td>
+<td>Active</td>
+<td>All</td>
+</tr>
+<tr>
+<td>A-R2</td>
+<td>Full features are available during the 3-month trial</td>
+<td>Proposed (O-05)</td>
+<td>M20</td>
+<div class="niav-applied-resolution" data-niav-applied="D-04"><strong>Resolved:</strong> 10-day grace with full function + daily reminder, then read-only + export + backup; data never deleted; entitlements.json (edition x term x trial x grace x limits) is single source for gates and tests <span class="niav-resolution-status">(Decided: proposed value)</span></div><div class="niav-applied-resolution" data-niav-applied="D-11"><strong>Resolved:</strong> Trial 3 months, full feature set of installed release (R1a = Simple features; R1b+ = Advanced). On trial end buying Simple keeps Advanced data read-only/exportable <span class="niav-resolution-status">(Decided: proposed value)</span></div><div class="niav-applied-resolution" data-niav-applied="Gates"><strong>Resolved:</strong> MPL 11.4 authoritative; rewrite TEST 6 with MPL gate numbers and add G4, G5, G6 <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+<tr>
+<td>A-R3</td>
+<td>Users export from Tally/Busy to Excel and map to NiAv templates; direct native-file import not promised</td>
+<td>Active</td>
+<td>M17</td>
+</tr>
+<tr>
+<td>A-R4</td>
+<td>GST-registered and unregistered small businesses in scope; composition scheme proposed</td>
+<td>Active</td>
+<td>M16</td>
+</tr>
+<tr>
+<td>A-R5</td>
+<td>Manufacturing (BOM), payroll and multi-currency not in initial scope</td>
+<td>Active</td>
+<td>M03, M16</td>
+</tr>
+<tr>
+<td>A-R6</td>
+<td>Owner is the sole developer; scope must be deliverable by one person using AI and free tools (ZCP A-07)</td>
+<td>Active</td>
+<td>Phasing (Section 28)</td>
+</tr>
+</tbody>
+</table>
+<h2>30. Open items (status-tracked)</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Item</th>
+<th>Status</th>
+<th>Notes / where resolved</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>O-01</td>
+<td>Native languages at launch</td>
+<td><strong>Resolved:</strong> English, Hindi, Gujarati</td>
+<td>D-R1</td>
+</tr>
+<tr>
+<td>O-02</td>
+<td>Platforms; offline-first and sync expectations</td>
+<td><strong>Partly resolved:</strong> Android V1 (proposed); offline-first + LAN/hotspot sync</td>
+<td>D-R5, D-R6; ZCP §6</td>
+</tr>
+<tr>
+<td>O-03</td>
+<td>Fast-billing benchmark definition (&quot;10 seconds&quot;: item count, taps, device class)</td>
+<td>Superseded by workbook reconciliation: Resolved</td>
+<td>ZCP D-09</td>
+<div class="niav-applied-resolution" data-niav-applied="D-09"><strong>Resolved:</strong> From New Bill to Pay &amp; Finish (cash): &lt;=10 s and &lt;=10 touch interactions; scripted harness + 3 volunteer timings; fixture TD-PERF-01 (5,000 items, 500 parties, 20,000 vouchers) <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+<tr>
+<td>O-04</td>
+<td>Licensing model</td>
+<td><strong>Partly resolved:</strong> Simple/Advanced × Monthly/Annual/Lifetime; <strong>prices, limits, monthly-issuing model, &quot;lifetime&quot; meaning still open</strong></td>
+<td>D-R2; ZCP D-10, D-14, D-15</td>
+<div class="niav-applied-resolution" data-niav-applied="D-10"><strong>Resolved:</strong> Simple (R1a): masters, P1 dual+accounting vouchers, Delivery Note, Stock Transfer/Journal, basic quotation/order, Quick Bill, search, core reports, GST reports, Excel import/export, backup, en/hi/gu, 1 device. Advanced (R1b+): all Simple + multi-user/roles, approvals, document-flow automation, Material Issue/Receive, batch/expiry, price lists, multi-godown reports, LAN/hotspot + file sync, audit/admin tools <span class="niav-resolution-status">(Decided: proposed value)</span></div><div class="niav-applied-resolution" data-niav-applied="D-14"><strong>Resolved:</strong> Prepaid keys carrying an expiry date (1/3/6/12 months or lifetime); no monthly re-issue <span class="niav-resolution-status">(Decided: proposed value)</span></div><div class="niav-applied-resolution" data-niav-applied="D-15"><strong>Resolved:</strong> yes V1.x patches count as upgrades <span class="niav-resolution-status">(Decided: owner value)</span></div></tr>
+<tr>
+<td>O-05</td>
+<td>Trial edition and post-expiry policy</td>
+<td>Superseded by workbook reconciliation: Resolved</td>
+<td>SEC D-11, D-04</td>
+</tr>
+<tr>
+<td>O-06</td>
+<td>Exact Admin module scope relative to Busy</td>
+<td>Superseded by workbook reconciliation: Resolved</td>
+<td>M18</td>
+<div class="niav-applied-resolution" data-niav-applied="O-06"><strong>Resolved:</strong> R1b admin = users, roles/rights, audit viewer, voucher controls, period locks, device/pairing management, rebuild utility <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+<tr>
+<td>O-07</td>
+<td>Approval matrix: levels, parallel approvals, notification channels</td>
+<td>Superseded by workbook reconciliation: Resolved</td>
+<td>M10</td>
+<div class="niav-applied-resolution" data-niav-applied="O-07"><strong>Resolved:</strong> Single-level approval by amount threshold and voucher type; no parallel; maker may recall before action; dashboard badge + inbox; no push notifications in V1; approval never bypasses posting validation <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+<tr>
+<td>O-08</td>
+<td>Numbering series scope (branch/user/counter) and cancellation/gap policy</td>
+<td>Open (device-scoped series in use for sync)</td>
+<td>M04.4</td>
+<div class="niav-applied-resolution" data-niav-applied="OD-001"><strong>Resolved:</strong> Invoice will have limited series, as CA advice on keeping number of invoice series to be minimum <span class="niav-resolution-status">(Decided: owner value)</span></div></tr>
+<tr>
+<td>O-09</td>
+<td>Stock valuation methods, negative-stock policy, whether orders reserve stock</td>
+<td>Superseded by workbook reconciliation: Resolved</td>
+<td>M13.1, Section 26</td>
+<div class="niav-applied-resolution" data-niav-applied="D-M5"><strong>Resolved:</strong> (1) Methods: Weighted Average and FIFO only. (2) Item overrides group; default Weighted Average. (3) Method locked after first posted stock movement; no change in V1. (4) Negative stock allowed with warning; no-layer issues costed at last known cost; no retro revaluation in V1. (5) Period lock by date; unlock needs right + reason + audit. (6) Orders never reserve stock (D-M6 = No). (7) Golden ledgers: opening, purchase, sale, returns, adjustment, negative-stock sale, lock/unlock <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+<tr>
+<td>O-10</td>
+<td>Statutory scope: e-invoice / e-way bill / TDS / payroll (in or out, when)</td>
+<td>Open (excluded from V1 for zero cost, ZCP §11)</td>
+<td>M16</td>
+<div class="niav-applied-resolution" data-niav-applied="O-10"><strong>Resolved:</strong> Stay in R3 as JSON export/manual upload (Level 0-4); capture IRN/ack/e-way fields in data model from R1a; GST return JSON stays R1a <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+<tr>
+<td>O-11</td>
+<td>Industry presets (kirana, garments, pharmacy…)</td>
+<td>Superseded by workbook reconciliation: Resolved</td>
+<td>M01.6</td>
+<div class="niav-applied-resolution" data-niav-applied="O-11"><strong>Resolved:</strong> In scope; delivered in R2 <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+<tr>
+<td>O-12</td>
+<td>Printing hardware to support</td>
+<td>Superseded by workbook reconciliation: Resolved</td>
+<td>M21</td>
+<div class="niav-applied-resolution" data-niav-applied="O-12"><strong>Resolved:</strong> Bluetooth ESC/POS thermal 58 mm and 80 mm + PDF via Android print/share for A4/A5; Indic text rendered as raster image; USB/Wi-Fi printers later; test on &gt;=3 printers; failures visible <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+<tr>
+<td>O-13</td>
+<td>Migration scope: Tally/Busy versions, data types, years of history</td>
+<td>Superseded by workbook reconciliation: Resolved</td>
+<td>M17</td>
+<div class="niav-applied-resolution" data-niav-applied="O-FG-006"><strong>Resolved:</strong> V1/R2: Excel import with documented templates; native adapters = R3 feasibility; FG-006 marked Deferred <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+<tr>
+<td>O-14</td>
+<td>Data hosting, compliance, privacy requirements</td>
+<td>Open (local-only V1)</td>
+<td>M22</td>
+<div class="niav-applied-resolution" data-niav-applied="O-14"><strong>Resolved:</strong> Local-only storage; minimal data collection; no telemetry; Indian data-protection obligations to be checked <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+<tr>
+<td>O-15</td>
+<td>Simple vs Advanced feature boundaries; add an Edition column to Sections 2 to 25 once confirmed</td>
+<td>Open (proposal in ZCP §7.3)</td>
+<td>ZCP D-10</td>
+<div class="niav-applied-resolution" data-niav-applied="O-15"><strong>Resolved:</strong> Advanced: up to 5 devices and 10 users per company; Simple: 1 device, up to 3 users. S3 only tests 3 devices: certify 5 until larger fleet tested. <span class="niav-resolution-status">(Decided: owner value)</span></div></tr>
+</tbody>
+</table>
+<h2>31. Decision register</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Decision</th>
+<th>Status</th>
+<th>Source / date</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D-R1</td>
+<td>Launch languages: English, Hindi, Gujarati; extensible</td>
+<td><strong>Decided</strong></td>
+<td>Owner, 30 Sep 2026</td>
+</tr>
+<tr>
+<td>D-R2</td>
+<td>Licensing: 3-month free trial, then Simple/Advanced editions on Monthly/Annual/Lifetime terms</td>
+<td><strong>Decided (structure)</strong>; details open</td>
+<td>Owner, 30 Sep 2026</td>
+</tr>
+<tr>
+<td>D-R3</td>
+<td>Zero-cost V1 (no spend on build, test, licence or distribution)</td>
+<td><strong>Decided</strong></td>
+<td>Owner; ZCP §1</td>
+</tr>
+<tr>
+<td>D-R4</td>
+<td>Product delivered as a standalone APK via WhatsApp/email</td>
+<td><strong>Decided</strong></td>
+<td>Owner; ZCP §13</td>
+</tr>
+<tr>
+<td>D-R5</td>
+<td>Android-only V1</td>
+<td>Proposed</td>
+<td>ZCP D-05</td>
+</tr>
+<tr>
+<td>D-R6</td>
+<td>Multi-user via offline-first + LAN/hotspot sync (host device); internet relay deferred</td>
+<td><strong>Decided</strong></td>
+<td>ZCP D-02</td>
+</tr>
+<tr>
+<td>D-R7</td>
+<td>Sole-developer scope: priority tags P1/P2/P3 govern release phasing; features may slip to R2 if a build gate fails</td>
+<td>Proposed</td>
+<td>ZCP §6.5</td>
+<div class="niav-applied-resolution" data-niav-applied="D-R7"><strong>Resolved:</strong> P1/P2/P3 govern phasing; features may slip to R2 if a gate fails <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+</tbody>
+</table>
+<h2>32. Cross-document traceability (Register ↔ ZCP ↔ SEC)</h2>
+<table>
+<thead>
+<tr>
+<th>Register module</th>
+<th>ZCP reference</th>
+<th>SEC reference</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M02 Language</td>
+<td>§4, §8</td>
+<td>n/a</td>
+</tr>
+<tr>
+<td>M10 Approvals, M19 Users</td>
+<td>§5, §6</td>
+<td>§6, §7</td>
+</tr>
+<tr>
+<td>M17 Import/Export</td>
+<td>§10</td>
+<td>§8</td>
+</tr>
+<tr>
+<td>M18 Admin</td>
+<td>§5</td>
+<td>§7, §3.10</td>
+</tr>
+<tr>
+<td>M20 Licensing &amp; Trial</td>
+<td>§7</td>
+<td>§3</td>
+</tr>
+<tr>
+<td>M21 Print/Share</td>
+<td>§12</td>
+<td>§9</td>
+</tr>
+<tr>
+<td>M22 Backup/Sync/Security</td>
+<td>§6, §14</td>
+<td>§5, §6</td>
+</tr>
+<tr>
+<td>M23 UI Customisation</td>
+<td>§5</td>
+<td>§3.7 (edition gating)</td>
+</tr>
+</tbody>
+</table>
+<p>Also: see MPL §5 (release train), §11 (schedule) and §12 (USP → module → work package → gate traceability).</p>
+<h2>33. Change log</h2>
+<table>
+<thead>
+<tr>
+<th>Ver</th>
+<th>Date</th>
+<th>Section(s)</th>
+<th>Change</th>
+<th>Trigger</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.1</td>
+<td>30 Sep 2026</td>
+<td>All</td>
+<td>Initial register</td>
+<td>Owner requirement and USP/voucher list</td>
+</tr>
+<tr>
+<td>0.2</td>
+<td>30 Sep 2026</td>
+<td>Header, 0, M02.3, M19.2, M20.2/3/6, M22.2/7, 29 to 33</td>
+<td>Converted to living document (control block, IDs, decision/assumption/open-item tracking, traceability); recorded languages, editions, sync and platform decisions</td>
+<td>Owner request to make all documents living; ZCP v0.2/0.3, SEC v0.1/0.2</td>
+</tr>
+<tr>
+<td>0.3</td>
+<td>30 Sep 2026</td>
+<td>Control block, 32, 33</td>
+<td>Added NIAV-MPL (Master Plan) to the document set, precedence rule and updated impact matrix; MPL §11 now holds the schedule for the phasing in Section 28</td>
+<td>Owner request for universal master plan</td>
+</tr>
+<tr><td>0.4</td><td>30 Sep 2026</td><td>M14, M16, M17, M20, M21, M22, releases, integration model</td><td>Expanded zero-cost file/user-mediated workflows: bank statement import, government JSON workflows and response import, Tally/Busy native import feasibility, TDS/TCS deferred; PF/ESI and payroll out of scope, manual remote operation-file sync, user-selected backup storage, reminder sharing and external/manual UPI licence payment</td><td>Zero-cost integration audit</td></tr>
+</tbody>
+</table>
+<hr>
+<h2>Verification log ([VERIFY] items resolved)</h2>
+<p>Add one row each time a <strong>[VERIFY]</strong> item is checked against an official source. If a check changes the plan, also add a change-log row.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item verified</th>
+<th>Section</th>
+<th>Date checked</th>
+<th>Source (official)</th>
+<th>Result / action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(empty: no [VERIFY] item has been checked yet)</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><em>End of register v0.2. Next step after your review: convert this into a numbered requirements traceability matrix (module → user stories → acceptance criteria → test cases).</em></p><section id="niav-closure-ledger" class="niav-linker-ledger"><h2>NiAv Cross-Document Closure Ledger</h2><p>This generated ledger records owner decisions and verification closures. Original text and IDs are retained.</p><table><thead><tr><th>ID</th><th>Status</th><th>Resolution / decision</th><th>Evidence / input</th><th>Affected documents</th><th>Recorded</th></tr></thead><tbody><tr><td><code>D-04</code></td><td>Closed</td><td>Post-expiry behaviour is read-only with export data feature and grace length will be 7-10 days</td><td></td><td></td><td>2026-09-30T16:58:21</td></tr><tr><td><code>D-09</code></td><td>Closed</td><td>Fast-billing benchmark definition (&quot;10 seconds&quot; means 3 item billing with walk-in customer with advanced search features in database of 5000 items and 500 party msater,android version 12-13</td><td></td><td></td><td>2026-09-30T17:13:13</td></tr><tr><td><code>D-10</code></td><td>Closed</td><td>Edition boundaries - AI model will recommend and licence details to be decided later stage before go-live</td><td></td><td></td><td>2026-09-30T17:14:16</td></tr><tr><td><code>D-14</code></td><td>Closed</td><td>to be decided later</td><td></td><td></td><td>2026-09-30T17:14:42</td></tr><tr><td><code>D-15</code></td><td>Closed</td><td>to be decided later</td><td></td><td></td><td>2026-09-30T17:14:52</td></tr><tr><td><code>D-R2</code></td><td>Closed</td><td>Lifetime meaning V1 version full access with no upgrades and zero support if AMC is not taken</td><td></td><td></td><td>2026-10-01T13:45:42</td></tr><tr><td><code>O-03</code></td><td>Closed</td><td>&quot;10 seconds&quot;: item count - 3, taps with quick advanced search, device android 12-13</td><td></td><td></td><td>2026-10-01T13:47:11</td></tr><tr><td><code>O-04</code></td><td>Closed</td><td>lifetime meaning V1 access for lifetime with no upgrades and no support without AMC</td><td></td><td></td><td>2026-10-01T13:48:03</td></tr><tr><td><code>O-05</code></td><td>Closed</td><td>Trial edition and post-expiry policy - data read only and export only</td><td></td><td></td><td>2026-10-01T13:48:40</td></tr><tr><td><code>O-06</code></td><td>Closed</td><td>See M18 in the document, whatever scope can be supported is recommended</td><td></td><td></td><td>2026-10-01T13:50:50</td></tr><tr><td><code>O-07</code></td><td>Closed</td><td>Simple approval with maker-checker, notification window in dashboard if possible</td><td></td><td></td><td>2026-10-01T13:51:56</td></tr><tr><td><code>O-08</code></td><td>Closed</td><td>Verified</td><td></td><td></td><td>2026-10-01T13:53:06</td></tr><tr><td><code>O-09</code></td><td>Closed</td><td>ok</td><td></td><td></td><td>2026-10-01T13:53:46</td></tr><tr><td><code>O-10</code></td><td>Closed</td><td>e-invoice / e-way bill generated though JSON export and manual upload to government portal</td><td></td><td></td><td>2026-10-01T13:54:24</td></tr><tr><td><code>O-11</code></td><td>Closed</td><td>Yes</td><td></td><td></td><td>2026-10-01T13:54:34</td></tr><tr><td><code>O-12</code></td><td>Closed</td><td>exact hardware matrix - suggest recommendation</td><td></td><td></td><td>2026-10-01T13:55:32</td></tr><tr><td><code>O-13</code></td><td>Closed</td><td>Migration scope: Tally/Busy versions, data types, years of history - suggest recommendation</td><td></td><td></td><td>2026-10-01T13:56:05</td></tr><tr><td><code>O-14</code></td><td>Closed</td><td>Data hosting - local, compliance-standard, privacy requirements-standard</td><td></td><td></td><td>2026-10-01T13:56:49</td></tr><tr><td><code>O-15</code></td><td>Closed</td><td>Simple vs Advanced feature boundaries- as suggested in recommendation, grace length-7 to 10 days, lifetime definition - already defined previously,, device/user limits - 15, Entitlement matrix - suggest recommendation</td><td></td><td></td><td>2026-10-01T13:58:16</td></tr><tr><td><code>R-XX</code></td><td>Closed</td><td>yes</td><td></td><td></td><td>2026-10-01T14:37:24</td></tr><tr><td><code>WP-XX</code></td><td>Closed</td><td>yes</td><td></td><td></td><td>2026-10-01T14:37:32</td></tr><tr><td><code>O-XX</code></td><td>Closed</td><td>yes</td><td></td><td></td><td>2026-10-01T14:37:40</td></tr><tr><td><code>D-XX</code></td><td>Closed</td><td>yes</td><td></td><td></td><td>2026-10-01T14:37:46</td></tr><tr><td><code>A-XX</code></td><td>Closed</td><td>yes</td><td></td><td>NiAv_ Universal Master Plan v0.2.html, NiAv_ Security &amp; Anti-Exploitation Plan (V1) v0.7.html, NiAv_ Modules &amp; Sub-Modules Register v0.8.html, NiAv_ Zero-Cost Strategy Plan (V1) v0.9.html</td><td>2026-10-01T14:37:52</td></tr></tbody></table><h3>Workbook reconciliation status</h3><table class="niav-reconciliation-table"><thead><tr><th>ID(s)</th><th>Topic</th><th>Effective value</th><th>Final status</th><th>Gate</th></tr></thead><tbody><tr><td><code>D-09 / O-03 / O-M03</code></td><td>10-second bill benchmark</td><td>From New Bill to Pay &amp; Finish (cash): &lt;=10 s and &lt;=10 touch interactions; scripted harness + 3 volunteer timings; fixture TD-PERF-01 (5,000 items, 500 parties, 20,000 vouchers)</td><td>Decided: proposed value</td><td>G2</td></tr><tr><td><code>O-M03</code></td><td>Search latency target</td><td>p95 &lt;=200 ms keystroke-to-results on 5,000-item fixture (Android 12-13); &lt;=400 ms on reference low-end device</td><td>Decided: proposed value</td><td>G2</td></tr><tr><td><code>D-05 / D-R5</code></td><td>Android-only V1</td><td>Accepted: Android-only V1</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>D-R7</code></td><td>Priority-driven phasing</td><td>P1/P2/P3 govern phasing; features may slip to R2 if a gate fails</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>O-14</code></td><td>Data hosting / privacy</td><td>Local-only storage; minimal data collection; no telemetry; Indian data-protection obligations to be checked</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>D-M5 / D-08 / D-FG-013 / O-09 / OD-004 / OD-FD-001</code></td><td>Valuation policy</td><td>(1) Methods: Weighted Average and FIFO only. (2) Item overrides group; default Weighted Average. (3) Method locked after first posted stock movement; no change in V1. (4) Negative stock allowed with warning; no-layer issues costed at last known cost; no retro revaluation in V1. (5) Period lock by date; unlock needs right + reason + audit. (6) Orders never reserve stock (D-M6 = No). (7) Golden ledgers: opening, purchase, sale, returns, adjustment, negative-stock sale, lock/unlock</td><td>Decided: proposed value</td><td>G1</td></tr><tr><td><code>OD-001 / O-08</code></td><td>Voucher series scope and gap policy</td><td>Invoice will have limited series, as CA advice on keeping number of invoice series to be minimum</td><td>Decided: owner value</td><td>G1</td></tr><tr><td><code>O-FG-005</code></td><td>Matching tolerance</td><td>Auto-match only if amount exact (0 paise) AND reference unique; otherwise suggestions with date window +/-3 days (cheques +/-7); user always confirms; CSV/XLSX first, PDF later</td><td>Decided: proposed value</td><td>R2</td></tr><tr><td><code>D-04 / O-05 / D-FG-014</code></td><td>Post-expiry behaviour and entitlement matrix</td><td>10-day grace with full function + daily reminder, then read-only + export + backup; data never deleted; entitlements.json (edition x term x trial x grace x limits) is single source for gates and tests</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>D-11 / D-13 / A-R2</code></td><td>Trial edition</td><td>Trial 3 months, full feature set of installed release (R1a = Simple features; R1b+ = Advanced). On trial end buying Simple keeps Advanced data read-only/exportable</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>D-10 / O-06 / O-15 / OD-007</code></td><td>Simple vs Advanced boundary</td><td>Simple (R1a): masters, P1 dual+accounting vouchers, Delivery Note, Stock Transfer/Journal, basic quotation/order, Quick Bill, search, core reports, GST reports, Excel import/export, backup, en/hi/gu, 1 device. Advanced (R1b+): all Simple + multi-user/roles, approvals, document-flow automation, Material Issue/Receive, batch/expiry, price lists, multi-godown reports, LAN/hotspot + file sync, audit/admin tools</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>O-15 / OD-007</code></td><td>Device and user limits</td><td>Advanced: up to 5 devices and 10 users per company; Simple: 1 device, up to 3 users. S3 only tests 3 devices: certify 5 until larger fleet tested.</td><td>Decided: owner value</td><td>S3</td></tr><tr><td><code>D-14</code></td><td>Monthly licence model</td><td>Prepaid keys carrying an expiry date (1/3/6/12 months or lifetime); no monthly re-issue</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>D-15 / D-R2 / O-04</code></td><td>Meaning of 'Lifetime'</td><td>yes V1.x patches count as upgrades</td><td>Decided: owner value</td><td>Go-live</td></tr><tr><td><code>D-FG-012</code></td><td>External payment to signed licence</td><td>reissue limit - 20</td><td>Decided: owner value</td><td>Go-live</td></tr><tr><td><code>O-10 / O-FG-002 / O-FG-003</code></td><td>E-invoice / e-way bill</td><td>Stay in R3 as JSON export/manual upload (Level 0-4); capture IRN/ack/e-way fields in data model from R1a; GST return JSON stays R1a</td><td>Decided: proposed value</td><td>G3</td></tr><tr><td><code>O-FG-007 / O-FG-008</code></td><td>TDS/TCS and PF/ESI</td><td>TDS/TCS deferred to later release; PF/ESI and payroll out of scope; remove from V1 scope text and RTM</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>O-FG-006 / A-FG-006 / O-13</code></td><td>Tally/Busy native import</td><td>V1/R2: Excel import with documented templates; native adapters = R3 feasibility; FG-006 marked Deferred</td><td>Decided: proposed value</td><td>G4</td></tr><tr><td><code>O-12 / O-M07 / OD-008</code></td><td>Printing hardware</td><td>Bluetooth ESC/POS thermal 58 mm and 80 mm + PDF via Android print/share for A4/A5; Indic text rendered as raster image; USB/Wi-Fi printers later; test on &gt;=3 printers; failures visible</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>O-07 / OD-FD-004 / OD-UI-004</code></td><td>Approval scope</td><td>Single-level approval by amount threshold and voucher type; no parallel; maker may recall before action; dashboard badge + inbox; no push notifications in V1; approval never bypasses posting validation</td><td>Decided: proposed value</td><td>R1b</td></tr><tr><td><code>O-06</code></td><td>Admin module scope</td><td>R1b admin = users, roles/rights, audit viewer, voucher controls, period locks, device/pairing management, rebuild utility</td><td>Decided: proposed value</td><td>R1b</td></tr><tr><td><code>O-11</code></td><td>Industry presets</td><td>In scope; delivered in R2</td><td>Decided: proposed value</td><td>R2</td></tr><tr><td><code>O-FG-011</code></td><td>Payment reminders</td><td>Prepare -&gt; preview -&gt; user-initiated share; status Prepared / Sent-by-user / Not-sent per item</td><td>Decided: proposed value</td><td>R1b</td></tr><tr><td><code>Gates</code></td><td>Gate definitions</td><td>MPL 11.4 authoritative; rewrite TEST 6 with MPL gate numbers and add G4, G5, G6</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>R-XX / WP-XX / O-XX / D-XX / A-XX</code></td><td>Placeholder closures</td><td>Withdraw: not real IDs; remove from all ledgers</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>FG-002 / 003 / 004</code></td><td>Statutory schema verification</td><td>Verify GST/e-invoice/e-way schemas from official sources; record in verification logs</td><td>Decided: owner value</td><td>G1</td></tr><tr><td><code>COMMERCIAL</code></td><td>Pricing, AMC price and content, reissue limit</td><td>Decide before go-live</td><td>Decided: owner value</td><td>Go-live</td></tr></tbody></table></section>
+<section id="niav-reconciliation-change-log"><h2>Change log</h2><table><tr><th>Version</th><th>Date</th><th>Change</th></tr><tr data-generated-by="niav-reconcile-workbook"><td>v0.8</td><td>2026-10-01</td><td>Workbook reconciliation applied: 27 decision row(s) integrated into body text, closure status, and cross-document traceability; deferred/verification-dependent items remain explicitly non-closed.</td></tr></table></section>
+<section id="niav-g0-final-change-log"><h2>Change log</h2><table><tr><th>Version</th><th>Date</th><th>Change</th></tr><tr><td>v0.8</td><td>2026-10-01</td><td>G0 exception register owner inputs applied; final reconciliation status recorded across 9 linked exception rows.</td></tr></table></section><section id="niav-g0-closeout-log"><h2>Closeout change log</h2><table><thead><tr><th>Version</th><th>Date</th><th>Change</th></tr></thead><tbody><tr><td>v0.8</td><td>2026-10-01</td><td>G0 closeout: verification evidence register, approved schema delta, RTM/test impact review and conditional sign-off recorded.</td></tr></tbody></table></section></body></html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

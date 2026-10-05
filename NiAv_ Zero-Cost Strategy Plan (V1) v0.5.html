@@ -1,0 +1,1161 @@
+﻿<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}</style><style>:root{color-scheme:light dark;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}}:root[data-theme="dark"]{color-scheme:dark;--md-bg:#0d0d0d;--md-text:rgba(255,255,255,.85);--md-muted:rgba(255,255,255,.6);--md-fill:rgba(255,255,255,.06);--md-fill-strong:rgba(255,255,255,.09);--md-rule:rgba(255,255,255,.14);--md-rule-strong:rgba(255,255,255,.22);--md-link:hsl(210 100% 72%)}:root[data-theme="light"]{color-scheme:light}@media print{:root,:root[data-theme="dark"]{color-scheme:light;--md-bg:#fff;--md-text:rgba(0,0,0,.8);--md-muted:rgba(0,0,0,.6);--md-fill:rgba(0,0,0,.04);--md-fill-strong:rgba(0,0,0,.06);--md-rule:rgba(0,0,0,.1);--md-rule-strong:rgba(0,0,0,.16);--md-link:hsl(210 100% 45%)}}body{background:var(--md-bg);color:var(--md-text);max-width:720px;margin:0 auto;padding:32px;display:flex;flex-direction:column;gap:10px;font:14px/1.55 -apple-system,BlinkMacSystemFont,'SF Pro','Segoe UI',sans-serif;overflow-wrap:break-word}body>:first-child{margin-top:0}h1,h2,h3,h4,h5,h6{margin:6px 0 0;line-height:1.25;font-weight:600;text-wrap:balance}h1{font-size:1.35em}h2{font-size:1.15em;color:var(--md-muted)}h3,h4,h5,h6{font-size:1em}p,ul,ol,blockquote,table,pre,hr{margin:0}strong{font-weight:600}a{color:var(--md-link);text-decoration:none}a:hover{text-decoration:underline}ul,ol{display:flex;flex-direction:column;gap:6px;padding-left:22px}ul{list-style:disc}ol{list-style:decimal}:is(li,td,th)>*+:is(p,ul,ol,blockquote){margin-top:6px}blockquote{display:flex;flex-direction:column;gap:10px;border-left:2px solid var(--md-rule);padding-left:10px;color:var(--md-muted)}:not(pre)>code{background:var(--md-fill);padding:1px 3px;border-radius:4px;font:.92em 'SF Mono',ui-monospace,Menlo,Consolas,monospace}a>code{background:none;color:inherit}pre{background:var(--md-fill);padding:10px 12px;border-radius:6px;overflow-x:auto;font:12px/1.5 'SF Mono',ui-monospace,Menlo,Consolas,monospace;margin-block:4px}pre code{background:none;padding:0;font:inherit}table{width:100%;border-collapse:separate;border-spacing:2px;font:inherit}th,td{padding:6px 8px;border-radius:3px;text-align:left;vertical-align:top}th{background:var(--md-fill-strong);font-weight:600}td{background:var(--md-fill)}:is(th,td) :not(pre)>code{background:transparent}hr{border:0;border-top:1px solid var(--md-rule-strong);margin-block:10px}img{max-width:100%;height:auto;border-radius:4px}</style>
+</head><body><section id="niav-g0-final-audit-cleanup-v6"><h2>G0 Final Audit Cleanup — 2026-10-03</h2><table><tr><th>Version</th><th>Date</th><th>Change</th></tr><tr><td>v0.10</td><td>2026-10-03</td><td>Aligned document status with the v0.10 change log and confirmed voice input rejected for V1.</td></tr></table></section><section id="niav-g0-final-cleanup-v5"><h2>G0 Final Cleanup — 2026-10-03</h2><p>Voice input is rejected for V1. The owner-approved navigation model is Home, Billing, Parties &amp; Items, Reports, More. Source-baseline tables are frozen snapshots of versions at authoring time.</p><table><tr><th>Version</th><th>Date</th><th>Change</th></tr><tr><td>v0.10</td><td>2026-10-03</td><td>Final voice/navigation cleanup, header alignment and source-baseline snapshot clarification.</td></tr></table></section><section id="niav-g0-correction-v2"><h2>G0 Correction Update — 2026-10-03</h2><p>Active body text corrected after the independent audit. Historical records are retained as history; the active requirements are the corrected statements.</p><table><tr><th>Version</th><th>Date</th><th>Change</th></tr><tr><td>v0.9</td><td>2026-10-03</td><td>Corrected audited body-text residue for G0-CON-001 through G0-CON-005; corrected voice-input rejection and added explicit active change log.</td></tr></table></section><section id="niav-g0-body-corrections"><h2>G0 Body-Text Corrections — 2026-10-03</h2><p>Authoritative corrections applied for G0-CON-001 through G0-CON-005. These corrections supersede contradictory historical wording in the active body. Historical change logs remain historical records.</p><ul><li>CON-001: TDS/TCS is later-release; PF/ESI and payroll are out of scope for V1.</li><li>CON-002: Tally/Busy native import is R3 feasibility only; V1 uses approved Excel templates.</li><li>CON-003: rollback is uninstall current APK, install previous APK, restore external backup; in-place downgrade is unsupported.</li><li>CON-004: master-data sync uses field merge; host arrival wins on same-field clash and the loser is logged.</li><li>CON-005: navigation label is Billing.</li></ul></section><section id="niav-g0-verification-evidence"><h2>G0 Verification Evidence — 2026-10-01</h2><p>Eight verification records are attached in <code>NiAv_G0_Verification_Evidence_Register_v0.1.xlsx</code>. Documentary sources are recorded where available. No execution result is represented as passed until the named fixture, device, adapter or physical test is attached.</p><table><thead><tr><th>Record</th><th>Subject</th><th>Disposition</th></tr></thead><tbody><tr><td>V-FG-001</td><td>SQLCipher/Drift Android 8+</td><td>Documentary source attached; Android 8 smoke test pending</td></tr><tr><td>GST-RND-001</td><td>GST rounding</td><td>Official rule attached; golden fixture pending</td></tr><tr><td>V-FG-003</td><td>GST/e-invoice/e-way schemas</td><td>Official e-way API/schema sources attached; adapter test pending</td></tr><tr><td>R-04</td><td>WhatsApp/email delivery</td><td>Official channel limits attached; delivery/checksum test pending</td></tr><tr><td>D-06</td><td>Android Keystore Android 8</td><td>Official API source attached; device test pending</td></tr><tr><td>O-M07</td><td>Printer compatibility</td><td>Three-printer physical test required</td></tr><tr><td>O-14/R-13</td><td>DPDP obligations</td><td>Official Act source attached; control/legal review pending</td></tr><tr><td>V-FG-003</td><td>File-provider/share/restore</td><td>Platform test required</td></tr></tbody></table></section><section id="niav-g0-final-signoff"><h2>Final G0 Sign-off — Conditional</h2><p><strong>Decision:</strong> Conditional G0 acceptance of the reconciled design baseline on 2026-10-01. Owner decisions and deferred gates are recorded, the seven schema changes are approved for implementation, and the eight verification records are registered with sources or explicit execution requirements.</p><p><strong>Not yet production-release accepted:</strong> device/printer/adapter/fixture evidence, schema migrations and the resulting regression execution remain open. Final unconditional sign-off requires those records to be attached and the RTM/test plan rerun with passing results.</p></section><section id="niav-g0-final-reconciliation" data-generated-by="niav_apply_g0_register.mjs"><h2>G0 Final Reconciliation — v0.10</h2><p>Source: NiAv G0 Exception Register v0.1.xlsx, owner inputs applied on 2026-10-01. Confirmed verification actions remain evidence-required; approved schema gaps remain implementation/design work. This section is authoritative for the current G0 disposition while prior history is retained.</p><table class="niav-g0-final-table"><thead><tr><th>Exception</th><th>Category</th><th>Source</th><th>Final status</th><th>Applied value/action</th><th>Gate</th><th>Owner notes</th></tr></thead><tbody><tr><td><code>G0-DEF-002</code></td><td>Deferred item</td><td>O-FG-007 / O-FG-008</td><td>Deferred — Later release</td><td>Owner confirmed deferment: Confirm the later-release gate for TDS/TCS and removal from V1 traceability.</td><td>Later release</td><td></td></tr><tr><td><code>G0-VER-001</code></td><td>Verification evidence missing</td><td>V-FG-001 / D-06</td><td>Evidence still required — owner confirmed action</td><td>Owner confirmed: Attach official library/version/licence and Android 8 compatibility evidence.</td><td>G0</td><td></td></tr><tr><td><code>G0-VER-002</code></td><td>Verification evidence missing</td><td>GST rounding / D-M4</td><td>Evidence still required — owner confirmed action</td><td>Owner confirmed: Attach the rule source and a passing golden rounding fixture.</td><td>G0</td><td></td></tr><tr><td><code>G0-VER-003</code></td><td>Verification evidence missing</td><td>V-FG-001 / O-FG-002/O-FG-003</td><td>Evidence still required — owner confirmed action</td><td>Owner confirmed: Attach official schema/version evidence and update verification logs.</td><td>G3</td><td></td></tr><tr><td><code>G0-VER-004</code></td><td>Verification evidence missing</td><td>R-04</td><td>Evidence still required — owner confirmed action</td><td>Owner confirmed: Attach channel limits and a successful APK/ZIP/checksum delivery test.</td><td>G5</td><td></td></tr><tr><td><code>G0-VER-005</code></td><td>Verification evidence missing</td><td>D-06 / SEC §5</td><td>Evidence still required — owner confirmed action</td><td>Owner confirmed: Attach Android 8 Keystore test result and key-wrap behaviour.</td><td>G0</td><td></td></tr><tr><td><code>G0-VER-007</code></td><td>Verification evidence missing</td><td>O-14 / R-13</td><td>Evidence still required — owner confirmed action</td><td>Owner confirmed: Attach the reviewed source and the resulting local-only/minimal-collection control mapping.</td><td>G5</td><td></td></tr><tr><td><code>G0-CON-001</code></td><td>Body contradiction</td><td>O-FG-007 / O-FG-008</td><td>Decided</td><td>Make V1 text authoritative: TDS/TCS later release; PF/ESI/payroll out of scope.</td><td>G0</td><td></td></tr><tr><td><code>G0-SCH-001</code></td><td>Schema design gap</td><td>D-M5 / D-08 / OD-DB-002</td><td>Approved design change — implementation required</td><td>Approved: Add cost-layer and stock-movement structures plus negative-stock costing/reconciliation rules.</td><td>G1</td><td></td></tr><tr><td><code>G0-SCH-002</code></td><td>Schema design gap</td><td>D-M5</td><td>Approved design change — implementation required</td><td>Approved: Add period-lock entity, rights, unlock reason and audit linkage.</td><td>G1</td><td></td></tr></tbody></table></section>
+<section id="niav-workbook-reconciliation" data-generated-by="niav_reconcile_workbook.mjs"><h2>Workbook Reconciliation — v0.10</h2><p>Source: NiAv_Decisions_Workbook_v0.1.xlsx Decisions sheet. Effective value and final status are authoritative for this reconciliation. Original history is retained; deferred and verification-dependent items are not represented as closed.</p><h3>Workbook-authoritative decision integration</h3><table class="niav-reconciliation-table"><thead><tr><th>ID(s)</th><th>Topic</th><th>Effective value</th><th>Final status</th><th>Gate</th></tr></thead><tbody><tr><td><code>D-09 / O-03 / O-M03</code></td><td>10-second bill benchmark</td><td>From New Bill to Pay &amp; Finish (cash): &lt;=10 s and &lt;=10 touch interactions; scripted harness + 3 volunteer timings; fixture TD-PERF-01 (5,000 items, 500 parties, 20,000 vouchers)</td><td>Decided: proposed value</td><td>G2</td></tr><tr><td><code>O-M03</code></td><td>Search latency target</td><td>p95 &lt;=200 ms keystroke-to-results on 5,000-item fixture (Android 12-13); &lt;=400 ms on reference low-end device</td><td>Decided: proposed value</td><td>G2</td></tr><tr><td><code>O-M04</code></td><td>Device baseline and budgets</td><td>minSdk 26. Reference low-end: Android 8-9, 2 GB RAM, 32 GB storage. Cold start &lt;=5 s; quick bill &lt;=15 s; core report on 20,000 vouchers &lt;=5 s; APK &lt;=40 MB per ABI</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>D-05 / D-R5</code></td><td>Android-only V1</td><td>Accepted: Android-only V1</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>D-07</code></td><td>Relax Rs0 rule later</td><td>V1 stays Rs0; server / Play Store / e-invoice provider reviewed only at V2 after revenue</td><td>Decided: proposed value</td><td>V2</td></tr><tr><td><code>D-M2 / D-M3 / O-M05</code></td><td>Release train</td><td>R1a (Simple, single device) then R1b (Advanced, multi-device); if S2/S3 slip, R1b ships with file merge, LAN sync as R1b.1</td><td>Decided: proposed value</td><td>G6</td></tr><tr><td><code>O-14</code></td><td>Data hosting / privacy</td><td>Local-only storage; minimal data collection; no telemetry; Indian data-protection obligations to be checked</td><td>Decided: proposed value</td><td>G5</td><div class="niav-g0-applied" data-g0-applied="G0-VER-007"><strong>G0 Evidence still required — owner confirmed action:</strong> Owner confirmed: Attach the reviewed source and the resulting local-only/minimal-collection control mapping.</div></tr><tr><td><code>D-M5 / D-08 / D-FG-013 / O-09 / OD-004 / OD-FD-001</code></td><td>Valuation policy</td><td>(1) Methods: Weighted Average and FIFO only. (2) Item overrides group; default Weighted Average. (3) Method locked after first posted stock movement; no change in V1. (4) Negative stock allowed with warning; no-layer issues costed at last known cost; no retro revaluation in V1. (5) Period lock by date; unlock needs right + reason + audit. (6) Orders never reserve stock (D-M6 = No). (7) Golden ledgers: opening, purchase, sale, returns, adjustment, negative-stock sale, lock/unlock</td><td>Decided: proposed value</td><td>G1</td><div class="niav-g0-applied" data-g0-applied="G0-SCH-001"><strong>G0 Approved design change — implementation required:</strong> Approved: Add cost-layer and stock-movement structures plus negative-stock costing/reconciliation rules.</div><div class="niav-g0-applied" data-g0-applied="G0-SCH-002"><strong>G0 Approved design change — implementation required:</strong> Approved: Add period-lock entity, rights, unlock reason and audit linkage.</div></tr><tr><td><code>D-M4 / OD-DB-001</code></td><td>Quantity scale and physical types</td><td>Money INTEGER paise. Quantity INTEGER x10^4 (per-unit display precision: pcs 0, kg/litre 3, other &lt;=4). Line amount = round-half-up(qty x rate / 10^4); invoice round-off separate ledger line to nearest rupee. Stock value in paise; unit cost derived. IDs UUIDv7 TEXT. Dates ISO TEXT; timestamps INTEGER epoch ms UTC</td><td>Decided: proposed value</td><td>G0</td><div class="niav-g0-applied" data-g0-applied="G0-VER-002"><strong>G0 Evidence still required — owner confirmed action:</strong> Owner confirmed: Attach the rule source and a passing golden rounding fixture.</div></tr><tr><td><code>D-04 / O-05 / D-FG-014</code></td><td>Post-expiry behaviour and entitlement matrix</td><td>10-day grace with full function + daily reminder, then read-only + export + backup; data never deleted; entitlements.json (edition x term x trial x grace x limits) is single source for gates and tests</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>D-11 / D-13 / A-R2</code></td><td>Trial edition</td><td>Trial 3 months, full feature set of installed release (R1a = Simple features; R1b+ = Advanced). On trial end buying Simple keeps Advanced data read-only/exportable</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>D-10 / O-06 / O-15 / OD-007</code></td><td>Simple vs Advanced boundary</td><td>Simple (R1a): masters, P1 dual+accounting vouchers, Delivery Note, Stock Transfer/Journal, basic quotation/order, Quick Bill, search, core reports, GST reports, Excel import/export, backup, en/hi/gu, 1 device. Advanced (R1b+): all Simple + multi-user/roles, approvals, document-flow automation, Material Issue/Receive, batch/expiry, price lists, multi-godown reports, LAN/hotspot + file sync, audit/admin tools</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>O-15 / OD-007</code></td><td>Device and user limits</td><td>Advanced: up to 5 devices and 10 users per company; Simple: 1 device, up to 3 users. S3 only tests 3 devices: certify 5 until larger fleet tested.</td><td>Decided: owner value</td><td>S3</td></tr><tr><td><code>D-14</code></td><td>Monthly licence model</td><td>Prepaid keys carrying an expiry date (1/3/6/12 months or lifetime); no monthly re-issue</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>D-15 / D-R2 / O-04</code></td><td>Meaning of 'Lifetime'</td><td>yes V1.x patches count as upgrades</td><td>Decided: owner value</td><td>Go-live</td></tr><tr><td><code>D-16</code></td><td>Optional online time check</td><td>Optional and opportunistic: used only to detect clock rollback when online; never required</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>D-06 / OD-DB-001</code></td><td>Database encryption</td><td>Whole-DB encryption with SQLCipher-class engine (AES-256); random 256-bit key wrapped by Android Keystore; PIN/biometric gates key use; final library chosen in G0 spike</td><td>Decided: proposed value</td><td>G0</td><div class="niav-g0-applied" data-g0-applied="G0-VER-001"><strong>G0 Evidence still required — owner confirmed action:</strong> Owner confirmed: Attach official library/version/licence and Android 8 compatibility evidence.</div><div class="niav-g0-applied" data-g0-applied="G0-VER-005"><strong>G0 Evidence still required — owner confirmed action:</strong> Owner confirmed: Attach Android 8 Keystore test result and key-wrap behaviour.</div></tr><tr><td><code>R-04</code></td><td>APK delivery via WhatsApp/email</td><td>Primary WhatsApp/email; fallbacks ZIP-wrapped APK and Rs0 hosted link; always publish checksum</td><td>Decided: proposed value</td><td>G5</td><div class="niav-g0-applied" data-g0-applied="G0-VER-004"><strong>G0 Evidence still required — owner confirmed action:</strong> Owner confirmed: Attach channel limits and a successful APK/ZIP/checksum delivery test.</div></tr><tr><td><code>R-12</code></td><td>Third-party licence compliance</td><td>Maintain open-source licence inventory and in-app 'Open-source licences' screen</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>R-13</code></td><td>Data-protection risk</td><td>Reclassify as 'Accepted - mitigated' (local-only, minimal collection); conflicts with O-14</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>O-10 / O-FG-002 / O-FG-003</code></td><td>E-invoice / e-way bill</td><td>Stay in R3 as JSON export/manual upload (Level 0-4); capture IRN/ack/e-way fields in data model from R1a; GST return JSON stays R1a</td><td>Decided: proposed value</td><td>G3</td><div class="niav-g0-applied" data-g0-applied="G0-VER-003"><strong>G0 Evidence still required — owner confirmed action:</strong> Owner confirmed: Attach official schema/version evidence and update verification logs.</div></tr><tr><td><code>O-FG-007 / O-FG-008</code></td><td>TDS/TCS deferred to a later release; PF/ESI and payroll out of scope</td><td>TDS/TCS deferred to later release; PF/ESI and payroll out of scope; remove from V1 scope text and RTM</td><td>Decided: proposed value</td><td>G0</td><div class="niav-g0-applied" data-g0-applied="G0-DEF-002"><strong>G0 Deferred — Later release:</strong> Owner confirmed deferment: Confirm the later-release gate for TDS/TCS and removal from V1 traceability.</div><div class="niav-g0-applied" data-g0-applied="G0-CON-001"><strong>G0 Decided:</strong> Make V1 text authoritative: TDS/TCS later release; PF/ESI/payroll out of scope.</div></tr><tr><td><code>O-06</code></td><td>Admin module scope</td><td>R1b admin = users, roles/rights, audit viewer, voucher controls, period locks, device/pairing management, rebuild utility</td><td>Decided: proposed value</td><td>R1b</td></tr><tr><td><code>Gates</code></td><td>Gate definitions</td><td>MPL 11.4 authoritative; rewrite TEST 6 with MPL gate numbers and add G4, G5, G6</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>R-XX / WP-XX / O-XX / D-XX / A-XX</code></td><td>Placeholder closures</td><td>Withdraw: not real IDs; remove from all ledgers</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>FG-002 / 003 / 004</code></td><td>Statutory schema verification</td><td>Verify GST/e-invoice/e-way schemas from official sources; record in verification logs</td><td>Decided: owner value</td><td>G1</td></tr><tr><td><code>COMMERCIAL</code></td><td>Pricing, AMC price and content, reissue limit</td><td>Decide before go-live</td><td>Decided: owner value</td><td>Go-live</td></tr></tbody></table></section>
+<h1>NiAv: Zero-Cost Strategy Plan (V1)</h1>
+<p><strong>Document status:</strong> Living document, v0.10 (draft)
+<strong>Depends on:</strong> NiAv Modules &amp; Sub-Modules Register v0.4 (module IDs M01 to M24 are referenced throughout); companion: NiAv Security &amp; Anti-Exploitation Plan v0.4
+<strong>Absolute criterion:</strong> ₹0 spent to build, test, license and distribute V1.
+<strong>End product:</strong> One standalone Android APK, distributed by WhatsApp or email.</p>
+<h2>Document control &amp; living-document protocol (common to all four NiAv documents)</h2>
+<p><strong>This document:</strong> NIAV-ZCP · NiAv Zero-Cost Strategy Plan · v0.10 · Status: <strong>Draft</strong> (statuses: Draft → Reviewed → Baselined; 1.0 = baseline approved by the owner) · Owner: Product owner / sole developer · Last updated: 30 Sep 2026</p>
+<p><strong>Document set</strong></p>
+<table>
+<thead>
+<tr>
+<th>Doc ID</th>
+<th>Title</th>
+<th>Version</th>
+<th>Role</th>
+<th>Link</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NIAV-REG</td>
+<td>NiAv Modules &amp; Sub-Modules Register</td>
+<td>v0.4</td>
+<td>Scope: what the product does (modules, vouchers, reports)</td>
+<td><a href="https://claude.ai/artifact/3s6wNgMF14n3zVjA7AfVB6">Open link</a></td>
+</tr>
+<tr>
+<td>NIAV-MPL</td>
+<td>NiAv Universal Master Plan</td>
+<td>v0.2</td>
+<td>Apex plan: design, architecture and implementation schedule</td>
+<td><a href="https://claude.ai/artifact/7FsXFaPSNkhfz32T66B2RG">Open link</a></td>
+</tr>
+<tr>
+<td>NIAV-ZCP</td>
+<td>NiAv Zero-Cost Strategy Plan <strong>(this document)</strong></td>
+<td>v0.9</td>
+<td>₹0 rules: stack, sync, distribution, costs, risks</td>
+<td><a href="https://claude.ai/artifact/QqMMUvmQJhJTCzFPKpxka3">Open link</a></td>
+</tr>
+<tr>
+<td>NIAV-SEC</td>
+<td>NiAv Security &amp; Anti-Exploitation Plan</td>
+<td>v0.4</td>
+<td>Security controls: licence, trial, data, sync, fraud</td>
+<td><a href="https://claude.ai/artifact/M16Qr4CTsrqz7B965ARKVf">Open link</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Precedence when documents disagree:</strong> (1) the ₹0 rules (ZCP §1) and the security controls (SEC) can <strong>veto</strong> any feature, tool or schedule item; (2) REG defines scope; (3) MPL defines architecture and schedule; (4) the owner arbitrates and records the outcome as a decision.</p>
+<p><strong>Update protocol (follow in this order every time something changes)</strong></p>
+<ol>
+<li><strong>Identify the trigger</strong> (new requirement, decision, incident, verified fact, estimate variance or pilot feedback) and record it in the change log of every document you touch.</li>
+<li><strong>Update in this order:</strong> Register (what) → Master Plan (design, architecture, schedule) → Strategy Plan (₹0 how) → Security Plan (protection), using the impact matrix below.</li>
+<li><strong>Bump the version:</strong> minor (0.x → 0.x+1) for content changes; major only when the owner baselines (1.0, 2.0).</li>
+<li><strong>Update IDs, don't delete:</strong> decisions (D-xx), assumptions (A-xx), risks (R-xx), open items (O-xx), work packages (WP-xx) change <strong>status</strong>; superseded rows stay for history.<div class="niav-applied-resolution" data-niav-applied="R-XX"><strong>Resolved:</strong> Withdraw: not real IDs; remove from all ledgers <span class="niav-resolution-status">(Decided: proposed value)</span></div></li>
+<li><strong>Resolve [VERIFY] flags</strong> by checking the official source and adding a row to the Verification log at the end of the document.</li>
+<li><strong>Re-publish to the same artifact link</strong> and keep the <code>.md</code> files in Git so history is retained.</li>
+</ol>
+<p><strong>Change-impact matrix</strong></p>
+<table>
+<thead>
+<tr>
+<th>Trigger</th>
+<th>Update first</th>
+<th>Then check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>New/changed module, voucher, report or edition boundary</td>
+<td>REG</td>
+<td>MPL §5, §11 (schedule); ZCP §5, §7.3; SEC §3.7, §13</td>
+</tr>
+<tr>
+<td>Architecture or design change</td>
+<td>MPL §6 to §9</td>
+<td>ZCP §3, §4; SEC §1 (threats); REG if scope changes</td>
+</tr>
+<tr>
+<td>Estimate variance, slippage or re-baseline</td>
+<td>MPL §11</td>
+<td>ZCP §15 (phases); REG §28 (phasing)</td>
+</tr>
+<tr>
+<td>Language added</td>
+<td>REG M02</td>
+<td>MPL §6.7; ZCP §4, §8</td>
+</tr>
+<tr>
+<td>Change to a ₹0 rule, tool or library</td>
+<td>ZCP §1, §4, §17</td>
+<td>MPL §7, §10; SEC §9</td>
+</tr>
+<tr>
+<td>Licence / trial / pricing model change</td>
+<td>REG M20</td>
+<td>MPL §7.8; ZCP §7; SEC §3</td>
+</tr>
+<tr>
+<td>Multi-user / sync change</td>
+<td>REG M19, M22</td>
+<td>MPL §7.7, §11; ZCP §6; SEC §6</td>
+</tr>
+<tr>
+<td>Security incident or new threat</td>
+<td>SEC §1, §10, §14</td>
+<td>MPL §13 (risks); ZCP §18</td>
+</tr>
+<tr>
+<td>A [VERIFY] item is checked</td>
+<td>Document holding the item + its Verification log</td>
+<td>Any document repeating the fact</td>
+</tr>
+<tr>
+<td>Pilot/customer feedback</td>
+<td>REG (scope)</td>
+<td>MPL (backlog, schedule), SEC (abuse cases)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Conventions:</strong> IDs are unique per document (REG: M-codes, D-R, A-R, O-; MPL: WP-, G-, D-M, A-M, R-M, O-M; ZCP: D-, A-, R-, C-; SEC: T-, RR-, D-, A-S). Cross-references cite the document ID and section, e.g. &quot;ZCP §6&quot;.</p>
+<hr>
+<hr>
+<h2>0. How to keep this document dynamic</h2>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Version and change log</td>
+<td>Every edit adds a row in Section 20 (date, section, what changed, why, trigger document).</td>
+</tr>
+<tr>
+<td>Decision register (Section 19)</td>
+<td>Each strategic choice has an ID (D-xx), status (Open / Decided / Superseded) and the reason. Change the status, don't delete the row.</td>
+</tr>
+<tr>
+<td>Assumption IDs (A-xx)</td>
+<td>Every assumption is numbered. When a future document confirms or breaks one, update it and note the sections affected.</td>
+</tr>
+<tr>
+<td>Module linkage</td>
+<td>Section 5 maps every register module to a V1 disposition. When the register changes, revisit Section 5 first.</td>
+</tr>
+<tr>
+<td>Store the file in Git</td>
+<td>Keep this <code>.md</code> in the project's Git repository so history is automatic.</td>
+</tr>
+<tr>
+<td>Verification flags</td>
+<td>Items marked <strong>[VERIFY]</strong> are facts (prices, limits, licences, rules) that change over time. I have not confirmed them for today's date. Check the official source before relying on them.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>1. Zero-cost rules (the &quot;₹0 gate&quot;)</h2>
+<p>A tool, service, or activity is allowed in V1 <strong>only if all of these hold</strong>:</p>
+<ol>
+<li><strong>No payment now or later:</strong> no card/UPI mandate, no &quot;free trial then charge&quot;, no auto-renewal.</li>
+<li><strong>No usage-based billing risk:</strong> a service that bills for overage is barred unless it can be hard-capped at zero.</li>
+<li><strong>Licence permits your use:</strong> open-source or free licence that allows commercial distribution of an app <strong>[VERIFY per component]</strong>.<div class="niav-applied-resolution" data-niav-applied="COMMERCIAL"><strong>Resolved:</strong> Decide before go-live <span class="niav-resolution-status">(Decided: owner value)</span></div></li>
+<li><strong>No dependency on a paid account of yours</strong> (e.g., a paid developer programme, paid domain, paid SMS/WhatsApp API).</li>
+<li><strong>Removable:</strong> if a free tier ends, V1 must keep working (offline core), even if a nice-to-have stops.</li>
+</ol>
+<p><strong>Rule of thumb:</strong> if a setup screen asks for a card, stop and record it in the decision register.</p>
+<h3>What &quot;zero cost&quot; does and doesn't cover</h3>
+<ul>
+<li><strong>Covered:</strong> software, tools, libraries, hosting/distribution, testing, licensing mechanism.</li>
+<li><strong>Assumed already owned (A-01):</strong> a computer, an Android phone for testing, and an internet connection. Your own time is not counted as a cost.</li>
+<li><strong>Not in the ₹0 budget:</strong> anything requiring new hardware or paid third parties. Listed under &quot;Deferred&quot; in Section 5.</li>
+</ul>
+<hr>
+<h2>2. Consequences of &quot;zero cost + standalone APK&quot; (read this first)</h2>
+<p>These follow logically from the constraints and shape the whole plan:</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Constraint</th>
+<th>Consequence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C1</td>
+<td>No paid server or cloud</td>
+<td>V1 is <strong>offline-first, data stored on the device</strong>. No central database.</td>
+</tr>
+<tr>
+<td>C2</td>
+<td>No Google Play (developer registration is a paid fee <strong>[VERIFY]</strong>)</td>
+<td>App is <strong>sideloaded</strong> as an APK. Users must allow &quot;install unknown apps&quot;; Android may show a security warning.</td>
+</tr>
+<tr>
+<td>C3</td>
+<td>APK sent by WhatsApp/email</td>
+<td>You control no store updates; the <strong>app must handle its own update path</strong> (users install a newer APK).</td>
+</tr>
+<tr>
+<td>C4</td>
+<td>No licence server</td>
+<td><strong>Offline licence keys</strong> verified inside the app (Section 7). Piracy resistance is limited.</td>
+</tr>
+<tr>
+<td>C5</td>
+<td>No paid server for sync</td>
+<td><strong>Real-time cloud/Internet relay sync across locations is not guaranteed at ₹0.</strong> Multi-user, multi-device is achievable through <strong>offline-first + sync over the shop's shared Wi-Fi/hotspot</strong> via a host device (Section 6). <strong>Manual encrypted remote operation-file synchronization is also a zero-cost fallback</strong> using user-controlled file transport; managed relay/cloud sync remains deferred.</td>
+</tr>
+<tr>
+<td>C6</td>
+<td>No paid messaging APIs</td>
+<td>WhatsApp/SMS sharing uses the phone's <strong>share sheet</strong> (user taps send), not automated messages.</td>
+</tr>
+<tr>
+<td>C7</td>
+<td>No paid GST/e-invoice provider</td>
+<td>Direct e-invoice/e-way API integration is out of V1, but local preparation, JSON/file export, user-mediated portal submission, and response-file import are in scope where official schemas/workflows are verified. GST return Excel/JSON export remains in scope (Section 11).</td>
+</tr>
+<tr>
+<td>C8</td>
+<td>No paid translators</td>
+<td>Language packs are built by you and <strong>volunteer native-speaker reviewers</strong> (Section 8).</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>D-02 (resolved in v0.2):</strong> Multi-user across devices in V1 is done by offline-first operation logs plus LAN/hotspot sync. It costs ₹0 but is the <strong>largest engineering risk</strong> for a sole developer; see the gates in Section 6.<div class="niav-applied-resolution" data-niav-applied="Gates"><strong>Resolved:</strong> MPL 11.4 authoritative; rewrite TEST 6 with MPL gate numbers and add G4, G5, G6 <span class="niav-resolution-status">(Decided: proposed value)</span></div></p>
+</blockquote>
+<hr>
+<h2>2A. Integration levels: file-first, API-second</h2>
+<p>₹0 V1 must not treat &quot;API unavailable&quot; as equivalent to &quot;integration impossible&quot;. Each external workflow is classified separately:</p>
+<ul>
+<li><strong>Level 0:</strong> local calculation/validation.</li>
+<li><strong>Level 1:</strong> JSON/CSV/XML/Excel/PDF export.</li>
+<li><strong>Level 2:</strong> user-mediated upload/submission through the external portal/app.</li>
+<li><strong>Level 3:</strong> import of acknowledgement/error/result files and local reconciliation.</li>
+<li><strong>Level 4:</strong> Android/device integration such as share sheet, filesystem, Bluetooth, camera and LAN.</li>
+<li><strong>Level 5:</strong> direct API integration; deferred unless it can remain within the ₹0 rules and required credentials/registrations are acceptable.</li>
+</ul>
+<p><strong>Design rule:</strong> prefer Levels 0–4 for V1. API automation is an optimization layer, not a prerequisite for the underlying business workflow.</p>
+<hr>
+<h2>3. Architecture strategy</h2>
+<p><strong>Principle:</strong> one self-contained Android app. No backend.</p>
+<pre><code>[Android APK]
+  ├─ UI layer (screens, language packs, customisable layouts)
+  ├─ Domain layer (voucher engine, numbering, document flow, approvals, GST calc)
+  ├─ Data layer (local SQLite database, search index, attachments folder)
+  ├─ Import/Export (Excel templates, PDF, backup files)
+  └─ Licence &amp; trial module (offline signature check)
+</code></pre>
+<ul>
+<li><strong>Database:</strong> SQLite on device (free, public domain). Single company database file per company, which makes backup/restore and transfer simple.</li>
+<li><strong>Search:</strong> indexed local search (SQLite full-text index if the bundled SQLite build supports it <strong>[VERIFY]</strong>, otherwise an in-memory index built at app start).</li>
+<li><strong>No network permission required for the core app.</strong> Network is used only for optional features like sharing via other apps. This also reduces privacy exposure.</li>
+<li><strong>Accounting integrity:</strong> double-entry postings generated by the voucher engine, with stock movements derived from inventory lines. All logic is local and unit-testable.</li>
+</ul>
+<hr>
+<h2>4. Technology stack (decided)</h2>
+<p>Decision D-01 (<strong>Decided</strong>, v0.2): <strong>Flutter (Dart), Android-only V1, built entirely from the command line.</strong></p>
+<p><strong>Why (for a sole developer using AI tools and CLI):</strong> one codebase and one language; CLI-first workflow (<code>flutter create/analyze/test/build apk</code>); built-in localisation (ARB files: adding a language means adding one file, meeting your &quot;add languages later&quot; requirement); good rendering of Indian scripts with bundled fonts; large public code base and documentation, which generally helps AI assistants (my judgement, not measured). <strong>Trade-offs:</strong> larger APK than native, reliance on third-party packages, and background/foreground service work needs plugins <strong>[VERIFY]</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Choice</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Language/framework</td>
+<td>Dart + Flutter SDK (CLI)</td>
+<td>Android SDK command-line tools and a JDK are still required <strong>[VERIFY setup steps]</strong></td>
+</tr>
+<tr>
+<td>Local DB</td>
+<td>SQLite via <strong>Drift</strong> (typed SQL, migrations)</td>
+<td>Encryption via SQLCipher-class library <strong>[VERIFY licence/binding]</strong>; full-text search <strong>[VERIFY FTS5 availability in the bundled build]</strong></td>
+</tr>
+<tr>
+<td>State/navigation</td>
+<td>Riverpod, go_router (candidates)</td>
+<td>Pin versions</td>
+</tr>
+<tr>
+<td>Localisation</td>
+<td>Flutter gen-l10n, ARB files: <code>en</code>, <code>hi</code>, <code>gu</code></td>
+<td>New language = new ARB file + font check</td>
+</tr>
+<tr>
+<td>Fonts</td>
+<td>Noto Sans (Latin), Noto Sans Devanagari, Noto Sans Gujarati</td>
+<td>Open licence <strong>[VERIFY]</strong>; subset to keep APK small</td>
+</tr>
+<tr>
+<td>Crypto</td>
+<td>Vetted libraries only for Ed25519 verify, AES-GCM, KDF <strong>[VERIFY]</strong></td>
+<td>No custom crypto</td>
+</tr>
+<tr>
+<td>Sync transport</td>
+<td><code>dart:io</code> HTTPS server on the host + client, self-signed cert with pinning</td>
+<td>Foreground service plugin <strong>[VERIFY]</strong></td>
+</tr>
+<tr>
+<td>PDF</td>
+<td><code>pdf</code> package</td>
+<td>On-device</td>
+</tr>
+<tr>
+<td>Excel/CSV</td>
+<td><code>excel</code> package + CSV</td>
+<td>Check performance with large files <strong>[VERIFY]</strong>; fallback CSV templates</td>
+</tr>
+<tr>
+<td>Barcode</td>
+<td>on-device scanner package (e.g., <code>mobile_scanner</code>)</td>
+<td><strong>[VERIFY licence, model bundling, APK size]</strong></td>
+</tr>
+<tr>
+<td>Thermal print</td>
+<td>ESC/POS package + Bluetooth plugin</td>
+<td><strong>[VERIFY compatibility]</strong></td>
+</tr>
+<tr>
+<td>Tests</td>
+<td><code>flutter_test</code>, integration tests, plain-Dart unit tests for the accounting core</td>
+<td>Core logic in pure Dart so it is testable without a device</td>
+</tr>
+<tr>
+<td>Source control</td>
+<td>Git, free hosted private repo <strong>[VERIFY]</strong></td>
+<td>Keep docs in <code>/docs</code></td>
+</tr>
+<tr>
+<td>Release</td>
+<td>One script: analyze, test, <code>flutter build apk --release --obfuscate --split-debug-info=&lt;dir&gt;</code>, sign, SHA-256, notes</td>
+<td>Details in Security Plan Section 4</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Suggested code structure (layers):</strong> <code>core/</code> (money, dates, GST, voucher engine, numbering) · <code>data/</code> (Drift tables, migrations, op-log, search index) · <code>sync/</code> (host/client, pairing) · <code>licence/</code> (verify, trial, time-integrity) · <code>features/&lt;module&gt;/</code> (UI per module) · <code>l10n/</code> · <code>tools/</code> (issuer CLI, test-data generator).</p>
+<p><strong>AI-assisted development rules (free open-source models via CLI):</strong></p>
+<ol>
+<li>Write specs first (Register and this plan live in <code>/docs</code>, referenced in prompts).</li>
+<li>Have the model write tests before or with code for money, tax, stock, numbering, sync and licence logic. Trust only code that passes them.</li>
+<li>Hand-review all crypto, licensing, permissions and posting logic. Model quality varies and small models make plausible mistakes.</li>
+<li>Never paste keys, passwords, keystores or customer data into a model or prompt.</li>
+<li>Commit small and often, so bad generations can be reverted.</li>
+<li>Keep a <code>DECISIONS.md</code> so context survives between sessions.</li>
+</ol>
+<p><strong>Rejected for V1:</strong> paid IDEs/plugins, paid cloud DBs, paid crash reporting, paid design tools, iOS (no free distribution path comparable to sideloading).</p>
+<hr>
+<h2>5. Module-by-module V1 disposition (maps to the Register)</h2>
+<p><strong>Legend:</strong> ✅ In V1 as specified | 🔧 In V1, adapted to be zero-cost | ⏭️ Deferred (post-V1) | ⛔ Excluded until a paid element becomes acceptable</p>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>V1 disposition</th>
+<th>Zero-cost approach / note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M01 Company &amp; Configuration</td>
+<td>✅</td>
+<td>Local. Multi-company = multiple local DB files. M01.8 branches: ⏭️</td>
+</tr>
+<tr>
+<td>M02 Language &amp; Localisation</td>
+<td>🔧</td>
+<td>ARB resource files + bundled Noto fonts. Launch languages: English, Hindi, Gujarati. Voice input (M02.5): rejected; excluded from V1</td>
+</tr>
+<tr>
+<td>M03 Masters</td>
+<td>✅</td>
+<td>Local tables. Cost centres, multi-currency, BOM: ⏭️</td>
+</tr>
+<tr>
+<td>M04 Voucher Engine &amp; Multi-Series</td>
+<td>✅</td>
+<td>Pure local logic. Per-series counters stored transactionally.</td>
+</tr>
+<tr>
+<td>M05 Dual Vouchers</td>
+<td>✅</td>
+<td>Core of V1</td>
+</tr>
+<tr>
+<td>M06 Accounting Vouchers</td>
+<td>✅</td>
+<td>Core of V1</td>
+</tr>
+<tr>
+<td>M07 Inventory Vouchers</td>
+<td>🔧</td>
+<td>Delivery Note, Stock Transfer, Stock Journal ✅. Material Issue/Receive (job work): ⏭️ (R2)</td>
+</tr>
+<tr>
+<td>M08 Orders &amp; Quotations</td>
+<td>🔧</td>
+<td>Sales Quotation/Order, Purchase Order ✅. Purchase Quotation comparison: ⏭️</td>
+</tr>
+<tr>
+<td>M09 Document Flow</td>
+<td>🔧</td>
+<td>Manual conversion ✅. Auto-conversion rules: basic in V1, advanced ⏭️</td>
+</tr>
+<tr>
+<td>M10 Approval Matrix</td>
+<td>🔧</td>
+<td>Runs across devices through the sync host (Section 6); in-app notifications delivered on sync. Advanced edition.</td>
+</tr>
+<tr>
+<td>M11 Fast Billing</td>
+<td>✅</td>
+<td>Local, offline. Bluetooth printing and share-sheet output.</td>
+</tr>
+<tr>
+<td>M12 Universal Search</td>
+<td>✅</td>
+<td>Local index, no network.</td>
+</tr>
+<tr>
+<td>M13 Inventory Management</td>
+<td>🔧</td>
+<td>Core valuation, godowns, negative-stock control ✅. Batch/expiry: ⏭️ (R2). Serial tracking: ⏭️</td>
+</tr>
+<tr>
+<td>M14 Financial Reports</td>
+<td>🔧</td>
+<td>Core books, TB, P&amp;L, BS, outstanding ✅. Bank reconciliation, ratios, interest: ⏭️</td>
+</tr>
+<tr>
+<td>M15 Inventory Reports</td>
+<td>🔧</td>
+<td>Core reports ✅. Ageing/batch/price-list reports: ⏭️</td>
+</tr>
+<tr>
+<td>M16 GST &amp; Statutory</td>
+<td>🔧</td>
+<td>GST calculation + reports + Excel/JSON export ✅ <strong>[VERIFY formats]</strong>. E-invoice/e-way remain R3/G3; TDS/TCS is deferred to a later release; PF/ESI and payroll are out of scope. No direct statutory APIs in V1.</td>
+</tr>
+<tr>
+<td>M17 Import/Migration</td>
+<td>✅</td>
+<td>Excel templates, validation, error report, import batch rollback and reconciliation. Tally/Busy native-file import is R3 feasibility only; unsupported versions/formats remain excluded.</td>
+</tr>
+<tr>
+<td>M18 Admin (Super User)</td>
+<td>✅</td>
+<td>Local admin console, roles, audit log. Cloud-side admin: ⛔</td>
+</tr>
+<tr>
+<td>M19 Users &amp; Multi-user</td>
+<td>✅</td>
+<td>Roles + PIN on each device; <strong>multi-device via offline-first + LAN/hotspot sync</strong> (Section 6). Remote/internet sync: ⏭️</td>
+</tr>
+<tr>
+<td>M20 Licensing &amp; Trial</td>
+<td>🔧</td>
+<td>Offline signed keys, Simple/Advanced x Monthly/Annual/Lifetime (Section 7; Security Plan Section 3). In-app payment: ⛔</td>
+</tr>
+<tr>
+<td>M21 Print/Share</td>
+<td>🔧</td>
+<td>PDF + share sheet + Bluetooth thermal + reminder/statement preparation ✅. Automated WhatsApp/SMS APIs: ⛔</td>
+</tr>
+<tr>
+<td>M22 Backup/Sync/Security</td>
+<td>🔧</td>
+<td>Encrypted backups + LAN/hotspot sync + manual remote operation-file exchange. User-selected external/cloud storage is supported through file-provider/share workflows; managed cloud sync: ⏭️</td>
+</tr>
+<tr>
+<td>M23 UI Customisation</td>
+<td>✅</td>
+<td>Layout preferences stored in local settings</td>
+</tr>
+<tr>
+<td>M24 Utilities &amp; Support</td>
+<td>🔧</td>
+<td>Dashboard ✅. Help via in-app guides; support via your existing WhatsApp/email</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>6. Multi-user strategy: offline-first with LAN/hotspot sync (D-02 resolved)</h2>
+<p><strong>Correction to v0.1:</strong> multi-user, multi-device is possible at ₹0 by syncing <strong>directly between phones on the same Wi-Fi or a phone hotspot</strong>, with no internet or server. &quot;Online&quot; here means <strong>&quot;connected to the shop network&quot;</strong>. Sync across different locations over the internet needs a relay/server, which I cannot guarantee at ₹0, so that is deferred.</p>
+<h3>6.1 Topology</h3>
+<pre><code> [Host device: owner&#39;s phone/tablet]  ◄── LAN / hotspot ──►  [Counter 1]  [Counter 2]  [Godown phone]
+   authoritative company DB + sync service                   each has a local replica, works offline
+</code></pre>
+<ul>
+<li>One <strong>host</strong> per company holds the authoritative database and runs the sync service (foreground service with visible notification).</li>
+<li><strong>Clients</strong> keep a full local replica (V1) and work fully offline; they sync whenever they can reach the host.</li>
+<li>Host loss or replacement: restore the latest backup on a new device, make it host, re-pair clients.</li>
+</ul>
+<h3>6.2 Data model for sync (build from day one)</h3>
+<ul>
+<li><strong>Append-only operation log:</strong> every change is an operation <code>{op_id, device_id, seq, timestamp, entity, action, payload}</code>. Local tables are a projection of the log.</li>
+<li><strong>UUID primary keys</strong> for all records created offline (parties, items, vouchers). Human-readable codes are separate fields.</li>
+<li><strong>Voucher numbering with no collisions:</strong> each device gets its <strong>own series prefix</strong> per voucher type (this uses USP 2, multiple series). The host rejects foreign prefixes.</li>
+<li><strong>Stock and balances are derived</strong> from vouchers, so merging vouchers yields consistent totals. Merges can produce <strong>negative stock</strong> or credit-limit breaches; these show in an exception report.</li>
+<li><strong>Conflict rules:</strong> posted/approved documents are read-only; edits carry a version number; if two devices edit the same record, the host accepts the first arrival, and the second goes to a <strong>Conflicts queue</strong> for the owner to resolve. Master-data edits use field merge; host arrival wins on a same-field clash and the loser is logged with audit history.</li>
+<li><strong>Approvals:</strong> requests and decisions are operations; the host arbitrates state transitions so one document cannot be approved and rejected at once.</li>
+<li><strong>Period locks, user rights and series assignments</strong> are pushed from the host to clients.</li>
+</ul>
+<h3>6.3 Transports of the same log (staged delivery)</h3>
+<ol>
+<li><strong>File transport (fallback, ships first):</strong> export/import of operation files by WhatsApp/email/USB. Useful for backups and offline-only sites.</li>
+<li><strong>LAN/hotspot transport:</strong> direct HTTPS sync with QR pairing (security details in Security Plan Section 6).
+Both use the same log, so the file path is not wasted work.</li>
+</ol>
+<h3>6.4 Android realities to test <strong>[VERIFY]</strong></h3>
+<p>Foreground-service and battery-optimisation behaviour on low-end phones; hotspot networks that isolate clients from each other; local-network permission changes across Android versions; QR pairing avoids relying on automatic discovery.</p>
+<h3>6.5 Risk and gates (be realistic)</h3>
+<p>Sync is the hardest part of the system for one developer. To control risk:</p>
+<ul>
+<li><strong>Gate S1:</strong> operation log and file transport working with automated merge tests (two simulated devices).</li>
+<li><strong>Gate S2:</strong> LAN sync between two real phones, including offline creation and merge.</li>
+<li><strong>Gate S3:</strong> three devices, conflicts, revocation, and a low-end phone in a hotspot test.
+If a gate slips, release V1 with the previous gate's capability (file merge or single device) and finish LAN sync in V1.1. Users are told plainly what V1 supports.</li>
+</ul>
+<h3>6.6 Simple vs Advanced</h3>
+<p>Proposal: Simple edition = 1 user, 1 device. Advanced = multiple users and devices with sync, approvals and admin controls (see Section 7.3, to confirm).</p>
+<hr>
+<h2>7. Licensing, editions &amp; trial (M20). Security detail in the Security Plan</h2>
+<h3>7.1 Commercial structure (from your input)</h3>
+<ul>
+<li><strong>Free trial:</strong> 3 months from first launch.</li>
+<li><strong>Editions:</strong> <strong>Simple</strong> and <strong>Advanced</strong>.</li>
+<li><strong>Terms:</strong> Monthly, Annual, Lifetime, giving 6 licence types (prices TBC, not assumed).</li>
+<li>Payment is collected <strong>outside the app</strong> (for example by UPI QR or bank transfer), then you issue the offline signed licence key. The app does not process or verify the payment itself.</li>
+</ul>
+<h3>7.2 Mechanism (offline)</h3>
+<ol>
+<li>App shows a <strong>request code</strong> (install ID + company ID + version + checksum) as text and QR.</li>
+<li>Customer sends it to you on WhatsApp/email and pays.</li>
+<li>You run your <strong>local issuer CLI</strong>, which signs a licence key (Ed25519 or similar) and logs it in your ledger.</li>
+<li>Customer pastes/scans/imports the key; the app verifies it with the embedded public key.</li>
+<li>Renewal = a new key; upgrade Simple to Advanced = a new key.</li>
+</ol>
+<p>Trial anchoring, clock protection, key-sharing prevention, denylist and post-expiry behaviour are specified in the <strong>Security &amp; Anti-Exploitation Plan, Section 3</strong>.</p>
+<h3>7.3 Proposed edition split (to be confirmed by you: D-10)</h3>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Simple (proposal)</th>
+<th>Advanced (proposal)</th>
+<div class="niav-applied-resolution" data-niav-applied="D-10"><strong>Resolved:</strong> Simple (R1a): masters, P1 dual+accounting vouchers, Delivery Note, Stock Transfer/Journal, basic quotation/order, Quick Bill, search, core reports, GST reports, Excel import/export, backup, en/hi/gu, 1 device. Advanced (R1b+): all Simple + multi-user/roles, approvals, document-flow automation, Material Issue/Receive, batch/expiry, price lists, multi-godown reports, LAN/hotspot + file sync, audit/admin tools <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+</thead>
+<tbody>
+<tr>
+<td>Fast billing, masters, search, languages, backup, Excel import/export</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Dual vouchers (Sales/Purchase/Returns)</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Payment, Receipt, Contra</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Journal, Debit/Credit Note without items</td>
+<td>Limited or No (TBC)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Quotation, Order, document-flow automation</td>
+<td>Basic or No (TBC)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Delivery Note</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Material Issue/Receive, Stock Transfer, Stock Journal</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Multiple voucher series per type</td>
+<td>Limited count (N TBC)</td>
+<td>Unlimited</td>
+</tr>
+<tr>
+<td>Godowns, batch/expiry, price lists</td>
+<td>Single godown</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Approval matrix, admin console, audit reports</td>
+<td>No / basic</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Users and devices</td>
+<td>1 user, 1 device</td>
+<td>Multi-user, multi-device sync</td>
+</tr>
+<tr>
+<td>Reports and GST</td>
+<td>Core</td>
+<td>Full incl. reconciliation</td>
+</tr>
+</tbody>
+</table>
+<h3>7.4 Open licensing decisions</h3>
+<p>D-10 edition boundaries · D-11 trial edition (suggest full Advanced) · D-14 monthly issuing model (prepaid multi-month keys reduce your workload) · D-15 meaning of &quot;lifetime&quot; (suggest all V1.x updates) · D-04 post-expiry policy and grace length.<div class="niav-applied-resolution" data-niav-applied="D-04"><strong>Resolved:</strong> 10-day grace with full function + daily reminder, then read-only + export + backup; data never deleted; entitlements.json (edition x term x trial x grace x limits) is single source for gates and tests <span class="niav-resolution-status">(Decided: proposed value)</span></div><div class="niav-applied-resolution" data-niav-applied="D-11"><strong>Resolved:</strong> Trial 3 months, full feature set of installed release (R1a = Simple features; R1b+ = Advanced). On trial end buying Simple keeps Advanced data read-only/exportable <span class="niav-resolution-status">(Decided: proposed value)</span></div><div class="niav-applied-resolution" data-niav-applied="D-14"><strong>Resolved:</strong> Prepaid keys carrying an expiry date (1/3/6/12 months or lifetime); no monthly re-issue <span class="niav-resolution-status">(Decided: proposed value)</span></div><div class="niav-applied-resolution" data-niav-applied="D-15"><strong>Resolved:</strong> yes V1.x patches count as upgrades <span class="niav-resolution-status">(Decided: owner value)</span></div></p>
+<hr>
+<h2>8. Native-language strategy (M02)</h2>
+<ul>
+<li>All UI text goes into language resource files from day one (no hard-coded strings).</li>
+<li>Fonts: bundle open-licence Indian-script fonts <strong>[VERIFY licence and app size]</strong>.</li>
+<li><strong>Translation at ₹0:</strong> you write the base strings; native-speaker volunteers (family, shopkeeper friends, user community) review. Machine-translation tools may assist drafts but must be checked for tone and accounting terms; <strong>verify each tool's free-use terms [VERIFY]</strong>.</li>
+<li>Maintain a small glossary of accounting terms per language (Ledger, Voucher, Baaki/Udhaar-style terms) approved by reviewers.</li>
+<li><strong>Launch languages (decided, D-03): English, Hindi, Gujarati.</strong> The code is built so a new language is added by adding an ARB file, a font check, and a print-template check; no code changes.</li>
+<li>Test long-script rendering (matras, conjuncts) on real low-end devices.</li>
+</ul>
+<hr>
+<h2>9. Fast billing &amp; search strategy (M11, M12)</h2>
+<ul>
+<li><strong>Fast billing:</strong> billing screen loads instantly from local DB; favourites/recent items grid; barcode scan; default walk-in customer; one-tap payment mode; hold/resume bills; offline by design.</li>
+<li><strong>Benchmark:</strong> define &quot;10 seconds&quot; precisely (e.g., 3-item cash bill, N taps, on a named low-end phone) and time it in usability tests with volunteer shopkeepers.</li>
+<li><strong>Search:</strong> build a dedicated search index for items, parties, ledgers and vouchers (type-ahead, alias, barcode, mobile number, native script). Target latency to be set with you <strong>[TBC]</strong> and tested with a large synthetic dataset (generated by a free script).</li>
+<li><strong>Performance guard rails:</strong> pagination/lazy lists for reports, database indexes on date/party/item, avoid loading whole tables into memory.</li>
+</ul>
+<hr>
+<h2>10. Import / migration strategy (M17)</h2>
+<ul>
+<li>Ship a <strong>versioned Excel template pack</strong> (masters, opening balances, vouchers) with an instruction sheet.</li>
+<li>Provide a <strong>Tally/Busy export-to-template mapping guide</strong>. The user exports from their existing software into Excel, then maps columns to NiAv's template. (Exact export menus differ by version and must be documented after checking the specific versions <strong>[VERIFY]</strong>.)</li>
+<li>Native Tally/Busy import is not a V1 implementation. Record it only as an R3 feasibility study requiring representative files and reconciliation tests.</li>
+<li>Import pipeline: <strong>read → validate → preview → commit (in one transaction) → log with batch ID</strong>. Failed rows produce a downloadable error sheet with reasons.</li>
+<li>Post-import reconciliation: trial balance and stock totals shown against the source's totals entered by the user.</li>
+<li>Test data: create your own sample company and synthetic data; do not use real customer data in testing.</li>
+</ul>
+<hr>
+<h2>11. GST &amp; statutory strategy (M16)</h2>
+<ul>
+<li>Implement GST tax calculation, place-of-supply logic, invoice tax breakup, HSN summary and return-support reports.</li>
+<li>Produce versioned Excel/JSON exports that a user (or their CA) uploads to the government portal manually. <strong>Confirm current portal formats and rules from official GST sources before building [VERIFY]</strong>.</li>
+<li><strong>E-invoice:</strong> prepare the applicable JSON/file payload locally, allow user-mediated upload through the relevant portal/provider workflow, and import/record acknowledgement, IRN and returned result data where the response format is available and verified. Direct API automation remains separately scoped.</li>
+<li><strong>E-way bill:</strong> prepare applicable JSON, including supported bulk/consolidated workflows, allow user-mediated portal upload, and import/record returned identifiers/results where supported. Direct API automation remains separately scoped.</li>
+<li><strong>TDS/TCS:</strong> deferred to a later release; excluded from V1 implementation and acceptance.</li>
+<li><strong>PF/ESI and payroll:</strong> out of scope for V1.</li>
+<li>Add a visible disclaimer in-app: reports assist filing and do not replace professional advice.</li>
+</ul>
+<hr>
+<h2>12. Printing, sharing &amp; communication (M21)</h2>
+<ul>
+<li><strong>PDF invoices:</strong> generated on-device; share through the Android share sheet to WhatsApp/email.</li>
+<li><strong>Thermal printers:</strong> ESC/POS over Bluetooth (users supply their own printer). Test with borrowed/owned printers; maintain a compatibility list.</li>
+<li><strong>UPI QR on invoice:</strong> generate a QR from the shop's UPI ID using the standard UPI payment link format <strong>[VERIFY spec]</strong>. No payment gateway; this is a static/dynamic-link QR only.</li>
+<li><strong>Reminder workflow:</strong> generate statement/reminder text and PDF locally, then use the Android share sheet for human-mediated WhatsApp/SMS/email sending. Automated messaging APIs remain out of V1.</li>
+</ul>
+<hr>
+<h2>13. Distribution strategy: APK by WhatsApp or email</h2>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Plan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Signing</strong></td>
+<td>Create your own release keystore with the free Android/Java tooling. <strong>Back it up safely</strong>; updates must be signed with the same key or users must uninstall first (losing data unless backed up).</td>
+</tr>
+<tr>
+<td><strong>Build type</strong></td>
+<td>Release APK (universal). Reduce size by trimming unused fonts/packages.</td>
+</tr>
+<tr>
+<td><strong>WhatsApp</strong></td>
+<td>Send as a document. File size and file-type rules change <strong>[VERIFY current WhatsApp limit and whether APKs are accepted on the recipient's device]</strong>.</td>
+</tr>
+<tr>
+<td><strong>Email</strong></td>
+<td>Some providers block APK attachments or have low size limits <strong>[VERIFY]</strong>. Fallback: share a link from a free file-hosting drive (free storage limits apply <strong>[VERIFY]</strong>) or send as a renamed/zip archive with instructions.</td>
+</tr>
+<tr>
+<td><strong>Install experience</strong></td>
+<td>Provide a one-page multilingual install guide (screenshots): allow installs from the sending app, install, ignore/understand the security prompt. Android may show a Play Protect warning for unknown apps.</td>
+</tr>
+<tr>
+<td><strong>Trust</strong></td>
+<td>Publish the APK's checksum (SHA-256) with the release message so users can verify.</td>
+</tr>
+<tr>
+<td><strong>Updates</strong></td>
+<td>Version number visible in-app; new APK sent by WhatsApp/email; in-app <strong>data migration</strong> on first launch of a new version (schema versioning). Provide an in-app &quot;check what's new&quot; screen offline (bundled changelog).</td>
+</tr>
+<tr>
+<td><strong>Uninstall safety</strong></td>
+<td>Prompt to create a backup before update; auto-backup on app close if enabled.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>14. Backup &amp; data-safety strategy (M22)</h2>
+<ul>
+<li>One-tap <strong>encrypted backup file</strong> per company, saved locally and shareable through WhatsApp/email or the Android document/file provider to user-selected storage, including user-selected cloud storage. NiAv does not operate a cloud backup service in V1.</li>
+<li>Scheduled local auto-backup (e.g., daily) to app storage; user reminded to copy it out of the phone.</li>
+<li><strong>Restore</strong> with integrity check and version compatibility check.</li>
+<li>Local database encryption uses free/open-source cryptographic libraries <strong>[VERIFY licence]</strong>; key handling is designed so a forgotten password is a documented risk (no recovery server exists).</li>
+</ul>
+<hr>
+<h2>15. Build sequence (dependency order; no dates committed)</h2>
+<p>Dates and effort depend on your team size, which is TBC. The order below is what matters.</p>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Deliverable</th>
+<th>Exit criteria</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P0: Foundation</td>
+<td>Repo, project skeleton, database schema v1, language framework, coding standards, ₹0 gate checklist</td>
+<td>App runs on a real phone, switches English↔one test language</td>
+</tr>
+<tr>
+<td>P1: Masters &amp; Voucher engine</td>
+<td>M03, M04 with multi-series numbering, posting engine</td>
+<td>Automated tests prove double-entry balance and series uniqueness</td>
+</tr>
+<tr>
+<td>P2: Core vouchers</td>
+<td>M05, M06, M07 (V1 subset)</td>
+<td>All V1 voucher types create, edit, cancel, print</td>
+</tr>
+<tr>
+<td>P3: Search + Fast billing</td>
+<td>M12, M11, M23 basics</td>
+<td>Timed benchmark met on low-end device</td>
+</tr>
+<tr>
+<td>P4: Reports</td>
+<td>M14, M15 (V1 subset)</td>
+<td>Trial balance/stock figures reconcile with test scenarios</td>
+</tr>
+<tr>
+<td>P5: Import/Export</td>
+<td>M17</td>
+<td>Sample legacy datasets import cleanly; error sheets clear</td>
+</tr>
+<tr>
+<td>P6: Users, Admin, Approvals</td>
+<td>M18, M19, M10 (V1 subset), entitlements service</td>
+<td>Role restrictions and audit log verified</td>
+</tr>
+<tr>
+<td>P6b: Sync</td>
+<td>Op-log + file transport (Gate S1), LAN/hotspot sync (Gates S2, S3)</td>
+<td>Two/three-device merge tests pass</td>
+</tr>
+<tr>
+<td>P7: GST</td>
+<td>M16 subset</td>
+<td>GST reports match hand-calculated scenarios</td>
+</tr>
+<tr>
+<td>P8: Licence, backup, distribution</td>
+<td>M20, M22, packaging</td>
+<td>Trial/licence key round-trip works offline; APK installs from WhatsApp on test phones</td>
+</tr>
+<tr>
+<td>P9: Pilot</td>
+<td>3 to 5 volunteer shops</td>
+<td>Feedback logged; blockers fixed before wider sharing</td>
+</tr>
+</tbody>
+</table>
+<p>(Order of P3 vs P4 may swap if reports are needed earlier to validate posting logic.)</p>
+<hr>
+<h2>16. Zero-cost testing strategy</h2>
+<ul>
+<li><strong>Automated tests:</strong> unit tests for accounting (Dr = Cr, stock movement, tax), numbering, document conversion quantities, import validation. Free test frameworks in the chosen stack.</li>
+<li><strong>Devices:</strong> your own phone(s) plus the free Android emulator; borrow low-end phones from friends/family for performance checks.</li>
+<li><strong>Test data:</strong> synthetic generator scripts (small, medium, and large data volumes).</li>
+<li><strong>Manual scripts:</strong> end-to-end flows for the two document chains (sales and purchase) and every voucher type.</li>
+<li><strong>Usability tests:</strong> volunteer shopkeepers using native-language UI; record time-to-invoice.</li>
+<li><strong>Regression pack:</strong> rerun automated tests before each APK release.</li>
+<li><strong>Crash visibility:</strong> no paid crash service. Provide an in-app &quot;share diagnostic log&quot; button so users can send logs by WhatsApp/email (contains no personal accounting data unless the user chooses).</li>
+</ul>
+<hr>
+<h2>17. Cost ledger (V1 target = ₹0)</h2>
+<table>
+<thead>
+<tr>
+<th>Cost head</th>
+<th>Planned spend</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Development tools / SDKs</td>
+<td>₹0</td>
+<td>Open-source / free tooling <strong>[VERIFY]</strong></td>
+</tr>
+<tr>
+<td>Libraries</td>
+<td>₹0</td>
+<td>Only permissive/free-licence packages</td>
+</tr>
+<tr>
+<td>Source hosting</td>
+<td>₹0</td>
+<td>Free plan</td>
+</tr>
+<tr>
+<td>Servers / cloud / domain</td>
+<td>₹0</td>
+<td>None used in V1</td>
+</tr>
+<tr>
+<td>App-store fees</td>
+<td>₹0</td>
+<td>Not used (sideload)</td>
+</tr>
+<tr>
+<td>Fonts / icons</td>
+<td>₹0</td>
+<td>Open-licence assets only</td>
+</tr>
+<tr>
+<td>Translation</td>
+<td>₹0</td>
+<td>Volunteer reviewers</td>
+</tr>
+<tr>
+<td>Testing devices</td>
+<td>₹0</td>
+<td>Existing/borrowed devices + emulator</td>
+</tr>
+<tr>
+<td>Licensing infrastructure</td>
+<td>₹0</td>
+<td>Offline signed keys</td>
+</tr>
+<tr>
+<td>Distribution</td>
+<td>₹0</td>
+<td>WhatsApp/email/free link</td>
+</tr>
+<tr>
+<td>Messaging APIs, e-invoice/e-way APIs, payment gateways</td>
+<td>₹0</td>
+<td><strong>Not used</strong> (deferred/excluded)</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>₹0</strong></td>
+<td>Track any deviation in Section 20</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Hidden-cost checklist</strong> (review before adopting anything new): card required at signup? overage billing? &quot;free for non-commercial only&quot; licence? watermark or branding required? attribution needed (then include in an in-app &quot;Open-source licences&quot; screen)?</p>
+<hr>
+<h2>18. Risk register</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Risk</th>
+<th>Impact</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R-01</td>
+<td>No server means trial reset/piracy</td>
+<td>Lost licence revenue</td>
+<td>Installation-ID-bound keys, secure storage, commercial trust, later server-based licensing</td>
+</tr>
+<tr>
+<td>R-02</td>
+<td>Data loss (lost/broken phone, uninstall)</td>
+<td>Severe for customers</td>
+<td>Prominent backup prompts, auto-backup, restore drills</td>
+</tr>
+<tr>
+<td>R-03</td>
+<td>Sideload friction / Play Protect warnings</td>
+<td>Lower installs</td>
+<td>Install guide, checksum, consider Play Store later when budget allows</td>
+</tr>
+<tr>
+<td>R-04</td>
+<td>Email/WhatsApp blocks APK or size limits</td>
+<td>Distribution problems</td>
+<td>Multiple channels (link, zip), keep APK small <strong>[VERIFY limits]</strong></td>
+<div class="niav-applied-resolution" data-niav-applied="R-04"><strong>Resolved:</strong> Primary WhatsApp/email; fallbacks ZIP-wrapped APK and Rs0 hosted link; always publish checksum <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+<tr>
+<td>R-05</td>
+<td>Sync complexity for a sole developer</td>
+<td>Delays / data inconsistencies</td>
+<td>Op-log from day one, staged gates S1 to S3, heavy merge tests, fall back to file merge or V1.1</td>
+</tr>
+<tr>
+<td>R-06</td>
+<td>Accounting logic errors</td>
+<td>Trust damage</td>
+<td>Heavy automated tests, pilot shops, CA review (volunteer)</td>
+</tr>
+<tr>
+<td>R-07</td>
+<td>Statutory changes (GST)</td>
+<td>Non-compliance</td>
+<td>Keep tax logic data-driven; monitor official notices; disclaimers</td>
+</tr>
+<tr>
+<td>R-08</td>
+<td>Free library abandoned or licence changes</td>
+<td>Rework</td>
+<td>Pin versions, prefer well-maintained packages, isolate behind interfaces</td>
+</tr>
+<tr>
+<td>R-09</td>
+<td>Indian-script rendering bugs on low-end phones</td>
+<td>Poor UX</td>
+<td>Early real-device tests, bundled fonts</td>
+</tr>
+<tr>
+<td>R-10</td>
+<td>Keystore loss</td>
+<td>Cannot ship updates</td>
+<td>Multiple secure backups of keystore and passwords</td>
+</tr>
+<tr>
+<td>R-11</td>
+<td>Performance on low-end phones with big data</td>
+<td>Slow billing/search</td>
+<td>Indexes, pagination, benchmark tests</td>
+</tr>
+<tr>
+<td>R-12</td>
+<td>Legal/licence compliance of bundled components</td>
+<td>Legal exposure</td>
+<td>Maintain an open-source licence inventory</td>
+<div class="niav-applied-resolution" data-niav-applied="R-12"><strong>Resolved:</strong> Maintain open-source licence inventory and in-app 'Open-source licences' screen <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+<tr>
+<td>R-14</td>
+<td>Exploitation of licence/trial</td>
+<td>Revenue loss</td>
+<td>Security &amp; Anti-Exploitation Plan; accepted residual risks RR1 to RR6</td>
+</tr>
+<tr>
+<td>R-13</td>
+<td>Data-protection obligations for customer data</td>
+<td>Compliance risk</td>
+<td>Local-only storage in V1, minimal data collection, verify applicable Indian law <strong>[VERIFY]</strong></td>
+<div class="niav-applied-resolution" data-niav-applied="R-13"><strong>Resolved:</strong> Reclassify as 'Accepted - mitigated' (local-only, minimal collection); conflicts with O-14 <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+</tbody>
+</table>
+<hr>
+<h2>19. Decision register &amp; open items</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Decision</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D-01</td>
+<td>Framework</td>
+<td><strong>Decided: Flutter/Dart, CLI-built</strong></td>
+<td>Section 4</td>
+</tr>
+<tr>
+<td>D-02</td>
+<td>Multi-user scope in V1</td>
+<td><strong>Decided: offline-first + LAN/hotspot sync, staged via file merge</strong></td>
+<td>Section 6</td>
+</tr>
+<tr>
+<td>D-03</td>
+<td>Launch languages</td>
+<td><strong>Decided: English, Hindi, Gujarati</strong></td>
+<td>Extensible via ARB</td>
+</tr>
+<tr>
+<td>D-04</td>
+<td>Post-trial behaviour (read-only, grace)</td>
+<td>Superseded by workbook reconciliation: Resolved</td>
+<td>Section 7</td>
+</tr>
+<tr>
+<td>D-05</td>
+<td>Platform: Android only for V1</td>
+<td>Proposed</td>
+<td>iOS sideloading isn't practical at ₹0</td>
+<div class="niav-applied-resolution" data-niav-applied="D-05"><strong>Resolved:</strong> Accepted: Android-only V1 <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+<tr>
+<td>D-06</td>
+<td>Database encryption approach</td>
+<td>Superseded by workbook reconciliation: Resolved</td>
+<td>Section 14</td>
+<div class="niav-applied-resolution" data-niav-applied="D-06"><strong>Resolved:</strong> Whole-DB encryption with SQLCipher-class engine (AES-256); random 256-bit key wrapped by Android Keystore; PIN/biometric gates key use; final library chosen in G0 spike <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+<tr>
+<td>D-07</td>
+<td>Whether to relax ₹0 for R2 (server, Play Store, e-invoice provider)</td>
+<td>Superseded by workbook reconciliation: Resolved</td>
+<td>Business call</td>
+<div class="niav-applied-resolution" data-niav-applied="D-07"><strong>Resolved:</strong> V1 stays Rs0; server / Play Store / e-invoice provider reviewed only at V2 after revenue <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+<tr>
+<td>D-08</td>
+<td>Stock valuation methods in V1</td>
+<td>Superseded by workbook reconciliation: Resolved</td>
+<td>Register open item 8</td>
+<div class="niav-applied-resolution" data-niav-applied="D-M5"><strong>Resolved:</strong> (1) Methods: Weighted Average and FIFO only. (2) Item overrides group; default Weighted Average. (3) Method locked after first posted stock movement; no change in V1. (4) Negative stock allowed with warning; no-layer issues costed at last known cost; no retro revaluation in V1. (5) Period lock by date; unlock needs right + reason + audit. (6) Orders never reserve stock (D-M6 = No). (7) Golden ledgers: opening, purchase, sale, returns, adjustment, negative-stock sale, lock/unlock <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+<tr>
+<td>D-09</td>
+<td>Definition of &quot;10-second invoice&quot; benchmark</td>
+<td>Superseded by workbook reconciliation: Resolved</td>
+<td>Section 9</td>
+<div class="niav-applied-resolution" data-niav-applied="D-09"><strong>Resolved:</strong> From New Bill to Pay &amp; Finish (cash): &lt;=10 s and &lt;=10 touch interactions; scripted harness + 3 volunteer timings; fixture TD-PERF-01 (5,000 items, 500 parties, 20,000 vouchers) <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+<tr>
+<td>D-10</td>
+<td>Simple vs Advanced feature split</td>
+<td>Open (proposal in 7.3)</td>
+<td></td>
+</tr>
+<tr>
+<td>D-11 to D-16</td>
+<td>Trial edition, licence issuing model, lifetime definition, flavour strategy, etc.</td>
+<td>Superseded by workbook reconciliation: Resolved</td>
+<td>Security Plan Section 16</td>
+<div class="niav-applied-resolution" data-niav-applied="D-16"><strong>Resolved:</strong> Optional and opportunistic: used only to detect clock rollback when online; never required <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+</tbody>
+</table>
+<p><strong>Assumptions:</strong> A-01 you already own a computer, phone and internet. A-02 Android-only V1. A-03 Users accept sideloading. A-04 Users export legacy data to Excel themselves. A-05 Perfect licence enforcement is not required in V1. A-06 You (or volunteers) can test on real devices. A-07 You are the sole developer using AI tools and free CLI tooling. A-08 Shops using multi-user share a Wi-Fi/hotspot at least occasionally.</p>
+<p><strong>Information still needed from you:</strong> target Android versions/device classes, Simple vs Advanced boundaries (7.3), monthly-licence approach, definition of &quot;lifetime&quot;, grace period, trial edition, &quot;10-second&quot; benchmark, search latency target, stock valuation methods.</p>
+<hr>
+<h2>20. Change log</h2>
+<table>
+<thead>
+<tr>
+<th>Ver</th>
+<th>Date</th>
+<th>Section(s)</th>
+<th>Change</th>
+<th>Trigger</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.1</td>
+<td>30 Sep 2026</td>
+<td>All</td>
+<td>Initial draft</td>
+<td>Requirement for zero-cost V1 plan; Register v0.1</td>
+</tr>
+<tr>
+<td>0.2</td>
+<td>30 Sep 2026</td>
+<td>2, 4, 5, 6, 7, 8, 15, 18, 19</td>
+<td>Corrected multi-user (LAN/hotspot sync is feasible at ₹0); stack decided (Flutter); languages fixed; licence editions/terms added; security plan linked</td>
+<td>Owner comments; Security Plan v0.1</td>
+</tr>
+<tr>
+<td>0.3</td>
+<td>30 Sep 2026</td>
+<td>Header, control block, 20, verification log</td>
+<td>Converted to common living-document protocol (document set, update order, change-impact matrix, verification log); aligned with REG v0.2 and SEC v0.2</td>
+<td>Owner request to make all documents living</td>
+</tr>
+<tr>
+<td>0.4</td>
+<td>30 Sep 2026</td>
+<td>Header, control block</td>
+<td>Added NIAV-MPL to the document set. MPL §11 proposes a release train (R1a then R1b) that would re-sequence §15; §15 is unchanged until MPL D-M2 is decided</td>
+<td>Owner request for universal master plan</td>
+<div class="niav-applied-resolution" data-niav-applied="D-M2"><strong>Resolved:</strong> R1a (Simple, single device) then R1b (Advanced, multi-device); if S2/S3 slip, R1b ships with file merge, LAN sync as R1b.1 <span class="niav-resolution-status">(Decided: proposed value)</span></div></tr>
+<tr><td>0.5</td><td>30 Sep 2026</td><td>2, 6, 10, 11, 12, 14, integration model</td><td>Reframed zero-cost integrations as Levels 0–4; added government file/response workflows, bank/statement import, manual remote operation-file sync, user-selected storage, direct Tally/Busy import feasibility, TDS/TCS deferred; PF/ESI and payroll out of scope, reminder sharing, and external UPI licence payment</td><td>Zero-cost integration audit</td></tr>
+</tbody>
+</table>
+<p><em>Next update: after your decisions on D-10, D-11, D-14, D-15 and the remaining open information.</em></p>
+<hr>
+<h2>Verification log ([VERIFY] items resolved)</h2>
+<p>Add one row each time a <strong>[VERIFY]</strong> item is checked against an official source. If a check changes the plan, also add a change-log row.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item verified</th>
+<th>Section</th>
+<th>Date checked</th>
+<th>Source (official)</th>
+<th>Result / action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(empty: no [VERIFY] item has been checked yet)</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table><section id="niav-closure-ledger" class="niav-linker-ledger"><h2>NiAv Cross-Document Closure Ledger</h2><p>This generated ledger records owner decisions and verification closures. Original text and IDs are retained.</p><table><thead><tr><th>ID</th><th>Status</th><th>Resolution / decision</th><th>Evidence / input</th><th>Affected documents</th><th>Recorded</th></tr></thead><tbody><tr><td><code>D-08</code></td><td>Closed</td><td>Stock valuation methods are weighted average + FIFO applicable at item master or item group master level</td><td></td><td></td><td>2026-09-30T17:07:56</td></tr><tr><td><code>D-07</code></td><td>Closed</td><td>yes. at v2 stage when revenue is generated</td><td></td><td></td><td>2026-09-30T17:11:35</td></tr><tr><td><code>D-09</code></td><td>Closed</td><td>Fast-billing benchmark definition (&quot;10 seconds&quot; means 3 item billing with walk-in customer with advanced search features in database of 5000 items and 500 party msater,android version 12-13</td><td></td><td></td><td>2026-09-30T17:13:13</td></tr><tr><td><code>D-10</code></td><td>Closed</td><td>Edition boundaries - AI model will recommend and licence details to be decided later stage before go-live</td><td></td><td></td><td>2026-09-30T17:14:16</td></tr><tr><td><code>D-14</code></td><td>Closed</td><td>to be decided later</td><td></td><td></td><td>2026-09-30T17:14:42</td></tr><tr><td><code>D-15</code></td><td>Closed</td><td>to be decided later</td><td></td><td></td><td>2026-09-30T17:14:52</td></tr><tr><td><code>D-16</code></td><td>Closed</td><td>as recommended by AI tool, to be verified by owner</td><td></td><td></td><td>2026-09-30T17:15:39</td></tr><tr><td><code>R-04</code></td><td>Closed</td><td>suggest recommendation</td><td></td><td></td><td>2026-10-01T14:35:33</td></tr><tr><td><code>R-12</code></td><td>Closed</td><td>as suggested</td><td></td><td></td><td>2026-10-01T14:35:58</td></tr><tr><td><code>R-13</code></td><td>Closed</td><td>not applicable at V1 stage</td><td></td><td></td><td>2026-10-01T14:36:44</td></tr><tr><td><code>R-XX</code></td><td>Closed</td><td>yes</td><td></td><td></td><td>2026-10-01T14:37:24</td></tr><tr><td><code>WP-XX</code></td><td>Closed</td><td>yes</td><td></td><td></td><td>2026-10-01T14:37:32</td></tr><tr><td><code>O-XX</code></td><td>Closed</td><td>yes</td><td></td><td></td><td>2026-10-01T14:37:40</td></tr><tr><td><code>D-XX</code></td><td>Closed</td><td>yes</td><td></td><td></td><td>2026-10-01T14:37:46</td></tr><tr><td><code>A-XX</code></td><td>Closed</td><td>yes</td><td></td><td></td><td>2026-10-01T14:37:52</td></tr><tr><td><code>D-06</code></td><td>Closed</td><td>suggest recommendation</td><td></td><td>NiAv_ Zero-Cost Strategy Plan (V1) v0.9.html</td><td>2026-10-01T14:38:05</td></tr></tbody></table><h3>Workbook reconciliation status</h3><table class="niav-reconciliation-table"><thead><tr><th>ID(s)</th><th>Topic</th><th>Effective value</th><th>Final status</th><th>Gate</th></tr></thead><tbody><tr><td><code>D-09 / O-03 / O-M03</code></td><td>10-second bill benchmark</td><td>From New Bill to Pay &amp; Finish (cash): &lt;=10 s and &lt;=10 touch interactions; scripted harness + 3 volunteer timings; fixture TD-PERF-01 (5,000 items, 500 parties, 20,000 vouchers)</td><td>Decided: proposed value</td><td>G2</td></tr><tr><td><code>O-M03</code></td><td>Search latency target</td><td>p95 &lt;=200 ms keystroke-to-results on 5,000-item fixture (Android 12-13); &lt;=400 ms on reference low-end device</td><td>Decided: proposed value</td><td>G2</td></tr><tr><td><code>O-M04</code></td><td>Device baseline and budgets</td><td>minSdk 26. Reference low-end: Android 8-9, 2 GB RAM, 32 GB storage. Cold start &lt;=5 s; quick bill &lt;=15 s; core report on 20,000 vouchers &lt;=5 s; APK &lt;=40 MB per ABI</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>D-05 / D-R5</code></td><td>Android-only V1</td><td>Accepted: Android-only V1</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>D-07</code></td><td>Relax Rs0 rule later</td><td>V1 stays Rs0; server / Play Store / e-invoice provider reviewed only at V2 after revenue</td><td>Decided: proposed value</td><td>V2</td></tr><tr><td><code>D-M2 / D-M3 / O-M05</code></td><td>Release train</td><td>R1a (Simple, single device) then R1b (Advanced, multi-device); if S2/S3 slip, R1b ships with file merge, LAN sync as R1b.1</td><td>Decided: proposed value</td><td>G6</td></tr><tr><td><code>O-14</code></td><td>Data hosting / privacy</td><td>Local-only storage; minimal data collection; no telemetry; Indian data-protection obligations to be checked</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>D-M5 / D-08 / D-FG-013 / O-09 / OD-004 / OD-FD-001</code></td><td>Valuation policy</td><td>(1) Methods: Weighted Average and FIFO only. (2) Item overrides group; default Weighted Average. (3) Method locked after first posted stock movement; no change in V1. (4) Negative stock allowed with warning; no-layer issues costed at last known cost; no retro revaluation in V1. (5) Period lock by date; unlock needs right + reason + audit. (6) Orders never reserve stock (D-M6 = No). (7) Golden ledgers: opening, purchase, sale, returns, adjustment, negative-stock sale, lock/unlock</td><td>Decided: proposed value</td><td>G1</td></tr><tr><td><code>D-M4 / OD-DB-001</code></td><td>Quantity scale and physical types</td><td>Money INTEGER paise. Quantity INTEGER x10^4 (per-unit display precision: pcs 0, kg/litre 3, other &lt;=4). Line amount = round-half-up(qty x rate / 10^4); invoice round-off separate ledger line to nearest rupee. Stock value in paise; unit cost derived. IDs UUIDv7 TEXT. Dates ISO TEXT; timestamps INTEGER epoch ms UTC</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>D-04 / O-05 / D-FG-014</code></td><td>Post-expiry behaviour and entitlement matrix</td><td>10-day grace with full function + daily reminder, then read-only + export + backup; data never deleted; entitlements.json (edition x term x trial x grace x limits) is single source for gates and tests</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>D-11 / D-13 / A-R2</code></td><td>Trial edition</td><td>Trial 3 months, full feature set of installed release (R1a = Simple features; R1b+ = Advanced). On trial end buying Simple keeps Advanced data read-only/exportable</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>D-10 / O-06 / O-15 / OD-007</code></td><td>Simple vs Advanced boundary</td><td>Simple (R1a): masters, P1 dual+accounting vouchers, Delivery Note, Stock Transfer/Journal, basic quotation/order, Quick Bill, search, core reports, GST reports, Excel import/export, backup, en/hi/gu, 1 device. Advanced (R1b+): all Simple + multi-user/roles, approvals, document-flow automation, Material Issue/Receive, batch/expiry, price lists, multi-godown reports, LAN/hotspot + file sync, audit/admin tools</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>O-15 / OD-007</code></td><td>Device and user limits</td><td>Advanced: up to 5 devices and 10 users per company; Simple: 1 device, up to 3 users. S3 only tests 3 devices: certify 5 until larger fleet tested.</td><td>Decided: owner value</td><td>S3</td></tr><tr><td><code>D-14</code></td><td>Monthly licence model</td><td>Prepaid keys carrying an expiry date (1/3/6/12 months or lifetime); no monthly re-issue</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>D-15 / D-R2 / O-04</code></td><td>Meaning of 'Lifetime'</td><td>yes V1.x patches count as upgrades</td><td>Decided: owner value</td><td>Go-live</td></tr><tr><td><code>D-16</code></td><td>Optional online time check</td><td>Optional and opportunistic: used only to detect clock rollback when online; never required</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>D-06 / OD-DB-001</code></td><td>Database encryption</td><td>Whole-DB encryption with SQLCipher-class engine (AES-256); random 256-bit key wrapped by Android Keystore; PIN/biometric gates key use; final library chosen in G0 spike</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>R-04</code></td><td>APK delivery via WhatsApp/email</td><td>Primary WhatsApp/email; fallbacks ZIP-wrapped APK and Rs0 hosted link; always publish checksum</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>R-12</code></td><td>Third-party licence compliance</td><td>Maintain open-source licence inventory and in-app 'Open-source licences' screen</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>R-13</code></td><td>Data-protection risk</td><td>Reclassify as 'Accepted - mitigated' (local-only, minimal collection); conflicts with O-14</td><td>Decided: proposed value</td><td>G5</td></tr><tr><td><code>O-10 / O-FG-002 / O-FG-003</code></td><td>E-invoice / e-way bill</td><td>Stay in R3 as JSON export/manual upload (Level 0-4); capture IRN/ack/e-way fields in data model from R1a; GST return JSON stays R1a</td><td>Decided: proposed value</td><td>G3</td></tr><tr><td><code>O-FG-007 / O-FG-008</code></td><td>TDS/TCS deferred to a later release; PF/ESI and payroll out of scope</td><td>TDS/TCS deferred to later release; PF/ESI and payroll out of scope; remove from V1 scope text and RTM</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>O-06</code></td><td>Admin module scope</td><td>R1b admin = users, roles/rights, audit viewer, voucher controls, period locks, device/pairing management, rebuild utility</td><td>Decided: proposed value</td><td>R1b</td></tr><tr><td><code>Gates</code></td><td>Gate definitions</td><td>MPL 11.4 authoritative; rewrite TEST 6 with MPL gate numbers and add G4, G5, G6</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>R-XX / WP-XX / O-XX / D-XX / A-XX</code></td><td>Placeholder closures</td><td>Withdraw: not real IDs; remove from all ledgers</td><td>Decided: proposed value</td><td>G0</td></tr><tr><td><code>FG-002 / 003 / 004</code></td><td>Statutory schema verification</td><td>Verify GST/e-invoice/e-way schemas from official sources; record in verification logs</td><td>Decided: owner value</td><td>G1</td></tr><tr><td><code>COMMERCIAL</code></td><td>Pricing, AMC price and content, reissue limit</td><td>Decide before go-live</td><td>Decided: owner value</td><td>Go-live</td></tr></tbody></table></section>
+<section id="niav-reconciliation-change-log"><h2>Change log</h2><table><tr><th>Version</th><th>Date</th><th>Change</th></tr><tr data-generated-by="niav-reconcile-workbook"><td>v0.9</td><td>2026-10-01</td><td>Workbook reconciliation applied: 27 decision row(s) integrated into body text, closure status, and cross-document traceability; deferred/verification-dependent items remain explicitly non-closed.</td></tr></table></section>
+<section id="niav-g0-final-change-log"><h2>Change log</h2><table><tr><th>Version</th><th>Date</th><th>Change</th></tr><tr><td>v0.9</td><td>2026-10-01</td><td>G0 exception register owner inputs applied; final reconciliation status recorded across 10 linked exception rows.</td></tr></table></section><section id="niav-g0-closeout-log"><h2>Closeout change log</h2><table><thead><tr><th>Version</th><th>Date</th><th>Change</th></tr></thead><tbody><tr><td>v0.9</td><td>2026-10-01</td><td>G0 closeout: verification evidence register, approved schema delta, RTM/test impact review and conditional sign-off recorded.</td></tr></tbody></table></section></body></html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

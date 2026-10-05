@@ -1,0 +1,109 @@
+# NiAvERP implementation decisions
+
+This file is an implementation ledger derived from the active reconciled
+project documents. It is not permission to invent values. When a decision is
+marked pending, implementation must stop only the dependent behavior and
+record the exact question.
+
+## Accepted baseline
+
+| ID | Decision | Status / gate |
+|---|---|---|
+| D-01 / D-05 / D-R5 | Flutter/Dart, standalone Android V1, CLI-only implementation | Accepted, G0 |
+| O-M04 | Minimum Android API 26 / Android 8; low-end device targets apply | Accepted, device evidence later |
+| D-M4 | Money integer paise; quantity integer ×10^4; line round-half-up; invoice round-off is a separate ledger line; UUIDv7 text IDs; ISO dates; epoch-ms timestamps | Accepted design, G0/G1 |
+| D-M5 / D-08 | FIFO and weighted-average costing; item override over group default; method locks after first posted movement; negative stock uses last-known cost with warning; no retroactive revaluation | Accepted design, G1 |
+| D-M6 | Orders do not reserve stock in V1 | Accepted |
+| D-04 / O-05 / D-FG-014 | Trial/grace/expiry: approved entitlement matrix; data is not deleted on expiry | Accepted design, G5 implementation/evidence |
+| D-10 / O-06 / O-15 | Simple/Advanced boundary as recorded in the master plan and workbook | Accepted decision, later edition gate |
+| OD-UI-001 | Top navigation: Home, Billing, Parties & Items, Reports, More | Accepted, G0 |
+| G0-CON-001 | TDS/TCS later release; PF/ESI/payroll out of scope for V1 | Accepted exclusion |
+| G0-CON-002 | Tally/Busy native adapters are R3 feasibility only; V1 uses Excel templates | Accepted exclusion |
+| G0-CON-003 | Rollback is uninstall current APK → install previous APK → restore external backup; in-place downgrade unsupported | Accepted |
+| G0-CON-004 | Master-data sync uses field merge; host arrival wins on same-field clash; loser is logged | Accepted rule; full sync is S1 |
+| G0-CON-005 | Five-item navigation model is authoritative | Accepted |
+| G0-OWN-002 | Voice input is rejected/excluded from V1 | Accepted exclusion |
+| G0-DEF-001 | Native Tally/Busy adapters deferred to R3 | Deferred |
+| G0-DEF-002 | TDS/TCS later release; PF/ESI/payroll out of scope | Deferred/excluded |
+| G0-DEF-003 | Automatic transliteration deferred to R2 | Deferred |
+
+## Voucher types required by the documents
+
+The shared voucher engine must represent all documented types:
+
+- Sales Invoice
+- Purchase Invoice
+- Sales Return / Credit Note with items
+- Purchase Return / Debit Note with items
+- Payment
+- Receipt
+- Contra
+- Journal
+- Debit Note without items
+- Credit Note without items
+- Delivery Note / Delivery Challan
+- Material Issue to Party
+- Material Receive from Party
+- Stock Transfer
+- Stock Journal
+- Sales Quotation / Proforma Invoice
+- Purchase Quotation
+- Sales Order
+- Purchase Order
+
+No type may be omitted silently. A type with a later gate must be represented
+with an explicit gate and boundary.
+
+## Schema scope
+
+The seven approved schema changes are:
+
+- G0-SCH-001 cost layers and stock movements;
+- G0-SCH-002 period locks;
+- G0-SCH-003 bill allocations;
+- G0-SCH-004 effective-dated tax/HSN and layout profiles;
+- G0-SCH-005 record/operation versioning and sync fields;
+- G0-SCH-006 trial anchors and denylist storage;
+- G0-SCH-007 voucher-line discount fields.
+
+Implement them through migrations with repeat-safe upgrades, FK/CHECK
+validation, auditability and downgrade refusal.
+
+## Gate boundaries
+
+- **G0:** requirements/design acceptance and reproducible host verification.
+- **G1:** schema, database and core accounting implementation.
+- **G2:** performance and search targets.
+- **G3/R1a:** official statutory schemas, approved fields and file workflows.
+- **G4:** import/migration and document-flow boundaries where assigned.
+- **G5:** Android/device, legal, printer and release/channel evidence.
+- **S1/S3:** sync transport, multi-user and device-fleet behavior.
+- **R2/R3:** deferred transliteration and native adapter feasibility.
+
+Downstream pending evidence does not authorise a false G0 or product-release
+claim.
+
+## Pending decisions/evidence — do not invent
+
+- exact production SQLCipher-class library, version, licence and Android 8
+  compatibility;
+- owner-approved IRN/acknowledgement/e-way field list and pinned schemas;
+- GST statutory source/fixture confirmation where not already recorded;
+- legal reviewer, applicability, retention/deletion and signed interpretation;
+- physical Android, printer, APK/ZIP and channel evidence;
+- any field, rule or workflow marked TBC in the principal documents;
+- exact licence key issuance/cryptographic format and payment integration.
+
+## Change rule
+
+If a new decision is supplied, append a dated row with source ID, exact value,
+affected modules, gate and evidence requirement. Do not rewrite historical
+decisions. If the change alters schema, accounting, security, legal scope or
+navigation, stop the affected implementation slice until the principal source
+set is reconciled.
+
+## Appended decisions
+
+| Date (UTC) | ID | Decision | Affected modules | Gate / evidence |
+|---|---|---|---|---|
+| 2026-10-05 | P-SQLIB | SQLCipher-class stack approved: package:sqlite3 3.7.0 with build-hook source sqlite3mc (SQLite3MultipleCiphers, prebuilt Android arm/arm64/x64); Drift 2.35.1 approved for the later DAO slice (unused so far). Dart-package licences MIT (LICENSE heads read from pub cache). sqlcipher_flutter_libs rejected (EOL — 0.7.0+eol is an empty package); git-only encrypted_drift rejected (unversioned). Owner: explicit approval via decision prompt. | Local backend/data layer (db opener, FFI engine, migration bootstrap, CompositionRoot backend) | G0 — remaining evidence: native cipher licence text from the bundled asset manifest + Android 8 compatibility proof on device (P-DEVICE-8); Drift DAO use lands only with its own slice (licence already MIT) |
