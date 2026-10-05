@@ -1,12 +1,17 @@
 // Reports hub — navigation slice (OD-UI-001, G1).
-// Two real destinations, both live screens over real queries: the stock
-// report (balances + book values) and the outstanding report (open bills +
-// totals). Tapping a row pushes the screen with the scoped company bound.
-// Traceability: OD-UI-001 (Reports destination); UI-009/UI-010; FR-M14-001.
+// Three real destinations, all live screens over real queries: the stock
+// report (balances + book values), the outstanding report (open bills +
+// totals) and the books report (day book / voucher register, trial balance,
+// ledger account). Tapping a row pushes the screen with the scoped company
+// bound. Every report is a projection of posted transactions — no report
+// carries its own arithmetic.
+// Traceability: OD-UI-001 (Reports destination); UI-009/UI-010;
+// FR-M14-001; M14.1/14.2/14.6.
 
 import 'package:flutter/material.dart';
 
 import 'package:niaverp/core/value_objects/ids.dart';
+import 'package:niaverp/presentation/reports/books_report_screen.dart';
 import 'package:niaverp/presentation/reports/outstanding_report_screen.dart';
 import 'package:niaverp/presentation/reports/stock_report_screen.dart';
 import 'package:niaverp/presentation/shared/company_scope.dart';
@@ -55,6 +60,21 @@ class ReportsHubScreen extends StatelessWidget {
                 companyId: companyId,
                 report: scope.outstanding,
                 asOf: scope.today,
+              ),
+            ),
+          ),
+        ),
+        ListTile(
+          key: const ValueKey<String>('reports-hub-books'),
+          title: const Text('Books'),
+          subtitle: const Text('Day book, trial balance, ledger account'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (BuildContext context) => BooksReportScreen(
+                companyId: companyId,
+                books: scope.books,
+                ledgers: scope.ledgers,
               ),
             ),
           ),

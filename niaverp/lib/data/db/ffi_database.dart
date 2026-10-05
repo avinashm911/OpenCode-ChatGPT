@@ -11,9 +11,10 @@
 import 'package:sqlite3/sqlite3.dart';
 
 import '../migrations/migration_runner.dart';
+import 'niav_database.dart';
 
 /// Production [MigrationDb] over one sqlite3 database handle.
-class FfiDatabase implements MigrationDb {
+class FfiDatabase implements MigrationDb, CloseableMigrationDb {
   FfiDatabase._(this._raw);
 
   /// Wrap an already-open handle (opener owns keying + cipher proof).
@@ -59,13 +60,25 @@ class FfiDatabase implements MigrationDb {
     try {
       body();
       _raw.execute('COMMIT');
-    } catch (_) {
-      _raw.execute('ROLLBACK');
+    } catch (error) {
+      // The rollback is best-effort: a failing statement may already have
+      // rolled the transaction back (SQLite rolls back on some constraint
+      // failures), and a ROLLBACK then throws "no transaction is active".
+      // That second failure must never replace [error] — the caller's cause is
+      // the one that matters, so it is rethrown untouched and the rollback
+      // failure is attached to nothing (never logged, never a new message).
+      try {
+        _raw.execute('ROLLBACK');
+      } catch (_) {
+        // Already rolled back (or rolled back automatically): keep the cause.
+      }
       rethrow;
     }
   }
 
-  /// Release the native handle. The opener owns native cleanup policy.
+  /// Release the native handle. Idempotent; every operation afterwards is
+  /// rejected by the guard.
+  @override
   void close() {
     if (!_closed) {
       _closed = true;

@@ -68,19 +68,28 @@ class CompositionRoot {
 
   /// Production backend over an injected [engine].
   ///
-  /// The engine is supplied by the opener: test harness today, the
-  /// Keystore-wrapped encrypted engine after P-SQLIB closes. The root
-  /// bootstraps migrations ([sqlByVersion] loaded via migration_assets),
-  /// then builds the repository/query graph. Throws exactly as
-  /// [NiavDatabase.bootstrap] does on a newer-schema database.
+  /// The engine is supplied by the opener: the test harness in host runs, the
+  /// Keystore-wrapped encrypted engine in production. The root bootstraps
+  /// migrations ([sqlByVersion] loaded via migration_assets), then builds the
+  /// repository/query graph. Throws exactly as [NiavDatabase.bootstrap] does
+  /// on a newer-schema database — and closes the handle first, so a failed
+  /// bootstrap never leaves a live connection behind (D1-B4).
   static BackendBundle backend({
     required MigrationDb engine,
     required Map<int, String> sqlByVersion,
     required Clock clock,
   }) {
     final NiavDatabase database = NiavDatabase(engine, clock: clock)
-      ..sqlByVersion = sqlByVersion
-      ..bootstrap();
+      ..sqlByVersion = sqlByVersion;
+    try {
+      database.bootstrap();
+    } catch (_) {
+      // Newer-schema refusal (G0-CON-003), missing SQL or a failing migration:
+      // release the native handle before the error propagates. Closing is
+      // idempotent and never masks the original failure.
+      database.close();
+      rethrow;
+    }
     final RepositoryContext ctx = RepositoryContext(db: database, clock: clock);
     final OperationLog ops = OperationLog(ctx);
     final AuditLog audit = AuditLog(ctx);
@@ -219,6 +228,8 @@ CompanyScope scopeOfBackend(
     search: backend.search,
     godowns: backend.godowns,
     stock: backend.stock,
+    books: backend.books,
+    ledgers: backend.ledgers,
     outstanding: backend.outstanding,
     vouchers: backend.vouchers,
     types: backend.types,

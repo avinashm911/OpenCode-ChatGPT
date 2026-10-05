@@ -8,6 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:niaverp/application/queries/ledger.dart';
 import 'package:niaverp/application/queries/master_search.dart';
 import 'package:niaverp/application/queries/outstanding.dart';
 import 'package:niaverp/application/queries/stock_levels.dart';
@@ -22,6 +23,7 @@ import 'package:niaverp/data/repositories/audit_log.dart';
 import 'package:niaverp/data/repositories/bill_allocation_repository.dart';
 import 'package:niaverp/data/repositories/company_repository.dart';
 import 'package:niaverp/data/repositories/item_repository.dart';
+import 'package:niaverp/data/repositories/ledger_masters.dart';
 import 'package:niaverp/data/repositories/operation_log.dart';
 import 'package:niaverp/data/repositories/party_repository.dart';
 import 'package:niaverp/data/repositories/repository.dart';
@@ -31,6 +33,7 @@ import 'package:niaverp/presentation/billing/billing_hub_screen.dart';
 import 'package:niaverp/presentation/billing/new_purchase_screen.dart';
 import 'package:niaverp/presentation/home/home_dashboard_screen.dart';
 import 'package:niaverp/presentation/inventory/new_transfer_screen.dart';
+import 'package:niaverp/presentation/reports/books_report_screen.dart';
 import 'package:niaverp/presentation/reports/outstanding_report_screen.dart';
 import 'package:niaverp/presentation/reports/reports_hub_screen.dart';
 import 'package:niaverp/presentation/reports/stock_report_screen.dart';
@@ -69,6 +72,8 @@ void main() {
       search: MasterSearch(db),
       godowns: godowns,
       stock: StockLevels(db),
+      books: LedgerBooks(db),
+      ledgers: LedgerRepository(ctx, ops: ops, audit: audit),
       outstanding: OutstandingReport(db),
       vouchers: vouchers,
       types: typeRepo,
@@ -227,7 +232,8 @@ void main() {
     });
   });
 
-  group('reports hub (OD-UI-001)', () {    testWidgets('routes to both live report screens',
+  group('reports hub (OD-UI-001)', () {
+    testWidgets('routes to all three live report screens',
         (WidgetTester t) async {
       await t.pumpWidget(
         MaterialApp(
@@ -246,6 +252,11 @@ void main() {
       await t.pumpAndSettle();
       expect(find.byType(OutstandingReportScreen), findsOneWidget);
       expect(find.text('v-h'), findsOneWidget);
+      await t.pageBack();
+      await t.pumpAndSettle();
+      await t.tap(find.byKey(const ValueKey<String>('reports-hub-books')));
+      await t.pumpAndSettle();
+      expect(find.byType(BooksReportScreen), findsOneWidget);
     });
   });
 }

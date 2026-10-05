@@ -10,6 +10,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:niaverp/application/queries/ledger.dart';
 import 'package:niaverp/application/queries/master_search.dart';
 import 'package:niaverp/application/queries/outstanding.dart';
 import 'package:niaverp/application/queries/stock_levels.dart';
@@ -25,6 +26,7 @@ import 'package:niaverp/data/repositories/audit_log.dart';
 import 'package:niaverp/data/repositories/bill_allocation_repository.dart';
 import 'package:niaverp/data/repositories/company_repository.dart';
 import 'package:niaverp/data/repositories/item_repository.dart';
+import 'package:niaverp/data/repositories/ledger_masters.dart';
 import 'package:niaverp/data/repositories/operation_log.dart';
 import 'package:niaverp/data/repositories/party_repository.dart';
 import 'package:niaverp/data/repositories/repository.dart';
@@ -69,6 +71,8 @@ void main() {
       search: MasterSearch(db),
       godowns: godowns,
       stock: StockLevels(db),
+      books: LedgerBooks(db),
+      ledgers: LedgerRepository(ctx, ops: ops, audit: audit),
       outstanding: OutstandingReport(db),
       vouchers: vouchers,
       types: typeRepo,

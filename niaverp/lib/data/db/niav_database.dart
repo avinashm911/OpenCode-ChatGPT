@@ -2,17 +2,30 @@
 // Engine-neutral bootstrap over [MigrationDb]: clean install, ordered
 // upgrade, repeat-safe re-run, and newer-schema refusal. The SQL text stays
 // the audited G0 migration chain (MIGRATION_DESIGN.md §2); this class only
-// orchestrates it. Encrypted-engine construction stays BLOCKED on P-SQLIB
-// (G0-VER-001); see [EncryptedDatabaseOpener].
-// Traceability: DSS §6; DB §8; DSS-C-007; RSP 5 / G0-CON-003; G0-SCH-001…007.
+// orchestrates it. The production encrypted engine is owner-approved and
+// wired in `cipher_opener.dart` (P-SQLIB, sqlite3 build hook source
+// `sqlite3mc`); on-device proof is still G0-VER-005 evidence.
+// [close] releases the native handle when the engine owns one and is
+// idempotent: every later call is rejected instead of using a dead handle.
+// Traceability: DSS §6; DB §8; DSS-C-007; RSP 5 / G0-CON-003; G0-SCH-001…007;
+// P-SQLIB; D1 (resource lifecycle).
 
 import '../migrations/migration_registry.dart';
 import '../migrations/migration_runner.dart';
 import '../../core/clock.dart';
 
+/// Engines that own a native/database handle they can release. Implemented
+/// by the production [FfiDatabase] and the test factory; the narrow shape
+/// keeps [MigrationDb] free of lifecycle methods that a pure in-memory double
+/// has no reason to implement.
+abstract class CloseableMigrationDb {
+  /// Release the handle. Implementations make this idempotent.
+  void close();
+}
+
 /// Production database handle. Created by an engine opener (test factory,
-///
-/// Drift/SQLCipher wiring once P-SQLIB closes) and bootstrapped before use.
+/// FfiDatabase over the encrypted file in production) and bootstrapped before
+/// use.
 class NiavDatabase implements MigrationDb {
   NiavDatabase(this._engine, {required this._clock});
 
@@ -55,10 +68,19 @@ class NiavDatabase implements MigrationDb {
     return currentVersion(_engine);
   }
 
-  /// Release the underlying connection. The opener owns native cleanup.
+  /// Release the handle: marks this database closed AND releases the native
+  /// handle when the engine owns one (production FFI, test factory). Calling
+  /// it twice is safe; any database use afterwards is rejected instead of
+  /// touching a released handle. The opener keeps nothing else to clean up.
   void close() {
+    if (_closed) return;
     _closed = true;
+    final Object engine = _engine;
+    if (engine is CloseableMigrationDb) engine.close();
   }
+
+  /// True once [close] has run (guards every operation).
+  bool get isClosed => _closed;
 
   @override
   void execute(String sql) {
@@ -91,11 +113,12 @@ class NiavDatabase implements MigrationDb {
   }
 }
 
-/// Constructs the encrypted engine for production use. No implementation
-/// exists until P-SQLIB closes (confirmed SQLCipher-class library, version,
-/// licence, Android 8 proof). Implementations must open the database with
-/// the Keystore-wrapped [DbKey] (D-06) and hand the live connection to
-/// [NiavDatabase]; they must never fall back to plaintext.
+/// Constructs the encrypted engine for production use. The library choice is
+/// owner-approved (P-SQLIB: package:sqlite3 with build-hook source
+/// `sqlite3mc`/SQLite3MultipleCiphers); on-device Android 8 proof stays
+/// G0-VER-001/005 evidence. Implementations open the database with the
+/// Keystore-wrapped [DbKey] (D-06) and hand the live connection to
+/// [NiavDatabase]; they never fall back to plaintext.
 abstract class EncryptedDatabaseOpener {
   /// Open (creating if needed) the per-company encrypted database and run
   /// [NiavDatabase.bootstrap] before returning it.

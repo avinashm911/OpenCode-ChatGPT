@@ -312,6 +312,26 @@ class VoucherRepository {
         'line_no must be > 0, rate must be >= 0, device id not empty',
       );
     }
+    // Editable-state rule: a line may only be added while the voucher is still
+    // a working document. `posted` and `cancelled` history is immutable
+    // (technical baseline; DSS-C-003) — corrections go through the engine's
+    // compensating cancellation, never through editing a stored line. Held
+    // bills keep their own rows (FR-M11-003, held/resumed/cancelled).
+    final List<Map<String, Object?>> parent = _db.queryArgs(
+      'SELECT status FROM voucher WHERE company_id = ? AND voucher_id = ?',
+      <Object?>[companyId.value, voucherId.value],
+    );
+    if (parent.isEmpty) {
+      return err('validation', 'voucher does not exist in this company');
+    }
+    final String parentStatus = parent.first['status'] as String;
+    if (parentStatus != 'draft' && parentStatus != 'held') {
+      return err(
+        'validation',
+        'lines may only be added to a draft or held voucher '
+        '(this voucher is $parentStatus)',
+      );
+    }
     // Dr/Cr sign convention (owner-directed): item-quantity lines carry
     // signed qty (lineAmount) and must not carry Dr/Cr; anything else must
     // be exactly Dr or Cr (DB CHECK is the backstop).
@@ -462,11 +482,14 @@ class VoucherRepository {
   }
 
   /// Explicitly move a held bill to its next counter state (FR-M11-003:
-  /// Held → Resumed/Cancelled/Posted) with operation + audit lineage in one
-  /// transaction. Only held bills may move, and only to those three states;
-  /// posted history stays immutable per the technical baseline, and every
-  /// other lifecycle (approvals, posting rules) belongs to its owning slice
-  /// and is rejected here, never invented.
+  /// Held → Resumed/Cancelled) with operation + audit lineage in one
+  /// transaction. Only held bills may move, and only to those two states.
+  /// `posted` is deliberately NOT reachable here: posting is the engine's job
+  /// (it owns validation, period lock, Dr=Cr, stock effects and allocations in
+  /// one transaction), so this counter queue can never produce a posted
+  /// voucher that skipped those checks. Every other lifecycle (approvals,
+  /// posting rules) belongs to its owning slice and is rejected here, never
+  /// invented. Traceability: FR-M11-003; D1 (D2).
   Result<Voucher> updateHeldStatus({
     required EntityId id,
     required CompanyId companyId,
@@ -476,8 +499,14 @@ class VoucherRepository {
     required String eventId,
     required String actor,
   }) {
-    if (status != 'resumed' && status != 'cancelled' && status != 'posted') {
-      return err('validation', 'held bills move only to resumed/cancelled/posted');
+    if (status == 'posted') {
+      return err(
+        'validation',
+        'posting is done by the voucher engine, not the held-bill queue',
+      );
+    }
+    if (status != 'resumed' && status != 'cancelled') {
+      return err('validation', 'held bills move only to resumed/cancelled');
     }
     if (deviceId.isEmpty) {
       return err('validation', 'device id must not be empty');

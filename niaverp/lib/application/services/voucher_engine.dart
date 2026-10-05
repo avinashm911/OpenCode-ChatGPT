@@ -254,8 +254,12 @@ class VoucherEngine {
     return rows.isNotEmpty;
   }
 
-  /// Post a draft (or resumed counter bill): validate everything the schema
-  /// supports, compute totals, move to `posted` with lineage.
+  /// Post a draft (or resumed counter bill) through the SAME transactional
+  /// path as [postWithStock] — validation, Dr=Cr, period lock, stock effects,
+  /// allocations and the status move all commit together (D1-D3). Kept as a
+  /// thin wrapper so no caller can post while skipping stock or numbering
+  /// rules; the policy defaults to refusing negative stock exactly as the
+  /// caller-facing pipeline does.
   Result<PostedTotals> postDraft({
     required EntityId id,
     required CompanyId companyId,
@@ -263,30 +267,22 @@ class VoucherEngine {
     required String opId,
     required String eventId,
     required String actor,
+    StockPolicy policy = StockPolicy.block,
   }) {
-    if (deviceId.isEmpty) {
-      return err('validation', 'device id must not be empty');
-    }
-    final Result<_Postable> checked = _validatePostable(id, companyId);
-    if (checked.isErr) {
-      final AppError e = (checked as Err<_Postable>).error;
-      return err(e.code, e.message);
-    }
-    final Result<Voucher> moved = _moveStatus(
+    final Result<PostingResult> posted = postWithStock(
       id: id,
       companyId: companyId,
-      status: 'posted',
-      action: 'post',
+      policy: policy,
       deviceId: deviceId,
       opId: opId,
       eventId: eventId,
       actor: actor,
     );
-    if (moved.isErr) {
-      final AppError e = (moved as Err<Voucher>).error;
+    if (posted.isErr) {
+      final AppError e = (posted as Err<PostingResult>).error;
       return err(e.code, e.message);
     }
-    return ok((checked as Ok<_Postable>).value.totals);
+    return ok((posted as Ok<PostingResult>).value.totals);
   }
 
   /// Shared validation path for every posting entry point: existence,
@@ -369,9 +365,31 @@ class VoucherEngine {
     return 'Dr total must equal Cr total';
   }
 
-  /// Compensating correction for a posted voucher: posted → cancelled with
-  /// a mandatory reason. The posted row is never rewritten; the cancellation
-  /// is a new audited event (immutability + compensating history).
+  /// Compensating correction for a posted voucher: posted → cancelled with a
+  /// mandatory reason. The posted row and its lines are NEVER rewritten; the
+  /// cancellation is a new audited event (immutability + compensating
+  /// history, DSS-C-003 / M04 common states: a cancelled voucher is one whose
+  /// "effect is neutralized through an auditable operation").
+  ///
+  /// Everything below happens in ONE transaction with the status move, so the
+  /// voucher can never end up cancelled with live stock effects:
+  ///  1. period lock — a locked voucher date refuses the whole cancellation
+  ///     (same [isDateLocked] rule posting uses; D-M5(5));
+  ///  2. compensating stock movements — one row per original movement with the
+  ///     opposite quantity, same item/godown/cost, `reverses_movement_id`
+  ///     pointing at the original and the cancelled voucher's line as
+  ///     `voucher_line_id`;
+  ///  3. cost-layer compensation — the layer that received the cancelled
+  ///     receipt is reduced back by exactly what it still holds, and an
+  ///     already-consumed layer is refused rather than adjusted (no retroactive
+  ///     revaluation: D-M5/DB A3);
+  ///  4. bill allocations allocated out of this voucher's lines are marked
+  ///     `reversed` with operation + audit lineage (the row survives).
+  ///
+  /// Returns the cancelled voucher. Every rejection leaves the stored data
+  /// untouched.
+  /// Traceability: DSS-C-003; M04 common states; FR-M06-001 (settlement
+  /// reversal); D-M5 (no retro revaluation); D1 (D1).
   Result<Voucher> cancelPosted({
     required EntityId id,
     required CompanyId companyId,
@@ -391,17 +409,267 @@ class VoucherEngine {
     if (current.voucher.status != 'posted') {
       return err('validation', 'only posted vouchers can be cancelled here');
     }
-    return _moveStatus(
-      id: id,
-      companyId: companyId,
-      status: 'cancelled',
-      action: 'correct',
-      deviceId: deviceId,
-      opId: opId,
-      eventId: eventId,
-      actor: actor,
-      reason: reason.trim(),
+    try {
+      Voucher? done;
+      _db.runInTransaction(() {
+        // 1. A locked period refuses corrections as firmly as posting.
+        if (isDateLocked(companyId, current.voucher.date.iso)) {
+          throw TxFailure(const AppError(
+              'validation', 'voucher date falls in a locked period'));
+        }
+        // 2 + 3. Neutralise the stock effect with compensating records.
+        _reverseStockEffects(companyId, current, deviceId, actor);
+        // 4. Release the allocations this voucher's lines consumed.
+        _reverseAllocationsOf(companyId, id, reason, deviceId, actor);
+        // 5. Status move last: it is the commit point.
+        done = _moveStatusInTx(
+          id: id,
+          companyId: companyId,
+          status: 'cancelled',
+          action: 'correct',
+          deviceId: deviceId,
+          opId: opId,
+          eventId: eventId,
+          actor: actor,
+          reason: reason.trim(),
+        );
+      });
+      return ok(done!);
+    } on TxFailure catch (f) {
+      return err(f.error.code, f.error.message);
+    } catch (e) {
+      final AppError be = dbError(e, 'voucher-cancel');
+      return err(be.code, be.message);
+    }
+  }
+
+  /// Compensating stock movements + layer adjustment for one cancelled
+  /// voucher. Throws [TxFailure] when a layer cannot be reduced without
+  /// rewriting history; the caller rolls the whole transaction back.
+  void _reverseStockEffects(
+    CompanyId companyId,
+    VoucherWithLines voucher,
+    String deviceId,
+    String actor,
+  ) {
+    final Set<String> lineIds = <String>{
+      for (final VoucherLine l in voucher.lines) l.id.value,
+    };
+    if (lineIds.isEmpty) return;
+    final List<Map<String, Object?>> movements = _db.queryArgs(
+      'SELECT m.movement_id, m.item_id, m.godown_id, m.qty_delta_q4, '
+      'm.cost_paise, m.cost_source FROM stock_movement m '
+      'WHERE m.company_id = ? AND m.reverses_movement_id IS NULL '
+      "AND m.voucher_line_id IN (${List<String>.filled(lineIds.length, '?').join(', ')}) "
+      'ORDER BY m.created_at, m.movement_id',
+      <Object?>[companyId.value, ...lineIds],
     );
+    for (final Map<String, Object?> mv in movements) {
+      final String movementId = mv['movement_id'] as String;
+      final _Reversal reversal = _planReversal(
+        companyId,
+        movementId,
+        EntityId(mv['item_id'] as String),
+        EntityId(mv['godown_id'] as String),
+        mv['qty_delta_q4'] as int,
+      );
+      _writeCompensatingMovement(
+        companyId: companyId,
+        originalMovementId: movementId,
+        itemId: reversal.itemId,
+        godownId: reversal.godownId,
+        voucherLineId: reversal.lineId,
+        deltaQ4: -reversal.qtyQ4,
+        costPaise: mv['cost_paise'] as int,
+        deviceId: deviceId,
+        actor: actor,
+      );
+      // Layer compensation: give back exactly what is still held; refuse when
+      // the layer was already consumed (that would need revaluation).
+      if (reversal.layerId != null) {
+        _reduceLayer(companyId, reversal, deviceId, actor);
+      }
+    }
+  }
+
+  /// Which layer (if any) the reversal must give back, and how much of it is
+  /// still held. An inbound layer row created by the original movement is the
+  /// only one a reversal can restore; outbound legs consumed layers and are
+  /// neutralised by their movement row alone.
+  _Reversal _planReversal(
+    CompanyId companyId,
+    String movementId,
+    EntityId itemId,
+    EntityId godownId,
+    int originalDeltaQ4,
+  ) {
+    final List<Map<String, Object?>> layers = _db.queryArgs(
+      'SELECT layer_id, qty_q4, value_paise, voucher_line_id, '
+      'COALESCE(remaining_qty_q4, qty_q4) AS rq, '
+      'COALESCE(remaining_value_paise, value_paise) AS rv '
+      'FROM stock_cost_layer WHERE company_id = ? AND voucher_line_id = ('
+      'SELECT voucher_line_id FROM stock_movement WHERE movement_id = ?)',
+      <Object?>[companyId.value, movementId],
+    );
+    if (layers.isEmpty) {
+      // No layer of its own (outbound leg): the movement row is the whole
+      // effect; nothing to restore.
+      return _Reversal(
+          itemId: itemId,
+          godownId: godownId,
+          lineId: _lineOf(companyId, movementId),
+          qtyQ4: originalDeltaQ4,
+          layerId: null,
+          layerQtyQ4: 0,
+          layerValuePaise: 0);
+    }
+    final Map<String, Object?> row = layers.first;
+    final int heldQty = row['rq'] as int;
+    final int heldValue = row['rv'] as int;
+    final int layerQty = row['qty_q4'] as int;
+    if (heldQty < layerQty) {
+      // Part of the layer was already consumed: restoring it would restate
+      // posted history (D-M5: no retro revaluation). Refuse instead of
+      // guessing a revaluation policy.
+      throw TxFailure(const AppError(
+          'validation',
+          'stock from this voucher was already issued; '
+          'cancel is refused because reversing it would restate history'));
+    }
+    return _Reversal(
+      itemId: itemId,
+      godownId: godownId,
+      lineId: row['voucher_line_id'] as String,
+      qtyQ4: originalDeltaQ4,
+      layerId: row['layer_id'] as String,
+      layerQtyQ4: layerQty,
+      layerValuePaise: row['value_paise'] as int,
+      heldQtyQ4: heldQty,
+      heldValuePaise: heldValue,
+    );
+  }
+
+  String _lineOf(CompanyId companyId, String movementId) {
+    final List<Map<String, Object?>> rows = _db.queryArgs(
+      'SELECT voucher_line_id FROM stock_movement WHERE movement_id = ?',
+      <Object?>[movementId],
+    );
+    return rows.isEmpty ? '' : (rows.first['voucher_line_id'] as String? ?? '');
+  }
+
+  void _reduceLayer(
+      CompanyId companyId, _Reversal r, String deviceId, String actor) {
+    _db.executeArgs(
+      'UPDATE stock_cost_layer SET remaining_qty_q4 = '
+      'COALESCE(remaining_qty_q4, qty_q4) - ?, remaining_value_paise = '
+      'COALESCE(remaining_value_paise, value_paise) - ? '
+      'WHERE company_id = ? AND layer_id = ?',
+      <Object?>[
+        r.layerQtyQ4,
+        r.layerValuePaise,
+        companyId.value,
+        r.layerId,
+      ],
+    );
+    _lineage(
+      entity: 'stock_cost_layer',
+      entityId: r.layerId!,
+      companyId: companyId,
+      deviceId: deviceId,
+      opId: 'op-reverse-layer-${r.layerId}',
+      eventId: 'ev-reverse-layer-${r.layerId}',
+      action: 'reverse',
+      actor: actor,
+    );
+  }
+
+  /// Mark every active allocation sourced from this voucher's lines as
+  /// `reversed` (with audit), so the settled amounts return to open.
+  void _reverseAllocationsOf(
+    CompanyId companyId,
+    EntityId voucherId,
+    String reason,
+    String deviceId,
+    String actor,
+  ) {
+    final List<AllocationView> allocations =
+        allocationRepo.activeForVoucher(companyId, voucherId);
+    for (final AllocationView a in allocations) {
+      allocationRepo.reverseTx(
+        id: EntityId(a.allocationId),
+        companyId: companyId,
+        reason: reason,
+        deviceId: deviceId,
+        opId: 'op-al-rev-${a.allocationId}',
+        eventId: 'ev-al-rev-${a.allocationId}',
+        actor: actor,
+      );
+    }
+  }
+
+  void _writeCompensatingMovement({
+    required CompanyId companyId,
+    required String originalMovementId,
+    required EntityId itemId,
+    required EntityId godownId,
+    required String voucherLineId,
+    required int deltaQ4,
+    required int costPaise,
+    required String deviceId,
+    required String actor,
+  }) {
+    final String movementId = 'mvr-$originalMovementId';
+    final int now = ctx.clock.nowMs();
+    // Operation first: stock_movement.operation_id is an FK to it.
+    final Map<String, Object?> moveRow = <String, Object?>{
+      'movement_id': movementId,
+      'delta_q4': deltaQ4,
+      'cost_paise': costPaise,
+      'cost_source': 'reversal',
+      'reverses_movement_id': originalMovementId,
+    };
+    final Result<OperationRecord> mop = ops.append(
+      opId: 'op-$movementId',
+      companyId: companyId.value,
+      deviceId: deviceId,
+      entity: 'stock_movement',
+      entityId: movementId,
+      action: 'reverse',
+      payloadHash: auditPayloadHash(moveRow),
+    );
+    if (mop.isErr) throw TxFailure((mop as Err<OperationRecord>).error);
+    try {
+      _db.executeArgs(
+        'INSERT INTO stock_movement (movement_id, company_id, item_id, '
+        'godown_id, qty_delta_q4, cost_paise, cost_source, voucher_line_id, '
+        'operation_id, reverses_movement_id, created_at) '
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        <Object?>[
+          movementId,
+          companyId.value,
+          itemId.value,
+          godownId.value,
+          deltaQ4,
+          costPaise,
+          'reversal',
+          voucherLineId.isEmpty ? null : voucherLineId,
+          'op-$movementId',
+          originalMovementId,
+          now,
+        ],
+      );
+    } catch (e) {
+      throw TxFailure(dbError(e, 'stock-reversal'));
+    }
+    final Result<AuditEvent> mev = audit.append(
+      eventId: 'ev-$movementId',
+      companyId: companyId.value,
+      entity: 'stock_movement',
+      entityId: movementId,
+      newRow: moveRow,
+      actor: actor,
+    );
+    if (mev.isErr) throw TxFailure((mev as Err<AuditEvent>).error);
   }
 
   /// Full posting pipeline in ONE database transaction: shared validation,
@@ -437,7 +705,7 @@ class VoucherEngine {
         final _StockPlan plan =
             _planStockEffects(companyId, p, canonical, policy);
         for (final _StockWrite w in plan.writes) {
-          _writeStockMovement(companyId, w, deviceId);
+          _writeStockMovement(companyId, w, deviceId, actor);
         }
         // Settlement reconciliation (FR-M06-001/002): every settlement line
         // caps what it can settle at its permitted amount (|line total|),
@@ -592,6 +860,20 @@ class VoucherEngine {
       return _StockPlan(
           writes: writes, movementIds: movementIds, warnings: warnings);
     }
+    // D7: an item line on a stock-moving type must name its location. The FR
+    // required-data rows list godown/location for exactly these documents
+    // (FR-M05-001 sales, FR-M07-001 delivery, FR-M07-002 transfer,
+    // FR-M07-003 stock journal). An item line without one is a validation
+    // error, never a silently ignored line that would post without moving
+    // stock. Item lines on non-stock types (journal/payment/...) are not stock
+    // lines at all, so nothing is required of them here.
+    for (final VoucherLine line in p.lines) {
+      if (line.itemId != null && line.godownId == null) {
+        throw TxFailure(const AppError(
+            'validation',
+            'item lines on this voucher type must carry a godown/location'));
+      }
+    }
     for (final VoucherLine line in stockLines) {
       if (line.qtyQ4 == 0) {
         throw TxFailure(const AppError(
@@ -619,6 +901,7 @@ class VoucherEngine {
           deltaQ4: line.qtyQ4,
           unitCostPaise: cost.unitCostPaise,
           costSource: cost.source,
+          costMethod: cost.method,
           consumes: cost.consumes,
         ));
         movementIds.add('mv-${line.id.value}');
@@ -675,6 +958,7 @@ class VoucherEngine {
           deltaQ4: delta,
           unitCostPaise: cost.unitCostPaise,
           costSource: cost.source,
+          costMethod: cost.method,
           consumes: cost.consumes,
         ));
       }
@@ -762,15 +1046,21 @@ class VoucherEngine {
           'validation', 'stored cost method must be fifo or wa'));
     }
     final List<Map<String, Object?>> priced = _db.queryArgs(
-      'SELECT cost_source FROM stock_movement '
+      'SELECT cost_source, cost_method FROM stock_movement '
       'WHERE company_id = ? AND item_id = ? AND godown_id = ? '
-      "AND cost_source IN ('average', 'fifo', 'fifo-fallback') "
+      'AND cost_source != ? '
       'ORDER BY created_at DESC, movement_id DESC LIMIT 1',
-      <Object?>[companyId.value, itemId.value, godownId.value],
+      <Object?>[companyId.value, itemId.value, godownId.value, 'reversal'],
     );
     if (priced.isNotEmpty) {
-      final String? locked =
-          methodOfPricedSource(priced.first['cost_source'] as String);
+      // D-M5: the method locks after the first posted stock MOVEMENT. Rows
+      // written since m016 carry the method resolved at post time (so a first
+      // fallback/zero issue binds a method too); older rows fall back to the
+      // historical cost_source derivation, leaving existing books unchanged.
+      final Object? stored = priced.first['cost_method'];
+      final String? locked = stored is String
+          ? stored
+          : methodOfPricedSource(priced.first['cost_source'] as String);
       if (locked != null && locked != method) {
         throw TxFailure(AppError('validation',
             'valuation method locked to $locked for item ${itemId.value}'));
@@ -801,18 +1091,20 @@ class VoucherEngine {
     ];
   }
 
-  int? _lastKnownCost(EntityId itemId) {
+  int? _lastKnownCost(CompanyId companyId, EntityId itemId) {
+    // Company-scoped (DSS-C-001, m016): the fallback cost of an item in one
+    // company can never be read by another company's book.
     final List<Map<String, Object?>> known = _db.queryArgs(
       'SELECT last_known_cost_paise AS c FROM item_cost_state '
-      'WHERE item_id = ?',
-      <Object?>[itemId.value],
+      'WHERE company_id = ? AND item_id = ?',
+      <Object?>[companyId.value, itemId.value],
     );
     if (known.isEmpty) return null;
     return known.first['c'] as int;
   }
 
   _StockWrite _inboundWrite(CompanyId companyId, VoucherLine line,
-      {int? valuePaise}) {
+      {int? valuePaise, String? method}) {
     final int value = valuePaise ?? line.amountPaise;
     final int qty = line.qtyQ4.abs();
     final int unitCost = qty == 0 ? 0 : ((value * 10000) + qty ~/ 2) ~/ qty;
@@ -826,6 +1118,10 @@ class VoucherEngine {
       deltaQ4: qty,
       unitCostPaise: unitCost,
       costSource: 'layer',
+      // A receipt does not consume layers, so it never binds the method
+      // (D-M5: the lock starts at the first issue). Recorded only when the
+      // caller already resolved one (transfer pairing).
+      costMethod: method,
       layerQtyQ4: qty,
       layerValuePaise: value,
       lastKnownCostPaise: unitCost,
@@ -874,7 +1170,7 @@ class VoucherEngine {
       int value = pricing.layersValuePaise;
       String source = 'fifo';
       if (pricing.shortfallQ4 > 0) {
-        final int? known = _lastKnownCost(itemId);
+        final int? known = _lastKnownCost(companyId, itemId);
         if (known != null) {
           value += fallbackShortfallValue(pricing.shortfallQ4, known);
           source = 'fifo-fallback';
@@ -888,6 +1184,7 @@ class VoucherEngine {
         unitCostPaise: ((value * 10000) + qtyOutQ4 ~/ 2) ~/ qtyOutQ4,
         totalValuePaise: value,
         source: source,
+        method: method,
         consumes: <_LayerConsume>[
           for (final LayerDraw d in pricing.draws)
             _LayerConsume(
@@ -922,26 +1219,31 @@ class VoucherEngine {
         unitCostPaise: ((totalValue * 10000) + qtyOutQ4 ~/ 2) ~/ qtyOutQ4,
         totalValuePaise: totalValue,
         source: 'average',
+        method: method,
         consumes: touched.values.toList(),
       );
     }
-    final int? known = _lastKnownCost(itemId);
+    final int? known = _lastKnownCost(companyId, itemId);
     if (known != null) {
       final int value = fallbackShortfallValue(qtyOutQ4, known);
       return _OutboundCost(
         unitCostPaise: ((value * 10000) + qtyOutQ4 ~/ 2) ~/ qtyOutQ4,
         totalValuePaise: value,
         source: 'fallback',
+        method: method,
       );
     }
     warnings.add('no cost history for item ${itemId.value}'
         '; valued at zero');
+    // A first issue valued at zero still binds the method (D-M5 locks after
+    // the first posted movement); the movement records the resolved method so
+    // the lock survives a later fallback-priced post.
     return _OutboundCost(
-        unitCostPaise: 0, totalValuePaise: 0, source: 'zero');
+        unitCostPaise: 0, totalValuePaise: 0, source: 'zero', method: method);
   }
 
   void _writeStockMovement(
-      CompanyId companyId, _StockWrite w, String deviceId) {
+      CompanyId companyId, _StockWrite w, String deviceId, String actor) {
     final int now = ctx.clock.nowMs();
     if (w.layerId != null) {
       _db.executeArgs(
@@ -969,14 +1271,18 @@ class VoucherEngine {
         deviceId: deviceId,
         opId: 'op-${w.layerId}',
         eventId: 'ev-${w.layerId}',
+        actor: actor,
       );
+      // Last-known cost is company-scoped (DSS-C-001, m016): the same item id
+      // can never read or overwrite another company's fallback cost.
       _db.executeArgs(
-        'INSERT INTO item_cost_state (item_id, last_known_cost_paise, '
-        'updated_at) VALUES (?, ?, ?) '
+        'INSERT INTO item_cost_state (item_id, company_id, '
+        'last_known_cost_paise, updated_at) VALUES (?, ?, ?, ?) '
         'ON CONFLICT (item_id) DO UPDATE SET '
+        'company_id = excluded.company_id, '
         'last_known_cost_paise = excluded.last_known_cost_paise, '
         'updated_at = excluded.updated_at',
-        <Object?>[w.itemId.value, w.lastKnownCostPaise, now],
+        <Object?>[w.itemId.value, companyId.value, w.lastKnownCostPaise, now],
       );
       _lineage(
         entity: 'item_cost_state',
@@ -985,6 +1291,7 @@ class VoucherEngine {
         deviceId: deviceId,
         opId: 'op-cost-${w.movementId}',
         eventId: 'ev-cost-${w.movementId}',
+        actor: actor,
       );
     }
     // Operation first: stock_movement.operation_id is an FK to it.
@@ -992,6 +1299,7 @@ class VoucherEngine {
       'movement_id': w.movementId,
       'delta_q4': w.deltaQ4,
       'cost_source': w.costSource,
+      'cost_method': w.costMethod,
     };
     final Result<OperationRecord> mop = ops.append(
       opId: 'op-${w.movementId}',
@@ -1006,7 +1314,8 @@ class VoucherEngine {
     _db.executeArgs(
       'INSERT INTO stock_movement (movement_id, company_id, item_id, '
       'godown_id, qty_delta_q4, cost_paise, cost_source, voucher_line_id, '
-      'operation_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      'operation_id, cost_method, created_at) '
+      'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
       <Object?>[
         w.movementId,
         companyId.value,
@@ -1017,6 +1326,7 @@ class VoucherEngine {
         w.costSource,
         w.lineId.value,
         'op-${w.movementId}',
+        w.costMethod,
         now,
       ],
     );
@@ -1026,7 +1336,7 @@ class VoucherEngine {
       entity: 'stock_movement',
       entityId: w.movementId,
       newRow: moveRow,
-      actor: 'posting-engine',
+      actor: actor,
     );
     if (mev.isErr) throw TxFailure((mev as Err<AuditEvent>).error);
     // Layer consumption: decrement remaining balances (the receipt record
@@ -1036,8 +1346,8 @@ class VoucherEngine {
         'UPDATE stock_cost_layer SET remaining_qty_q4 = '
         'COALESCE(remaining_qty_q4, qty_q4) - ?, remaining_value_paise = '
         'COALESCE(remaining_value_paise, value_paise) - ? '
-        'WHERE layer_id = ?',
-        <Object?>[c.qtyQ4, c.valuePaise, c.layerId],
+        'WHERE company_id = ? AND layer_id = ?',
+        <Object?>[c.qtyQ4, c.valuePaise, companyId.value, c.layerId],
       );
       _lineage(
         entity: 'stock_cost_layer',
@@ -1047,6 +1357,7 @@ class VoucherEngine {
         opId: 'op-consume-${w.movementId}-${c.layerId}',
         eventId: 'ev-consume-${w.movementId}-${c.layerId}',
         action: 'consume',
+        actor: actor,
       );
     }
   }
@@ -1058,6 +1369,7 @@ class VoucherEngine {
     required String deviceId,
     required String opId,
     required String eventId,
+    required String actor,
     String action = 'create',
   }) {
     final Map<String, Object?> row = <String, Object?>{
@@ -1080,44 +1392,9 @@ class VoucherEngine {
       entity: entity,
       entityId: entityId,
       newRow: row,
-      actor: 'posting-engine',
+      actor: actor,
     );
     if (ev.isErr) throw TxFailure((ev as Err<AuditEvent>).error);
-  }
-
-  Result<Voucher> _moveStatus({
-    required EntityId id,
-    required CompanyId companyId,
-    required String status,
-    required String action,
-    required String deviceId,
-    required String opId,
-    required String eventId,
-    required String actor,
-    String? reason,
-  }) {
-    try {
-      Voucher? done;
-      _db.runInTransaction(() {
-        done = _moveStatusInTx(
-          id: id,
-          companyId: companyId,
-          status: status,
-          action: action,
-          deviceId: deviceId,
-          opId: opId,
-          eventId: eventId,
-          actor: actor,
-          reason: reason,
-        );
-      });
-      return ok(done!);
-    } on TxFailure catch (f) {
-      return err(f.error.code, f.error.message);
-    } catch (e) {
-      final AppError be = dbError(e, 'voucher-engine-move');
-      return err(be.code, be.message);
-    }
   }
 
   /// Status move assuming the caller already holds the transaction (used by
@@ -1193,6 +1470,7 @@ class _StockWrite {
     required this.deltaQ4,
     required this.unitCostPaise,
     required this.costSource,
+    this.costMethod,
     this.layerQtyQ4,
     this.layerValuePaise,
     this.lastKnownCostPaise,
@@ -1208,6 +1486,9 @@ class _StockWrite {
   final int deltaQ4;
   final int unitCostPaise;
   final String costSource;
+
+  /// Valuation method resolved for this write when one applies (D-M5 lock).
+  final String? costMethod;
   final int? layerQtyQ4;
   final int? layerValuePaise;
   final int? lastKnownCostPaise;
@@ -1232,6 +1513,7 @@ class _OutboundCost {
     required this.unitCostPaise,
     required this.totalValuePaise,
     required this.source,
+    required this.method,
     this.consumes = const <_LayerConsume>[],
   });
 
@@ -1241,6 +1523,10 @@ class _OutboundCost {
   /// Total issue value including any fallback-priced shortfall.
   final int totalValuePaise;
   final String source;
+
+  /// Valuation method resolved for this issue ('fifo'/'wa'). Recorded on the
+  /// movement so D-M5's method lock also binds a first fallback/zero issue.
+  final String method;
 
   /// Per-layer consumption (empty when nothing was drawn from layers).
   final List<_LayerConsume> consumes;
@@ -1257,4 +1543,41 @@ class _LayerConsume {
   final String layerId;
   final int qtyQ4;
   final int valuePaise;
+}
+
+/// Plan for one compensating (reversing) movement: which layer to give back,
+/// how much of it the reversal removes and which voucher line links them.
+class _Reversal {
+  const _Reversal({
+    required this.itemId,
+    required this.godownId,
+    required this.lineId,
+    required this.qtyQ4,
+    required this.layerId,
+    required this.layerQtyQ4,
+    required this.layerValuePaise,
+    this.heldQtyQ4 = 0,
+    this.heldValuePaise = 0,
+  });
+
+  final EntityId itemId;
+  final EntityId godownId;
+
+  /// Voucher line the compensating movement is attributed to.
+  final String lineId;
+
+  /// Original movement quantity; the reversal writes its negation.
+  final int qtyQ4;
+
+  /// Layer the reversal gives back (null for an outbound-only movement).
+  final String? layerId;
+
+  /// Immutable receipt record of the layer (never rewritten).
+  final int layerQtyQ4;
+  final int layerValuePaise;
+
+  /// Live balances observed before the reversal (evidence for the refusal
+  /// case and for the audit trail).
+  final int heldQtyQ4;
+  final int heldValuePaise;
 }

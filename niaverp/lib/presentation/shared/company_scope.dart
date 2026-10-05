@@ -8,6 +8,7 @@
 // not business data).
 // Traceability: OD-UI-001 / G0-CON-005 (five-item model).
 
+import 'package:niaverp/application/queries/ledger.dart';
 import 'package:niaverp/application/queries/master_search.dart';
 import 'package:niaverp/application/queries/outstanding.dart';
 import 'package:niaverp/application/queries/stock_levels.dart';
@@ -17,6 +18,7 @@ import 'package:niaverp/core/value_objects/niav_date.dart';
 import 'package:niaverp/data/repositories/alias_repository.dart';
 import 'package:niaverp/data/repositories/company_repository.dart';
 import 'package:niaverp/data/repositories/item_repository.dart';
+import 'package:niaverp/data/repositories/ledger_masters.dart';
 import 'package:niaverp/data/repositories/party_repository.dart';
 import 'package:niaverp/data/repositories/voucher_repository.dart';
 import 'package:niaverp/data/repositories/voucher_type_repository.dart';
@@ -34,6 +36,8 @@ class CompanyScope {
     required this.search,
     required this.godowns,
     required this.stock,
+    required this.books,
+    required this.ledgers,
     required this.outstanding,
     required this.vouchers,
     required this.types,
@@ -50,6 +54,8 @@ class CompanyScope {
   final MasterSearch search;
   final GodownRepository godowns;
   final StockLevels stock;
+  final LedgerBooks books;
+  final LedgerRepository ledgers;
   final OutstandingReport outstanding;
   final VoucherRepository vouchers;
   final VoucherTypeRepository types;

@@ -141,41 +141,29 @@ void main() {
     rawEngineOf(db).close();
   });
 
+  /// Journal fixtures go through the production path: draft → lines → engine
+  /// post (D1-D4 forbids adding lines to a voucher created as posted).
+  /// Journal fixtures go through the production path: draft → lines → engine
+  /// post (D1-D4 forbids adding lines to a voucher created as posted).
   void createJournal(String id, String date, List<Map<String, Object>> arms,
-      {String status = 'posted'}) {
-    final Result<Voucher> h = vouchers.create(
+      {bool post = true}) {
+    final Result<PostingResult> r = seeder.postVoucher(
       id: EntityId(id),
       companyId: companyId,
       type: 'Journal',
       series: 'J',
-      no: id,
       date: NiavDate(date),
-      status: status,
-      deviceId: 'host-test',
-      opId: 'op-$id',
-      eventId: 'ev-$id',
-      actor: 'tester',
+      lines: <SeedLine>[
+        for (int i = 0; i < arms.length; i++)
+          SeedLine(
+            ledgerId: EntityId(arms[i]['ledger'] as String),
+            drCr: arms[i]['side'] as String,
+            qtyQ4: 10000,
+            ratePaise: arms[i]['amount'] as int,
+          ),
+      ],
     );
-    expect(h.isOk, isTrue);
-    int lineNo = 0;
-    for (final Map<String, Object> arm in arms) {
-      lineNo += 1;
-      final Result<VoucherLine> l = vouchers.addLine(
-        lineId: EntityId('$id-l$lineNo'),
-        voucherId: EntityId(id),
-        companyId: companyId,
-        lineNo: lineNo,
-        ledgerId: EntityId(arm['ledger'] as String),
-        drCr: arm['side'] as String,
-        qtyQ4: 10000,
-        ratePaise: arm['amount'] as int,
-        deviceId: 'host-test',
-        opId: 'op-$id-l$lineNo',
-        eventId: 'ev-$id-l$lineNo',
-        actor: 'tester',
-      );
-      expect(l.isOk, isTrue);
-    }
+    expect(r.isOk, isTrue);
   }
 
   group('day book and registers (M14.1)', () {
@@ -191,7 +179,7 @@ void main() {
       createJournal('v-draft', '2026-04-02', <Map<String, Object>>[
         {'ledger': 'l-cash', 'side': 'Dr', 'amount': 9000},
         {'ledger': 'l-cap', 'side': 'Cr', 'amount': 9000},
-      ], status: 'draft');
+      ], post: false);
 
       final List<DayBookEntry> all = books.dayBook(companyId);
       expect(

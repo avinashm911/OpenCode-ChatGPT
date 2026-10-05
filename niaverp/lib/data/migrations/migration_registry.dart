@@ -129,7 +129,15 @@ const List<Migration> kMigrations = <Migration>[
         'stock_cost_layer remaining balances with backfill (no revaluation)',
     fileName: 'm015_stock_valuation.sql',
   ),
+  Migration(
+    version: 16,
+    g0Id: 'D1',
+    description: 'Company scope on item_cost_state (backfilled from item); '
+        'stock_movement reversal self-reference and the resolved costing '
+        'method (additive, no retro revaluation)',
+    fileName: 'm016_company_scope_and_reversal.sql',
+  ),
 ];
 
 /// Highest approved schema version.
-const int kLatestVersion = 15;
+const int kLatestVersion = 16;

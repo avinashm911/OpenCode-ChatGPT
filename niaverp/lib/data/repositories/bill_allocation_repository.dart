@@ -232,6 +232,106 @@ class BillAllocationRepository {
     if (ev.isErr) throw TxFailure((ev as Err<AuditEvent>).error);
   }
 
+  /// Reverse one active allocation inside a caller-held transaction: the
+  /// status moves to `reversed` with operation + audit lineage (compensating
+  /// history — the row is never deleted), so the reversal commits atomically
+  /// with the voucher cancellation that caused it (D1). Throws [TxFailure];
+  /// the caller rolls back.
+  void reverseTx({
+    required EntityId id,
+    required CompanyId companyId,
+    required String reason,
+    required String deviceId,
+    required String opId,
+    required String eventId,
+    required String actor,
+  }) {
+    if (reason.trim().isEmpty || deviceId.isEmpty) {
+      throw TxFailure(const AppError(
+          'validation', 'reversal reason and device id are required'));
+    }
+    final List<Map<String, Object?>> rows = _db.queryArgs(
+      'SELECT allocation_id, source_voucher_line_id, '
+      'settlement_voucher_line_id, allocated_amount_paise, status, '
+      'operation_id FROM bill_allocation WHERE company_id = ? AND allocation_id = ?',
+      <Object?>[companyId.value, id.value],
+    );
+    if (rows.isEmpty) {
+      throw TxFailure(const AppError(
+          'validation', 'allocation does not exist in this company'));
+    }
+    final AllocationView target = AllocationView(
+      allocationId: rows.first['allocation_id'] as String,
+      sourceLineId: rows.first['source_voucher_line_id'] as String,
+      settlementLineId: rows.first['settlement_voucher_line_id'] as String,
+      amountPaise: rows.first['allocated_amount_paise'] as int,
+      status: rows.first['status'] as String,
+      operationId: rows.first['operation_id'] as String,
+    );
+    final List<String> guardErrors = checkReversible(target);
+    if (guardErrors.isNotEmpty) {
+      throw TxFailure(AppError('validation', guardErrors.first));
+    }
+    _db.executeArgs(
+      "UPDATE bill_allocation SET status = 'reversed' "
+      'WHERE company_id = ? AND allocation_id = ?',
+      <Object?>[companyId.value, id.value],
+    );
+    final Result<OperationRecord> op = ops.append(
+      opId: opId,
+      companyId: companyId.value,
+      deviceId: deviceId,
+      entity: 'bill_allocation',
+      entityId: id.value,
+      action: 'reverse',
+      payloadHash: auditPayloadHash(<String, Object?>{
+        'allocation_id': id.value,
+        'status': 'reversed',
+        'reason': reason.trim(),
+      }),
+    );
+    if (op.isErr) throw TxFailure((op as Err<OperationRecord>).error);
+    final Result<AuditEvent> ev = audit.append(
+      eventId: eventId,
+      companyId: companyId.value,
+      entity: 'bill_allocation',
+      entityId: id.value,
+      newRow: <String, Object?>{
+        'status': 'reversed',
+        'reason': reason.trim(),
+      },
+      actor: actor,
+    );
+    if (ev.isErr) throw TxFailure((ev as Err<AuditEvent>).error);
+    // The status move, its operation row and its audit event share the
+    // caller's transaction, so a later failure rolls the reversal back.
+  }
+
+  /// Active allocations whose SOURCE line belongs to the voucher [voucherId].
+  /// Used by the cancelling engine to release everything this voucher settled.
+  List<AllocationView> activeForVoucher(CompanyId companyId, EntityId voucherId) {
+    final List<Map<String, Object?>> rows = _db.queryArgs(
+      'SELECT a.allocation_id, a.source_voucher_line_id, '
+      'a.settlement_voucher_line_id, a.allocated_amount_paise, a.status, '
+      'a.operation_id FROM bill_allocation a '
+      'JOIN voucher_line l ON l.voucher_line_id = a.source_voucher_line_id '
+      'WHERE a.company_id = ? AND l.voucher_id = ? AND a.status = ? '
+      'ORDER BY a.created_at, a.allocation_id',
+      <Object?>[companyId.value, voucherId.value, 'active'],
+    );
+    return <AllocationView>[
+      for (final Map<String, Object?> r in rows)
+        AllocationView(
+          allocationId: r['allocation_id'] as String,
+          sourceLineId: r['source_voucher_line_id'] as String,
+          settlementLineId: r['settlement_voucher_line_id'] as String,
+          amountPaise: r['allocated_amount_paise'] as int,
+          status: r['status'] as String,
+          operationId: r['operation_id'] as String,
+        ),
+    ];
+  }
+
   /// Reverse one active allocation, releasing its amount back to open
   /// (compensating history — the row is never deleted).
   Result<void> reverse({
