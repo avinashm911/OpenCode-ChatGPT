@@ -1,0 +1,26 @@
+# Backups
+.niav_linker_backups/
+niav_*_backups_*/
+*_backups_*/
+*.bak.html
+*.bak
+
+# Outputs
+outputs/
+
+# Flutter / Dart
+niaverp/.dart_tool/
+niaverp/build/
+niaverp/.flutter-plugins
+niaverp/.flutter-plugins-dependencies
+.dart_tool/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
