@@ -17,6 +17,7 @@ void main() {
       expect(parseQuantityQ4('0'), -1);
       expect(parseQuantityQ4('-2'), -1);
       expect(parseQuantityQ4('many'), -1);
+      expect(parseQuantityQ4('1.12345'), -1); // >4 decimals rejected
     });
 
     test('rupees scale to paise, empty is zero, invalid yields -1', () {
@@ -27,6 +28,8 @@ void main() {
       expect(parsePaise('0'), 0);
       expect(parsePaise('-1'), -1);
       expect(parsePaise('lots'), -1);
+      expect(parsePaise('9.999'), -1); // >2 decimals rejected
+      expect(parsePaise('10.1'), 1010);
     });
 
     test('percents scale to basis points with 0..100 guard', () {
