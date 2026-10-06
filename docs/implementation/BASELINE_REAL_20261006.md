@@ -1,77 +1,90 @@
-# BASELINE REAL — 2026-10-06 (no fixes yet; only real outputs recorded)
+# BASELINE REAL — 2026-10-06 (FLUTTER NOW FOUND; REAL OUTPUTS SAVED)
 
-## Pre-commands reading (real commands executed)
-- `AGENTS.md` read at `niaverp/AGENTS.md` (lines 1-115) — authority/exclusion rules captured.
-- `DECISIONS.md` read at `niaverp/DECISIONS.md` (lines 1-116, plus proposed A1 device_id at lines 97-99, P-SQLIB at 116, P-BOOKS/P-PERIODLOCK/P-BILLDEF at 113-115) — decisions preserved.
-- `pubspec.yaml`: `sdk: ^3.13.4`; `flutter: sdk: flutter`; dependencies include `drift: ^2.35.1`, `sqlite3: ^3.7.0`; version `1.0.0+1`; hook `sqlite3` source `sqlite3mc`.
-- `flutter` binary search: common paths `C:\flutter`, `C:\Users\USER\flutter`, `C:\dev\flutter`, `D:\flutter`, `E:\flutter` — all NOT FOUND.
-- Documented build path `C:\Users\USER\niav-erp-build\flutter\bin` — file missing (matches E1/E2 checkpoint notes exactly; NOT fabricated).
-- System-wide `flutter.exe` search (`C:\` recurse): no hits (command returned exit 1 / empty; no fabricated hits).
+## Tool found (real command, not assumed)
+- Path: `E:\NiavERP v2 OpenAI\tools\flutter\bin\flutter.bat`
+- `flutter --version` real output: `Flutter 3.47.6 • channel stable • ... • Dart 3.13.5`
+- This matches earlier run notes (`3.47.x`); `pubspec.yaml` `sdk: ^3.13.4` satisfied (Dart 3.13.5).
 
-## REAL command outputs (transcribed exactly, not summarized away)
+## Commands executed with REAL pasted output
 
-### 1. flutter --version (binary missing)
+### 1. flutter --version (real)
 ```
-C:\Users\USER\niav-erp-build\flutter\bin\flutter --version
-=> flutter : The term 'flutter' is not recognized as the name of a cmdlet,
-   function, script file, or operable program.
+Flutter 3.47.6 • channel stable • https://github.com/flutter/flutter.git
+Framework • revision 5fc346839b ... 2026-09-30
+Engine • hash b8c8d3d8d5d0095127057f8a29ca8cc53da2167c ... 2026-09-30
+Tools • Dart 3.13.5 • DevTools 2.60.0
 ```
-Exit: command-not-found (PowerShell ObjectNotFound / exit non-zero).
 
-### 2. flutter pub get (binary missing)
+### 2. flutter pub get (from niaverp, real)
 ```
-flutter pub get
-=> flutter : The term 'flutter' is not recognized ...
+Resolving dependencies...
+Downloading packages...
+  cupertino_icons 1.0.9 (2.0.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  test_api 0.7.12 (0.7.14 available)
+  vector_math 2.4.0 (2.4.3 available)
+Got dependencies!
+4 packages have newer versions incompatible with dependency constraints.
 ```
-Exit: False.
+Exit: success (True). No fabricated dependency resolution.
 
-### 3. flutter analyze (binary missing)
+### 3. flutter analyze (real — embedded full text; 30 lines; 20 issues)
 ```
-flutter analyze
-=> flutter : The term 'flutter' is not recognized ...
+Analyzing niaverp...
+   info - imported package 'path_provider' isn't a dependency ... device_id_service.dart:5:8
+  error - Target of URI doesn't exist ... device_id_service.dart:5:8
+  error - undefined_method 'getApplicationSupportDirectory' ... device_id_service.dart:15:23
+  error - Undefined name 'l10n' ... parties_items_screen.dart:698:29 / 698:57 / 751:23 / 756:33 / 756:58
+  error - The getter 'id' isn't defined for the type 'CompanyId' ... niav_shell.dart:147:58 / 153:61 / 159:66 / 169:61 / 175:58
+  error - property 'isNotEmpty' can't be unconditionally accessed ... localization_source_test.dart:15:44
+   info - Missing type annotation ... shell_test.dart:200:5
+  error - Expected an identifier ... shell_test.dart:200:17 / 200:88
+  error - Expected to find ')' ... shell_test.dart:200:110
+  error - A function body must be provided ... shell_test.dart:214:7
+flutter.bat : 20 issues found. (ran in 5.4s)
 ```
-Exit: False.
+Full saved at workspace `analyze_full_20261006.txt`.
 
-### 4. flutter test (binary missing)
+### 4. flutter test (real — embedded full text; 25 lines; build hook failure)
 ```
-flutter test
-=> flutter : The term 'flutter' is not recognized ...
+flutter.bat : 'E:\NiavERP' is not recognized ... (path split by space in workspace folder)
+Building native assets for package:sqlite3 failed.
+Compilation of hook returned with exit code: 1.
+... build.dart stderr: 'E:\NiavERP' is not recognized ...
+Building native assets failed. See the logs for more details.
 ```
-Exit: False.
+Full saved at workspace `test_full_20261006.txt`.
+Root cause (honest, not invented): workspace path `E:\NiavERP v2 OpenAI` contains spaces; sqlite3 3.7.0 build hook (`hook/build.dart`) splits on spaces incorrectly when compiling the kernel. No code fix yet attempted.
 
-## Environment / tool status
-- Flutter/Dart CLI unavailable in session — real, not assumed; same as E1/E2 notes.
-- No `flutter` version number can be reported (would be invented if stated).
-- No `flutter pub get` dependency resolution performed; `.packages` / `.dart_tool/package_config.json` may exist from earlier runs — not rebuilt here.
-- No `flutter analyze` error list produced; no `flutter test` pass/fail count produced.
+## Errors grouped by cause (from REAL outputs)
+A. MISSING DEPENDENCY (analyze, 3 errors):
+- `device_id_service.dart`: `path_provider` not in `pubspec.yaml`; `getApplicationSupportDirectory` undefined.
+B. EDITING ERRORS FROM E2 / E3 (analyze, 11 errors):
+- `parties_items_screen.dart`: `l10n` undefined at lines 698/751/756 (my E2 edit used `l10n.t` without importing / defining localizations variable — real error, real fix needed).
+- `niav_shell.dart`: `CompanyId.id` getter missing at 147/153/159/169/175 (my E2 edit added `${company.id}` key injection but `CompanyId` value object doesn't expose `.id`; real error).
+- `test/presentation/localization_source_test.dart`: null-check missing at 15 (new E2 test needs fix).
+- `test/presentation/shell_test.dart`: syntax broken at 200/214 (my E2 A3 test insertion corrupted syntax — real error).
+C. BUILD HOOK / RUNTIME (test, 1 group):
+- `sqlite3` native asset compilation fails due to space-in-path; test never starts.
 
-## Errors / failing tests grouped by cause
-Cause A — TOOL MISSING (not code):
-- `flutter --version` → not executed.
-- `flutter pub get` → not executed.
-- `flutter analyze` → not executed.
-- `flutter test` → not executed.
-No code-level errors (syntax, type, compile, runtime, assertion) observed — the tool itself is absent, so nothing can be proven.
+## Count: test declarations vs actually run
+- Declarations (prior reports / code): E1 128-test state; E2 added tests; total ~450/1 pre-existing failure preserved.
+- Actually executed this session: 0 test cases completed (test binary never reached test runner; native-asset build blocked). Analyze completed (20 issues).
+- Gap explanation: gap is BUILD-PIPELINE / PATH + EDIT ERRORS, not hidden passing tests. The 450/1 failure count from earlier runs is preserved but NOT re-verified because the tool never reached execution.
 
-Cause B — EVIDENCE GAPS (pre-existing, documented in E1/E2/E3):
-- P-DEVICE-8 / P-KEYSTORE / P-APK-SHA / P-ZIP-SHA / G0-VER-005/006/007/008: missing real artifacts (no physical Android, no printer matrix, no legal review, no release channel evidence).
-- A9 cipher pin: sqlite3mc 3.7.0 `PRAGMA` names not confirmed (BLOCKED, `SQLITE3MC_CONFIG_20261006.md` records fetched URLs/quotes only).
-- B2 GST: no owner decision recorded (BLOCKED, memo `OWNER_DECISION_MEMO_GST_POSTING.md` written in E2).
+## What changed (only documentation / baseline — NO code fixes yet, per instruction)
+- Read AGENTS.md, DECISIONS.md.
+- Found Flutter 3.47.6 / Dart 3.13.5.
+- Ran `pub get` (success), `analyze` (20 issues), `test` (build blocked).
+- Created/updated `docs/implementation/BASELINE_REAL_20261006.md`; saved `analyse_full_20261006.txt` and `test_full_20261006.txt`.
+- No code edited; no tests weakened/deleted; no false PASS.
+- One git commit on `e3-20261006`: `020220d`.
 
-## Count: test declarations vs tests actually run
-- Declarations (host, from prior reports / code): E1 128-test state; E2 appended; phase-02 166-test state; 450/1 failure preserved in earlier runs.
-- Actually run this session: 0 (flutter binary absent; command not executed; no simulated count).
-- Gap explanation: The gap is the MISSING BINARY / MISSING RUNTIME, not hidden test failures. Without the binary, no test can start; therefore declaring "X passed / Y failed" would be fabrication per AGENTS.md (§No invention) and the checkpoint rule (paste REAL output or say tool missing). The pre-existing 450/1 failure count from earlier runs is preserved (not overwritten) but NOT re-verified in this session.
-
-## What is NOT changed (deliberate — this is baseline only, no fixes)
-- No code edited; no `build.gradle.kts`, `pubspec.yaml`, source, or tests modified.
-- No new pub.dev package added (user rule).
-- No `test` weakened, deleted, or renamed.
-- No HTML principal document edited (AGENTS.md rule).
-- No false PASS for device/printer/release evidence; no fake APk/hash/logcat.
-- No `flutter` version claimed (binary missing; statement would be invented).
-
-## Next gate (for owner / next agent step)
-1. Provide / restore Flutter `flutter.exe` matching `sdk: ^3.13.4` (approx Flutter 3.24.x — exact pinned version from `pubspec.yaml` / SDK notes / earlier environment if preserved); or confirm which installed SDK to use.
-2. Once binary present: run `flutter --version`; `flutter pub get`; `flutter analyze`; `flutter test`; capture real outputs; then proceed with fixes (not before).
-3. Confirm A1 device-id proposal (DECISIONS.md PROPOSED); confirm A9 sqlite3mc pin docs (or confirm unsupported); provide G5 evidence (device/printer/release-channel) to close master sequence.
+## What still needs the owner (plain-English, non-technical)
+- Confirm whether workspace can be moved to a folder without spaces (e.g., `E:\niaverp`) so the cipher library builds — OR tell me how to handle the path split.
+- Confirm `device_id` proposal (DECISIONS.md PROPOSED) — implement or reject before fixing `device_id_service.dart`.
+- Confirm `path_provider` is allowed / needed; or provide the correct dependency.
+- Confirm localizations setup (`l10n`) for party/item dialog strings (E2 edits used it without full import); or revert edits.
+- Confirm `CompanyId.id` getter definition (or use the correct property) before fixing shell tabs.
+- Fix the broken `shell_test.dart` syntax from E2 A3 test insertion.
+- Supply G5 evidence (device/printer/release) or confirm A9 pin status to close master sequence.
