@@ -1,0 +1,12 @@
+﻿{
+    "D-06":  {
+                 "id":  "D-06",
+                 "status":  "Closed",
+                 "decision":  "suggest recommendation",
+                 "evidence":  "",
+                 "timestamp":  "2026-10-01T14:38:05",
+                 "documents":  [
+                                   "NiAv_ Zero-Cost Strategy Plan (V1) v0.5.html"
+                               ]
+             }
+}

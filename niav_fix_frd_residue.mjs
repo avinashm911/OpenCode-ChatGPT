@@ -1,0 +1,1 @@
+import fs from 'node:fs/promises'; const f='NiAv_Functional_Requirements_Input_Data_v0.1.html'; let h=await fs.readFile(f,'utf8'); h=h.replaceAll('Adapter-per-format; Excel mapping fallback.','Excel-template mapping and reconciliation for V1; native adapters are R3 feasibility only.'); await fs.writeFile(f,h,'utf8'); console.log('fixed FRD residue');
