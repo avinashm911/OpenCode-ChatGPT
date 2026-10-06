@@ -83,6 +83,18 @@ class NiavShellState extends State<NiavShell> {
     selectedCompanyId = widget.initialCompanyId;
   }
 
+  @override
+  void didUpdateWidget(NiavShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialCompanyId != widget.initialCompanyId) {
+      setState(() {
+        selectedCompanyId = widget.initialCompanyId;
+        _built.clear();
+        _built.add(0);
+      });
+    }
+  }
+
   void selectTab(int index) {
     setState(() {
       selectedIndex = index;
@@ -91,7 +103,11 @@ class NiavShellState extends State<NiavShell> {
   }
 
   void openCompany(CompanyId id) {
-    setState(() => selectedCompanyId = id);
+    setState(() {
+      selectedCompanyId = id;
+      _built.clear();
+      _built.add(0); // reset lazy build; only selected tab stays built
+    });
   }
 
   /// Persistent, non-alarming offline marker (UX-007): V1 stores everything
@@ -128,19 +144,19 @@ class NiavShellState extends State<NiavShell> {
     switch (d) {
       case NiavDestination.home:
         return HomeDashboardScreen(
-          key: const ValueKey<String>('tab-page-home'),
+          key: ValueKey<String>('tab-page-home-${company.id}'),
           companyId: company,
           scope: scope,
         );
       case NiavDestination.billing:
         return BillingHubScreen(
-          key: const ValueKey<String>('tab-page-billing'),
+          key: ValueKey<String>('tab-page-billing-${company.id}'),
           companyId: company,
           scope: scope,
         );
       case NiavDestination.partiesItems:
         return PartiesItemsScreen(
-          key: const ValueKey<String>('tab-page-partiesItems'),
+          key: ValueKey<String>('tab-page-partiesItems-${company.id}'),
           companyId: company,
           parties: scope.parties,
           items: scope.items,
@@ -150,13 +166,13 @@ class NiavShellState extends State<NiavShell> {
         );
       case NiavDestination.reports:
         return ReportsHubScreen(
-          key: const ValueKey<String>('tab-page-reports'),
+          key: ValueKey<String>('tab-page-reports-${company.id}'),
           companyId: company,
           scope: scope,
         );
       case NiavDestination.more:
         return MoreTabScreen(
-          key: const ValueKey<String>('tab-page-more'),
+          key: ValueKey<String>('tab-page-more-${company.id}'),
           companyId: company,
           scope: scope,
           language:

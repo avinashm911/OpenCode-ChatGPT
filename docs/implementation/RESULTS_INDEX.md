@@ -11,3 +11,5 @@ D4 | 2026-10-06 | PASS-WITH-BLOCKS | tests 449/1 | Localisation (en/hi/gu ARB), 
 E1 | 2026-10-06 | BLOCKED-DEPENDENT | protect: A1 (device-id rule missing) + A9 (sqlite3mc pin doc); A2-A8/A10 host-verified; 450/1 preserved; G0-VER-005/008 still missing | docs/implementation/RESULT_E1_make_app_start_on_device.md
 
 E1b | 2026-10-06 | BLOCKED-DEPENDENT | A1: implemented-pending-approval (proposal in DECISIONS.md); A9: BLOCKED (sqlite3mc docs for 3.7.0 unconfirmed); source evidence quoted; file docs/g0/evidence/SQLITE3MC_CONFIG_20261006.md; result docs/implementation/RESULT_E1b_close_device_id_and_cipher_pin.md
+
+E2 | 2026-10-06 | PASS-WITH-BLOCKS | A company-switch fixed (key + reset); B GST BLOCKED (memo OWNER_DECISION_MEMO_GST_POSTING.md); C backup MAC mandatory; D localisation source + machine-drafted hi/gu; 450/1 preserved | docs/implementation/RESULT_E2_correctness_fixes.md

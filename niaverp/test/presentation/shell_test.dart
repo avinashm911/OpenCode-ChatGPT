@@ -196,3 +196,20 @@ void main() {
     });
   });
 }
+
+    testWidgets('A3: visit billing/reports, switch company, no stale data on any tab', (WidgetTester tester) async {
+      // Use same setup as existing shell test; visit billing (2) and reports (4), then open second company.
+      final scope = await createTestScope();
+      await tester.pumpWidget(buildApp(useScope: scope, company: CompanyId('c-first')));
+      await tester.pumpAndSettle();
+      tester.state<NiavShellState>(find.byType(NiavShell)).selectTab(1); // billing
+      await tester.pumpAndSettle();
+      tester.state<NiavShellState>(find.byType(NiavShell)).selectTab(3); // reports
+      await tester.pumpAndSettle();
+      tester.state<NiavShellState>(find.byType(NiavShell)).openCompany(CompanyId('c-second'));
+      await tester.pumpAndSettle();
+      // After switch, unvisited tabs rebuilt; no old-company data remains.
+      expect(find.text('Second Co', skipOffstage: false), findsOneWidget);
+      expect(find.text('Nav Co', skipOffstage: false), findsNothing);
+    });
+

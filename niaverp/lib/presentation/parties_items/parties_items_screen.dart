@@ -695,7 +695,7 @@ class _ItemFormDialogState extends State<_ItemFormDialog> {
   Widget build(BuildContext context) {
     final bool editing = widget.existing != null;
     return AlertDialog(
-      title: Text(editing ? 'Edit item' : 'Add item'),
+      title: Text(editing ? l10n.t('piEditItemTitle') : l10n.t('piAddItemTitle')),
       content: SingleChildScrollView(
         child: Form(
           key: _form,
@@ -748,12 +748,12 @@ class _ItemFormDialogState extends State<_ItemFormDialog> {
       actions: <Widget>[
         TextButton(
           onPressed: _saving ? null : () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(l10n.t('commonCancel')),
         ),
         FilledButton(
           key: const ValueKey<String>('item-save-button'),
           onPressed: _saving ? null : _save,
-          child: Text(_saving ? 'Saving…' : 'Save'),
+          child: Text(_saving ? l10n.t('commonSaving') : l10n.t('commonSave')),
         ),
       ],
     );

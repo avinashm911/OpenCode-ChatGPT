@@ -176,10 +176,12 @@ List<String> checkRestorable({
     errors.add('backup company ${manifest.companyId} does not match live '
         'company $liveCompanyId: restore refused (no silent overwrite)');
   }
-  if (macKey != null &&
-      manifest.macHex != null &&
-      !verifyManifestMac(manifest: manifest, macKey: macKey)) {
-    errors.add('manifest authentication failed: backup is tampered or replayed');
+  if (macKey != null) {
+    if (manifest.macHex == null) {
+      errors.add('manifest MAC missing: backup requires authentication');
+    } else if (!verifyManifestMac(manifest: manifest, macKey: macKey)) {
+      errors.add('manifest authentication failed: backup is tampered or replayed');
+    }
   }
   return errors;
 }
