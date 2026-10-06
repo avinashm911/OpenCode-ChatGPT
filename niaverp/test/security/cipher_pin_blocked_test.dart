@@ -4,15 +4,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('A9 cipher pin BLOCKED: no invented pragma emitted', () {
-    // BLOCKED — docs unconfirmed. No `PRAGMA cipher_...` / `cipher_key` call
-    // is made until sqlite3mc docs confirm the exact pragma names.
-    expect(true, isTrue); // placeholder: BLOCKED, not FAIL
-  });
+  test('A9 cipher pin BLOCKED: no invented pragma emitted', () {}, skip: 'BLOCKED — sqlite3mc docs unconfirmed (P-SQLIB / P-DEVICE-8)');
 
-  test('A9 wrong-key fails at open time', () {
-    // The open-time failure behavior (not deferred) is preserved by design;
-    // test verifies through existing cipher_opener tests; no new false PASS.
-    expect(true, isTrue);
-  });
+  test('A9 wrong-key fails at open time', () {}, skip: 'Verified by cipher_opener tests; BLOCKED until sqlite3mc docs confirm pin order');
 }
