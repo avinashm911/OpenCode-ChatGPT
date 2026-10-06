@@ -39,6 +39,7 @@ dependencies:
   crypto: ^3.0.7
   drift: ^2.35.1
   sqlite3: ^3.7.0
+  path_provider: ^2.1.6
 
 # Encryption source for package:sqlite3 build hooks (P-SQLIB, owner-approved
 # 2026-10-05): bundle SQLite3MultipleCiphers on all native targets, including
