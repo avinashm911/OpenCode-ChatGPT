@@ -144,19 +144,19 @@ class NiavShellState extends State<NiavShell> {
     switch (d) {
       case NiavDestination.home:
         return HomeDashboardScreen(
-          key: ValueKey<String>('tab-page-home-${company.id}'),
+          key: ValueKey<String>('tab-page-home-${company.value}'),
           companyId: company,
           scope: scope,
         );
       case NiavDestination.billing:
         return BillingHubScreen(
-          key: ValueKey<String>('tab-page-billing-${company.id}'),
+          key: ValueKey<String>('tab-page-billing-${company.value}'),
           companyId: company,
           scope: scope,
         );
       case NiavDestination.partiesItems:
         return PartiesItemsScreen(
-          key: ValueKey<String>('tab-page-partiesItems-${company.id}'),
+          key: ValueKey<String>('tab-page-partiesItems-${company.value}'),
           companyId: company,
           parties: scope.parties,
           items: scope.items,
@@ -166,13 +166,13 @@ class NiavShellState extends State<NiavShell> {
         );
       case NiavDestination.reports:
         return ReportsHubScreen(
-          key: ValueKey<String>('tab-page-reports-${company.id}'),
+          key: ValueKey<String>('tab-page-reports-${company.value}'),
           companyId: company,
           scope: scope,
         );
       case NiavDestination.more:
         return MoreTabScreen(
-          key: ValueKey<String>('tab-page-more-${company.id}'),
+          key: ValueKey<String>('tab-page-more-${company.value}'),
           companyId: company,
           scope: scope,
           language:
