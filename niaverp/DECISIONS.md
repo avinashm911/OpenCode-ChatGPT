@@ -94,6 +94,10 @@ claim.
 - any field, rule or workflow marked TBC in the principal documents;
 - exact licence key issuance/cryptographic format and payment integration.
 
+## Proposed (needs owner approval) — recorded 2026-10-06
+
+- device_id (A1 / E1b): source evidence = Sync Protocol Specification (device_id UUID, "Originating trusted device"), Data Schema (`device` table `device_id PK`), O-FG-009 (`device_id` with `seq`); no document defines a hardware/advertising identifier. Proposal (NOT approved): device_id = UUIDv7 generated once at first launch, persisted in app-private storage (`app_data/device_id.uuid`); never a hardware or advertising ID; never changed on restore without explicit re-pair flow. Implementation behind proposal completed; owner approval required before marking PASS.
+
 ## Change rule
 
 If a new decision is supplied, append a dated row with source ID, exact value,

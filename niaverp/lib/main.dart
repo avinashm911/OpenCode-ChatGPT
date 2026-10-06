@@ -20,6 +20,7 @@ import 'package:niaverp/app/niav_app.dart';
 import 'package:niaverp/app/startup.dart';
 import 'package:niaverp/core/clock.dart';
 import 'package:niaverp/data/db/key_provider.dart';
+import 'package:niaverp/data/security/device_id_service.dart';
 
 /// Database file inside the app-private sandbox (never a shared location).
 const String kDatabaseFileName = 'niaverp.db';
@@ -32,19 +33,17 @@ Future<void> main() async {
   // Sandbox path: the platform owns it (app-private files directory). If the
   // channel cannot answer, startup fails honestly instead of opening anything.
   String filesDir = '';
-  String deviceId = '';
   try {
     filesDir = await channel.invokeMethod<String>('getFilesDirectory') ?? '';
-    deviceId = await channel.invokeMethod<String>('getDeviceId') ?? '';
   } on PlatformException {
     filesDir = '';
   } on MissingPluginException {
     filesDir = '';
   }
 
+  final deviceId = await DeviceIdService().getOrCreate();
   final StartupOutcome outcome;
-  if (filesDir.isEmpty || deviceId.isEmpty) {
-    // No sandbox, no device identity: refuse to guess either one.
+  if (filesDir.isEmpty) {
     outcome = const StartupOutcome.databaseFailure(
         StartupCode.databaseUnavailable);
   } else {
