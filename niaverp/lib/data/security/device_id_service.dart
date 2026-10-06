@@ -22,10 +22,17 @@ class DeviceIdService {
           return _cached!;
         }
       }
-    } catch (_) { /* corrupt — fall through to visible state */ }
+    } catch (e) {
+      // Corrupt file: visible error, never silent regeneration.
+      throw StateError('device_id file corrupt or unreadable: $e');
+    }
     // First launch (or corrupt): create.
     final id = _gen.next();
-    try { await file.writeAsString(id); } catch (_) {}
+    try {
+      await file.writeAsString(id);
+    } catch (e) {
+      throw StateError('device_id write failed: $e');
+    }
     _cached = id;
     return id;
   }
