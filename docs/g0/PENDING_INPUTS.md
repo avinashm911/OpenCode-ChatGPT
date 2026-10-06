@@ -105,3 +105,9 @@ DECISIONS.md P-SQLIB). The Â§A P-SQLIB row still reads as an open question, so
 it stays `PENDING-INPUT` until the owner confirms this approval and the
 remaining G0-VER-001 evidence (native cipher licence text from the bundled
 asset manifest + Android 8 compatibility proof on device) is attached.
+
+## G. E3 note (2026-10-06, addition only — no row status changed) 
+- CI workflow .github/workflows/build.yml created (template); no real build/APK/hash/logcat/emulator evidence captured from this session (no CI runner / AVD available). 
+- AVD evidence labelled AVD (not physical device) — P-DEVICE-8 / P-DEVICE-CUR / P-KEYSTORE remain open; P-APK-SHA / P-ZIP-SHA / P-CH-* remain open. 
+- Cipher bundled library (sqlite3mc.dll) present; embedded licence text not extractable on host; CIPHER_LIB_LICENSE_20261006.md records partial evidence. 
+- G0 is not unconditionally closed.

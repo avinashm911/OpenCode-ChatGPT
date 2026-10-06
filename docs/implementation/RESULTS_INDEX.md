@@ -13,3 +13,5 @@ E1 | 2026-10-06 | BLOCKED-DEPENDENT | protect: A1 (device-id rule missing) + A9 
 E1b | 2026-10-06 | BLOCKED-DEPENDENT | A1: implemented-pending-approval (proposal in DECISIONS.md); A9: BLOCKED (sqlite3mc docs for 3.7.0 unconfirmed); source evidence quoted; file docs/g0/evidence/SQLITE3MC_CONFIG_20261006.md; result docs/implementation/RESULT_E1b_close_device_id_and_cipher_pin.md
 
 E2 | 2026-10-06 | PASS-WITH-BLOCKS | A company-switch fixed (key + reset); B GST BLOCKED (memo OWNER_DECISION_MEMO_GST_POSTING.md); C backup MAC mandatory; D localisation source + machine-drafted hi/gu; 450/1 preserved | docs/implementation/RESULT_E2_correctness_fixes.md
+
+E3 | 2026-10-06 | PASS-WITH-BLOCKS | A build config/pins done (A1 kept, A2 file-exists check, A3 CI doc); B CI template (.github/workflows/build.yml + CI_DEPENDENCIES.md); C evidence PENDING-INPUT (EMULATOR_API26_RUN_20261006 template + CIPHER_LIB_LICENSE partial); D not executed; 450/1 preserved | docs/implementation/RESULT_E3_ci_build_and_android8_proof.md

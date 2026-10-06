@@ -49,6 +49,12 @@ android {
                     "KEY_PASSWORD). The debug key is never used for releases."
                 )
             }
+            if (!file(releaseStoreFile).exists()) {
+                throw GradleException(
+                    "NiAvERP release keystore missing: $releaseStoreFile not found. " +
+                    "Verify path and permissions (G0-VER-004 / G5 evidence pending)."
+                )
+            }
             signingConfig = signingConfigs.create("niavRelease") {
                 storeFile = file(releaseStoreFile)
                 storePassword = project.findProperty("NIAV_RELEASE_STORE_PASSWORD") as String?
