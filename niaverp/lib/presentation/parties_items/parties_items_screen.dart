@@ -693,6 +693,7 @@ class _ItemFormDialogState extends State<_ItemFormDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final bool editing = widget.existing != null;
     return AlertDialog(
       title: Text(editing ? l10n.t('piEditItemTitle') : l10n.t('piAddItemTitle')),
