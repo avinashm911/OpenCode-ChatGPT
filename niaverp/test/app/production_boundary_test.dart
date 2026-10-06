@@ -22,7 +22,7 @@ void main() {
       expect(migrationAssetPath(kMigrations.first),
           'lib/data/migrations/m001_base.sql');
       expect(migrationAssetPath(kMigrations.last),
-          'lib/data/migrations/m015_stock_valuation.sql');
+          'lib/data/migrations/m016_company_scope_and_reversal.sql');
     });
 
     test('loads every version; empty text throws', () async {
@@ -31,7 +31,7 @@ void main() {
         chain: kMigrations,
       );
       expect(sql.keys.toSet(), hasLength(kMigrations.length));
-      expect(sql[kLatestVersion], contains('m015_stock_valuation.sql'));
+      expect(sql[kLatestVersion], contains('m016_company_scope_and_reversal.sql'));
       expect(
         () => loadMigrationSqlAssets(
           loadString: (String path) async => '   ',
@@ -43,6 +43,27 @@ void main() {
   });
 
   group('backend bundle', () {
+    test('bootstrap failure closes the database (D1-B4)', () {
+      final NiavDatabase db = openTestDatabase();
+      // Poison the version ledger past the app: bootstrap must refuse
+      // (G0-CON-003, no in-place downgrade) and release the handle.
+      db.executeArgs(
+        'INSERT INTO schema_migrations (version, description, applied_at) '
+        'VALUES (?, ?, ?)',
+        <Object?>[kLatestVersion + 1000, 'future', 1700000000000],
+      );
+      expect(
+        () => CompositionRoot.backend(
+          engine: db,
+          sqlByVersion: loadMigrationSql(),
+          clock: testClock(),
+        ),
+        throwsStateError,
+      );
+      expect(db.isClosed, isTrue);
+      expect(() => db.schemaVersion, throwsStateError);
+    });
+
     test('bootstraps latest schema and wires a working company path', () {
       final NiavDatabase db = openTestDatabase();
       try {

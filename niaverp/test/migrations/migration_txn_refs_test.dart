@@ -76,7 +76,7 @@ void main() {
       v10.sqlByVersion = loadMigrationSql();
       v10.bootstrap();
       addTearDown(() => rawEngineOf(v10).close());
-      expect(v10.schemaVersion, 15);
+      expect(v10.schemaVersion, 16); // registry ends at v16 (m016, D1-D5);
       final List<Map<String, Object?>> rows = v10.queryArgs(
         'SELECT narration, actor FROM voucher WHERE voucher_id = ?',
         <Object?>['v-u'],
@@ -87,7 +87,7 @@ void main() {
           NiavDatabase(rawEngineOf(v10), clock: testClock());
       again.sqlByVersion = loadMigrationSql();
       again.bootstrap();
-      expect(again.schemaVersion, 15);
+      expect(again.schemaVersion, 16); // registry ends at v16 (m016, D1-D5);
     });
 
     test('party/godown FKs reject dangling references', () {      db = openTestDatabase();
@@ -137,7 +137,7 @@ void main() {
     test('financial_year table and dr_cr check exist at v11', () {
       db = openTestDatabase();
       addTearDown(() => rawEngineOf(db).close());
-      expect(db.schemaVersion, 15);
+      expect(db.schemaVersion, 16); // registry ends at v16 (m016, D1-D5);
       final List<Map<String, Object?>> tables = db.query(
         "SELECT name FROM sqlite_master WHERE type = 'table' "
         "AND name = 'financial_year'",
@@ -158,7 +158,7 @@ void main() {
       v11.sqlByVersion = loadMigrationSql();
       v11.bootstrap();
       addTearDown(() => rawEngineOf(v11).close());
-      expect(v11.schemaVersion, 15);
+      expect(v11.schemaVersion, 16); // registry ends at v16 (m016, D1-D5);
       expect(
         v11.queryArgs(
           'SELECT name FROM company WHERE company_id = ?',
@@ -221,7 +221,7 @@ void main() {
           NiavDatabase(rawEngineOf(v11), clock: testClock());
       again.sqlByVersion = loadMigrationSql();
       again.bootstrap();
-      expect(again.schemaVersion, 15);
+      expect(again.schemaVersion, 16); // registry ends at v16 (m016, D1-D5);
     });
   });
 }

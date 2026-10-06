@@ -1,8 +1,10 @@
 // Prompt-05 tests: held-bill queue and counter transitions (FR-M11-003).
 // Disposable in-memory databases only. Proves: held vouchers persist with
 // lines without creating accounting/stock effects, the Held →
-// Resumed/Cancelled/Posted moves carry lineage, terminal states and unknown
-// targets are rejected, and the queue stays company-scoped.
+// Resumed/Cancelled moves carry lineage, `posted` is refused here (D1-D2:
+// posting goes only through the voucher engine) with the voucher left
+// unchanged, terminal states and unknown targets are rejected, and the queue
+// stays company-scoped.
 // Traceability: FR-M11-003 (held data must not affect accounting/stock
 // until posting); DSS-C-001 (scope); OD-DB-004 (lineage).
 
@@ -125,8 +127,8 @@ void main() {
       expect(audit.forEntity('c-h', 'voucher', 'h-1'), isNotEmpty);
     });
 
-    test('held moves to resumed/cancelled/posted with lineage', () {
-      for (final String target in <String>['resumed', 'cancelled', 'posted']) {
+    test('held moves to resumed/cancelled with lineage', () {
+      for (final String target in <String>['resumed', 'cancelled']) {
         final String id = 'h-$target';
         expect(holdBill(id, 'c-h').isOk, isTrue);
         final int opsBefore = ops.forEntity('c-h', 'voucher', id).length;
@@ -142,9 +144,29 @@ void main() {
       }
     });
 
+    test('posted is refused here; the voucher is left unchanged', () {
+      // D1-D2: posting goes only through the voucher engine (validation,
+      // period lock, stock effects and allocations in one transaction), so
+      // the held-bill queue can never produce a posted voucher directly.
+      // That engine path is proven by voucher_engine_test.dart
+      // ('only draft/resumed post', held → resumed → post).
+      expect(holdBill('h-p', 'c-h').isOk, isTrue);
+      final int opsBefore = ops.forEntity('c-h', 'voucher', 'h-p').length;
+      final Result<Voucher> r = moveBill('h-p', 'c-h', 'posted', 'm-posted');
+      expect(r.isErr, isTrue);
+      expect((r as Err<Voucher>).error.code, 'validation');
+      expect(vouchers.get(CompanyId('c-h'), EntityId('h-p'))?.voucher.status,
+          'held');
+      expect(ops.forEntity('c-h', 'voucher', 'h-p').length, opsBefore);
+      expect(
+        vouchers.heldBills(CompanyId('c-h')).map((Voucher v) => v.no),
+        contains('h-p'),
+      );
+    });
+
     test('terminal and non-held states reject further moves', () {
       expect(holdBill('h-t', 'c-h').isOk, isTrue);
-      expect(moveBill('h-t', 'c-h', 'posted', 'm1').isOk, isTrue);
+      expect(moveBill('h-t', 'c-h', 'resumed', 'm1').isOk, isTrue);
       final Result<Voucher> again = moveBill('h-t', 'c-h', 'cancelled', 'm2');
       expect(again.isErr, isTrue);
       expect((again as Err<Voucher>).error.code, 'validation');

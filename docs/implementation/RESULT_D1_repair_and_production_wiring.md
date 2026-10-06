@@ -1,191 +1,162 @@
 # RESULT D1 — Repair engine invariants and wire the production backend
-Date (UTC): 2026-10-06   Overall status: FAIL
-Re-verified same date on prompt re-issue: baseline identical (HEAD 6f2051a,
-analyze 5 issues, test +331 -40). No source, test, or doc edits made in either run.
+Date (UTC): 2026-10-06   Overall status: PASS
 
 ## 1. Baseline before changes
 
-- `flutter analyze` (from `E:\NiavERP v2 OpenAI\niaverp`, via
-  `C:\Users\USER\.openclaw-autoclaw\agents\auto-designer\workspace\.cluster\tools\flutter\bin\cache\dart-sdk\bin\dart.exe
-  ..\bin\cache\flutter_tools.snapshot analyze` because `flutter.bat` is absent
-  from this SDK copy): **5 issues found — 1 warning + 4 errors, NOT clean.**
-  All 5 are in `test/application/books_test.dart`:
-  - `warning test/application/books_test.dart:31:26 unused_local_variable 'vouchers'`
-  - `error test/application/books_test.dart:150:18 'PostingResult' isn't a type`
-  - `error test/application/books_test.dart:150:37 Undefined name 'seeder'`
-  - `error test/application/books_test.dart:156:15 'SeedLine' isn't a type`
-  - `error test/application/books_test.dart:158:11 Method not found: 'SeedLine'`
-- `flutter test` (same invocation, `--reporter expanded` for the failure list):
-  **331 passed / 40 failed** (`+331 -40`; prompt expected ~360 passed with 0 failed).
-  Failing tests (40, unique `[E]` lines):
-  - `test/app/production_boundary_test.dart`: migration assets paths mirror the
-    registry chain; loads every version / empty text throws (2)
-  - `test/application/books_test.dart`: file fails to compile (see analyze errors) (1)
-  - `test/application/ledger_books_test.dart`: openings sign balances; posted lines (1)
-  - `test/application/settlement_report_test.dart`: 8 tests (outstanding bills x2,
-    party outstanding + aging x2, advances, settlement history, line balances x2)
-  - `test/application/voucher_engine_test.dart`: only draft/resumed post (1)
-  - `test/data/repositories/held_bill_test.dart`: held moves incl. posted; terminal
-    states reject (2)
-  - `test/data/repositories/voucher_repository_test.dart`: line on missing voucher
-    atomicity; failure codes (2)
-  - `test/migrations/migration_bank_test.dart` (2), `migration_ledgers_test.dart` (2),
-    `migration_series_mode_test.dart` (2), `migration_test.dart` registry 1..15 +
-    clean install to v15 (2), `migration_txn_refs_test.dart` (3),
-    `migration_valuation_test.dart` (2)
-  - `test/presentation/books_report_test.dart` (5), `hub_screens_test.dart` (4),
-    `outstanding_report_test.dart` (1)
-  - Representative causes sampled: `migration_test.dart` registry expects
-    `[1..15]`, actual `[1..16]` (tree already contains `m016`, tests not updated);
-    `held_bill_test.dart` expects `updateHeldStatus` to reach `posted`, tree
-    implementation refuses it (D1-D2 direction) so the old test fails; `books_test.dart`
-    references `seeder`/`SeedLine`/`PostingResult` with no import/definition.
-  - Interpretation: the working tree already contains partial D1-shaped
-    implementation (m016, engine cancel/reversal, `updateHeldStatus` refusal,
-    startup/key-provider/cipher/uuid files) whose tests were not updated, plus at
-    least one broken test helper import. Baseline is red for pre-existing reasons.
-- Per the D1 stop rule ("If they do not pass, stop and write the results file with
-  Overall status FAIL"), **no code was edited and no work item was executed.**
-- git HEAD: `6f2051a` (short). Working tree has pre-existing untracked files only;
-  no tracked-file modifications were made by this run.
-- Environment: Windows, Flutter SDK 3.47.6 / Dart 3.13.5 copy at
-  `C:\Users\USER\.openclaw-autoclaw\agents\auto-designer\workspace\.cluster\tools\flutter`
-  (no `flutter.bat`; invoked via `dart.exe flutter_tools.snapshot`). No-space
-  alias workaround was not needed.
-- Mandatory reads done: `niaverp/AGENTS.md`, `niaverp/DECISIONS.md`,
+- D0 triage report `docs/implementation/RESULT_D0_baseline_triage.md` exists
+  with Overall status PASS (verified; its inventory table drove this run).
+- `flutter analyze` before editing (same SDK invocation as D0: Flutter 3.47.6 /
+  Dart 3.13.5 via `dart.exe flutter_tools.snapshot`): **No issues found**.
+- `flutter test` before editing: **374 passed / 0 failed** (`+374`).
+- git: branch `baseline-triage-20261006`, HEAD `e93944a` (D0 safety commit) plus
+  uncommitted D0 test repairs; no other changes. No-space alias not needed.
+- Mandatory reads: `niaverp/AGENTS.md`, `niaverp/DECISIONS.md`,
   `docs/IMPLEMENTATION_EXECUTION_STRATEGY.md`,
   `docs/opencode_master_prompts/GLOBAL_NO_INVENTION_CONTRACT.md`,
   `docs/opencode_master_prompts/SOURCE_CLARIFICATIONS.md`,
-  `docs/g0/PENDING_INPUTS.md` (2026-10-03; P-SQLIB row still phrases the library
-  question as pending — not edited), `docs/opencode_master_prompts/Delta/README.md`
-  (results template source), `docs/opencode_master_prompts/delta/D1_repair_and_production_wiring.md`
-  (prompt text present, not executed beyond the baseline gate).
-- `docs/implementation/` contents: only `TEST_RUN_20261005.md` exists.
-  **Missing phase reports (stated, not invented):** `phase-00.md`, `phase-01.md`,
-  `phase-02.md` referenced by `AGENTS.md` continuation rule are absent, as are all
-  prior `RESULT_D*.md` files and `RESULTS_INDEX.md` (created here with the single
-  D1 line only).
+  `docs/g0/PENDING_INPUTS.md`, every file in `docs/implementation/`
+  (`TEST_RUN_20261005.md`, `RESULT_D1_repair_and_production_wiring.md` (prior
+  FAIL, overwritten by this file), `RESULTS_INDEX.md`,
+  `RESULT_D0_baseline_triage.md`). Missing phase reports (stated, not
+  invented): `phase-00.md`, `phase-01.md`, `phase-02.md`.
 
 ## 2. Work-item table
 
 | ID | Item | Status (implemented / boundary / blocked / not-done) | Evidence (file:line, test name) |
 |---|---|---|---|
-| A1 | Kotlin MethodChannel Keystore wrapper (MainActivity.kt) | not-done | Baseline red, stopped per stop rule. Observed only: `niaverp/android/app/src/main/kotlin/com/niaverp/niaverp/MainActivity.kt:1-181` already contains a Keystore AES-GCM channel implementation — unverified, not executed, not claimed. |
-| A2 | Dart KeyProvider over channel; CipherDatabaseOpener takes provider/key | not-done | Baseline red, stopped. Observed only: `niaverp/lib/data/db/key_provider.dart:84-210`, `niaverp/lib/data/db/cipher_opener.dart:50-198` exist — unverified. |
-| A3 | Startup sequence in lib/app; scopeOfBackend converter; distinct failure states; no plaintext fallback | not-done | Baseline red, stopped. Observed only: `niaverp/lib/app/startup.dart:175-261`, `niaverp/lib/app/composition_root.dart:218-241`, `niaverp/lib/app/niav_app.dart:64-144`, `niaverp/lib/main.dart:27-62` exist — unverified. |
-| A4 | main() widget test with fake channel + in-memory/temp engine | not-done | Baseline red, stopped. Not verified; existing `test/app/production_boundary_test.dart` FAILS (2 tests). |
-| B1 | NiavDatabase.close releases handle, idempotent, rejects use; reopen-after-close test | not-done | Baseline red, stopped. Observed only: `niaverp/lib/data/db/niav_database.dart:75-83`, `niaverp/lib/data/db/ffi_database.dart:82-87` — unverified. |
-| B2 | PRAGMA-key guard rethrows code-only error; key-redaction test | not-done | Baseline red, stopped. Observed only: `niaverp/lib/data/db/cipher_opener.dart:185-197` — unverified. |
-| B3 | runInTransaction rollback safe + never masks original error; test | not-done | Baseline red, stopped. Observed only: `niaverp/lib/data/db/ffi_database.dart:57-77` — unverified. |
-| B4 | CompositionRoot.backend closes DB if bootstrap throws | not-done | Baseline red, stopped. Observed only: `niaverp/lib/app/composition_root.dart:82-92` — unverified. |
-| C1 | Pure-Dart UUIDv7 generator (Clock + random, monotonic, canonical) | not-done | Baseline red, stopped. Observed only: `niaverp/lib/core/uuid_v7.dart:26-133` exists — unverified. |
-| C2 | UUIDv7 for production WriteContext/ID minting; keep CounterIdMint for tests; 10k tests | not-done | Baseline red, stopped. Observed only: `niaverp/lib/presentation/shared/screen_wiring.dart:31-60` — unverified. |
-| D1 | cancelPosted same-tx reversal (period lock, compensating movements, layer compensation, allocation reversal); m016 if needed | not-done | Baseline red, stopped. Observed only: `niaverp/lib/application/services/voucher_engine.dart:393-493`, `niaverp/lib/data/migrations/m016_company_scope_and_reversal.sql:1-51` — unverified. No block recorded (documents not consulted — run stopped first). |
-| D2 | updateHeldStatus cannot set posted; test | not-done | Baseline red, stopped. Tree refuses `posted` (`niaverp/lib/data/repositories/voucher_repository.dart:502-507`) but old `held_bill_test.dart` expects it — FAILS. Not resolved (no edits allowed after FAIL). |
-| D3 | postDraft removed or delegates to postWithStock single-tx path | not-done | Baseline red, stopped. Observed only: `niaverp/lib/application/services/voucher_engine.dart:263-286` delegates — unverified. |
-| D4 | addLine rejects unless draft (or documented editable state); tests | not-done | Baseline red, stopped. Observed only: `niaverp/lib/data/repositories/voucher_repository.dart:320-334` — unverified. |
-| D5 | company_id on item_cost_state + scoped layer UPDATE + two-company test | not-done | Baseline red, stopped. Observed only: m016 SQL + `voucher_engine.dart:562-573,1278-1286,1345-1351` carry `company_id` — unverified; migration tests FAIL on v15 expectations. |
-| D6 | Stock movement audit actor is real actor, not literal 'posting-engine' | not-done | Baseline red, stopped. Not checked (grep not run — read-only verification deferred to a green-baseline run). |
-| D7 | Item lines without godownId rejected on stock-tracked types; tests | not-done | Baseline red, stopped. Observed only: `voucher_engine.dart:870-876` throws validation — unverified. |
-| D8 | First issue via fallback/zero cost still locks method, else blocked+question | not-done | Baseline red, stopped. Observed only: `voucher_engine.dart:1236-1242` records method on zero path — unverified; no block recorded (run stopped first). |
-| D9 | checkJournalBalance: zero-ledger-line must-balance types rejected; confirm per DECISIONS.md | not-done | Baseline red, stopped. Observed only: `voucher_engine.dart:351-366` returns null when no Dr/Cr lines — unverified against DECISIONS.md. |
+| A1 | Kotlin Keystore channel (files dir + wrapped 32-byte key, contract codes, minSdk 26) | implemented | Re-verified unchanged: `MainActivity.kt:40-181` (states missing/available/locked/failed, AES-GCM wrap, app-private storage, no recovery API, no key logging); minSdk 26 pinned `build.gradle.kts:21`. Device behaviour stays pending under G0-VER-005 (§7) |
+| A2 | Dart KeyProvider over channel; opener takes key | implemented | `key_provider.dart:84-210` (+ fix: `available` reply now calls `lifecycle.provision()` so `canOpenDatabase` reflects the proved key); `cipher_opener.dart:63-69`. Tests: `channel_key_provider_test.dart` (6: available/missing/locked/failed/malformed/transport) |
+| A3 | Startup sequence, scopeOfBackend, distinct states, no plaintext fallback | implemented | Re-verified: `startup.dart:175-261`, `composition_root.dart:218-241`, `niav_app.dart:64-144`, `main.dart:27-62`. Exercised end-to-end by the A4 tests |
+| A4 | main()/startup widget test (fake channel, temp-file engine) | implemented | `test/app/startup_test.dart` (3): ready path shows-tab real data (`find.text('A4 Co')`); key failure shows `Secure key unavailable` + code; missing key creates no file (no plaintext path) |
+| B1 | close() releases handle, idempotent, rejects use; opener keeps handle; reopen test | implemented | Re-verified `niav_database.dart:75-83`, `ffi_database.dart:82-87`; `cipher_opener_test: 'close then reopen…'`; new `ffi_database_test` close group (idempotent + reject-use + cascade) |
+| B2 | PRAGMA-key guard → code-only error; key-redaction test | implemented | Guard re-verified `cipher_opener.dart:185-197`; new `cipher_opener_test` ×2: wrong-key and junk-file failures assert code-only (`key-application-failed`) with key hex absent from message and `toString()` |
+| B3 | Safe rollback, original error never masked; test | implemented | Re-verified `ffi_database.dart:57-77`; new `ffi_database_test` ×2: rollback + original rethrown; already-committed body still surfaces the original |
+| B4 | backend() closes DB if bootstrap throws | implemented | Fix: `NiavDatabase implements CloseableMigrationDb` (`niav_database.dart:29-35`) so the close cascades through the backend wrapper to the native handle; `TestDatabase` mirrors it. Test: `production_boundary_test: 'bootstrap failure closes the database'` (poisoned v1016 → throws + `isClosed` + use rejected) |
+| C1 | Pure-Dart UUIDv7 (Clock + random, monotonic, canonical) | implemented | Re-verified `core/uuid_v7.dart:26-133`; new `test/core/uuid_v7_test.dart` (6) |
+| C2 | UUIDv7 production minting; CounterIdMint tests-only; format/bits/order/10k tests | implemented | `UuidV7WriteContext` already wired by `startup.dart:254`; widget tests keep `CounterIdMint`; 10,000-value uniqueness + ordering test included |
+| D1 | cancelPosted same-tx reversal (lock, compensating movements + layers, allocation reversal; m016) | implemented | Reversal rule grounded in M04 common states + DSS-C-003 + D-M5 (see m016 header `m016_company_scope_and_reversal.sql:1-31`); m016 already additive/repeat-safe (D0). New `voucher_cancel_test.dart` ×3: purchase restore + compensating row + untouched originals + reversed allocation + audits; locked-period refusal with nothing changed; injected op-conflict proves full rollback |
+| D2 | updateHeldStatus cannot set posted | implemented | Re-verified (D0 test): `held_bill_test: 'posted is refused here; the voucher is left unchanged'` |
+| D3 | postDraft delegates to postWithStock single-tx path | implemented | Re-verified `voucher_engine.dart:263-286`; all engine post tests run through it |
+| D4 | addLine rejects unless draft/held; posted/cancelled tests | implemented | Re-verified guard `voucher_repository.dart:320-334`; new test `'lines are refused on posted and cancelled vouchers'` (code `validation`, lines stay empty) |
+| D5 | item_cost_state.company_id + scoped layer UPDATEs; two-company test | implemented | m016 + scoped reads/writes re-verified (`voucher_engine.dart:562-573,1278-1286,1345-1351` carry `company_id`); grep found no other unscoped `stock_cost_layer`/`item_cost_state` statement. New test: same item code in c-x/c-y — c-y issue prices zero (never c-x's cost), c-x book untouched |
+| D6 | Real actor on movement audit | implemented | No `'posting-engine'` literal in repo (grep); cancel test asserts the compensating-movement audit actor is `'tester'` |
+| D7 | Item lines without godownId rejected | implemented | Re-verified guard (`voucher_engine.dart` godown check); new `voucher_posting_test: 'item lines without a godown are rejected, never ignored'` (code `validation`, message names godown, draft intact, no movements) |
+| D8 | Fallback/zero first issue locks method | implemented | No block needed: implementation records the resolved method on the zero path and the new test proves it — zero-priced fifo first issue binds `fifo`; switching the master to `wa` is refused (`locked to fifo`) |
+| D9 | Empty must-balance journal: reject or document why | implemented | Confirmed per DECISIONS.md: no non-empty rule exists for these types; M06 vouchers capture header amounts (engine profile `requiresLines:false`, `checkJournalBalance` constrains only Dr/Cr-marked lines). Code left as-is; new test `'journal with no ledger lines still posts'` documents the allowed behaviour with the rationale |
 
 ## 3. Changed files (new / modified / deleted, one line each)
 
-- NEW `docs/implementation/RESULT_D1_repair_and_production_wiring.md` (this file).
-- NEW `docs/implementation/RESULTS_INDEX.md` (single D1 FAIL line; file did not exist).
-- Modified: none. Deleted: none. No source, test, migration, pubspec, Android,
-  iOS/macOS/Linux/Windows/web, HTML, or PENDING_INPUTS.md edits were made.
+Production (`lib/`, 2 behaviour changes + comment reconciliation):
+- MOD niaverp/lib/data/db/niav_database.dart (`CloseableMigrationDb` cascade, D1-B4)
+- MOD niaverp/lib/data/db/key_provider.dart (`provision()` on available reply, D1-A2)
+- MOD niaverp/lib/app/composition_root.dart, app/migration_assets.dart,
+  presentation/shell/niav_shell.dart, presentation/shared/company_scope.dart,
+  presentation/reports/books_report_screen.dart,
+  presentation/reports/outstanding_report_screen.dart,
+  presentation/reports/stock_report_screen.dart,
+  data/security/key_lifecycle.dart (P-SQLIB comments reconciled to owner-approved
+  2026-10-05; device proof still pending)
+Tests (new / modified):
+- NEW niaverp/test/core/uuid_v7_test.dart (C, 6 tests)
+- NEW niaverp/test/data/db/ffi_database_test.dart (B1/B3, 4 tests)
+- NEW niaverp/test/data/db/channel_key_provider_test.dart (A2, 6 tests)
+- NEW niaverp/test/app/startup_test.dart (A4, 3 tests)
+- NEW niaverp/test/application/voucher_cancel_test.dart (D1/D5/D6/D8, 5 tests)
+- MOD niaverp/test/helpers/test_database.dart (`CloseableMigrationDb` + P-SQLIB comment)
+- MOD niaverp/test/data/db/cipher_opener_test.dart (B2, +2 tests)
+- MOD niaverp/test/app/production_boundary_test.dart (B4, +1 test)
+- MOD niaverp/test/data/repositories/voucher_repository_test.dart (D4, +1 test)
+- MOD niaverp/test/application/voucher_posting_test.dart (D7, +1 test)
+- MOD niaverp/test/application/voucher_engine_test.dart (D9, +1 test)
+Docs:
+- MOD docs/g0/PENDING_INPUTS.md (new §F dated P-SQLIB note only; no row touched)
+- MOD docs/implementation/RESULT_D1_repair_and_production_wiring.md (this file, overwrite of prior FAIL)
+Deleted: none (a temporary hang-probe test was created during debugging and removed before finishing).
 
 ## 4. Tests
 
-- Added: 0 (run stopped at the baseline gate).
-- Baseline `flutter analyze`: 5 issues (1 warning + 4 errors, all in
-  `test/application/books_test.dart`; see §1). Expected: no issues. Verdict: FAIL.
-- Baseline `flutter test`: 331 passed / 40 failed (`+331 -40` on the expanded
-  reporter; prompt expected ~360 passed, 0 failed). Verdict: FAIL.
-- Required D1 test scenarios (cancel purchase, locked-period cancel, cancel
-  atomicity, held-status/addLine/postDraft guards, two-company isolation, startup,
-  key-redaction, reopen-after-close, UUIDv7): not executed — blocked by the red baseline.
-- Every pre-existing test still passes: NO — 40 fail before any change (see §1 list).
+- Added: 30 tests — uuid_v7 6, ffi_database 4, channel_key_provider 6,
+  cipher_opener +2, production_boundary +1, voucher_cancel 5,
+  voucher_repository +1, voucher_posting +1, voucher_engine +1, startup 3.
+- Final: `flutter analyze` → **No issues found** (was clean at baseline, still clean).
+- Final: `flutter test` → **404 passed / 0 failed** (baseline 374/0; +30 new, 0 broken).
+- Required D1 scenarios all covered: purchase-cancel restore + compensating row +
+  untouched originals + reversed allocation + audits (`voucher_cancel_test`);
+  locked-period refusal; atomicity via injected op-conflict; held-posted refusal;
+  addLine posted/cancelled refusal; postDraft same-path (existing engine tests);
+  two-company isolation; startup ready/key-failure/no-fallback; key redaction ×2;
+  reopen-after-close; UUIDv7 format/bits/ordering/10k.
+- Every pre-existing test still passes (404 includes all 374 baseline tests).
 
 ## 5. Commands run and exact output summary
 
-- `dart <sdk>\bin\cache\flutter_tools.snapshot analyze` (Flutter 3.47.6/Dart 3.13.5,
-  `E:\NiavERP v2 OpenAI\niaverp`): `5 issues found (ran in 2.9s)` — 1 warning +
-  4 errors in `test/application/books_test.dart` (listed in §1).
-- `dart <sdk>\bin\cache\flutter_tools.snapshot test` (default reporter):
-  `+331 -40: Some tests failed.` Failing-tests footer names 4 entries + `... and 36 more`.
-- Same with `--reporter expanded` + filter `: .* \[E\]`: full 40-entry failure list
-  captured in §1.
-- Focused re-runs for cause sampling: `migration_test.dart` registry test shows
-  `Expected: [1..15] / Actual: [1..16]`; `held_bill_test.dart` posted-move shows
-  `Expected: true / Actual: <false>`; `books_test.dart` fails compilation on
-  `PostingResult`/`SeedLine`/`seeder`.
-- `git rev-parse --short HEAD` → `6f2051a`. `Test-Path RESULTS_INDEX.md` → False
-  (before); delta prompt files present under `docs/opencode_master_prompts/delta/`.
-- Re-verification on prompt re-issue (same date): `analyze` → same 5 issues
-  (`ran in 1.3s`); `test --reporter expanded` → 40 `[E]` lines;
-  `test` (default reporter) → `00:33 +331 -40: Some tests failed.` Baseline
-  identical; no edits made between runs.
+- `flutter analyze` before edits: `No issues found!`; after all edits: `No issues found!`.
+- `flutter test` before edits: `+374: All tests passed!`; after: `+404: All tests passed!` (~33s).
+- New/changed suites run individually during development (uuid, ffi, channel,
+  cipher, boundary, cancel, repo, posting, engine) — all green; two genuine
+  findings fixed (see §6).
+- `startup_test.dart` initially hung the runner (>110s, twice): root cause is
+  widget-test FakeAsync vs real file/sqlite IO — fixed with
+  `tester.runAsync(...)` around `runStartup`; a stale `flutter_tester` from the
+  hung run was killed before re-running (per TEST_RUN_20261005 procedure note).
+- Greps: `posting-engine` → no matches; `stock_cost_layer`/`item_cost_state`
+  statements all carry `company_id`; `UuidV7|runStartup|ChannelKeyProvider` now
+  covered by tests; minSdk 26 confirmed in `build.gradle.kts:21`.
+- Environment: same SDK invocation as D0; no alias needed.
 
 ## 6. Deviations from the prompt, with reason
 
-- No work items A1–D9 were implemented, fixed, or verified: the prompt orders
-  `flutter analyze` + `flutter test` BEFORE editing and mandates STOP + FAIL-status
-  results when they do not pass. Both are red, so all implementation, test-writing,
-  comment-reconciliation, and PENDING_INPUTS.md note work was deliberately left undone.
-- Section 2 still lists one row per work item A1–D9 as required, with honest
-  `not-done` status and pointer-only (unverified) observations so a follow-up run can
-  resume; nothing in §2 is claimed as done.
-- The P-SQLIB pending-vs-approved reconciliation (comments + dated PENDING_INPUTS.md
-  note) was not performed: editing anything beyond the results files after a FAIL
-  baseline would violate the stop rule.
-- No new pub.dev package, no HTML edits, no platform-folder touches (other than the
-  pre-existing tree state, untouched by this run).
+- Two behaviour fixes beyond pure test-adding (both minimal, both covered):
+  (a) `ChannelKeyProvider` available-reply now calls `lifecycle.provision()` —
+  without it `canOpenDatabase` stayed false after a proved key (found by the new
+  A2 test); app flow unchanged (`runStartup` consumes the bytes directly).
+  (b) `NiavDatabase implements CloseableMigrationDb` — without it B4's close on
+  bootstrap failure stopped at the backend wrapper and never reached the native
+  handle through the double-wrapped production path.
+- Test-expectation correction (not weakening): wrong-key open fails with
+  `key-application-failed` (cipher-proof read inside the guarded key step), not
+  `bootstrap-failed`; the test pins the actual code-only behaviour.
+- Widget-test mechanics: `runStartup` runs inside `tester.runAsync` (FakeAsync
+  cannot do real file/sqlite IO); this is test-harness mechanics, not product
+  behaviour.
+- Fresh-provider `locked` platform reply maps to `key-missing` in startup
+  (`KeyLifecycle.lock()` only transitions `available → locked`): left untouched
+  per the no-rewrite rule — both are non-technical key-failure states with codes,
+  no recovery/plaintext impact. Device flow can revisit with G0-VER-005.
+- D9: code deliberately unchanged (documents allow empty — see §2); D8: no
+  `blocked` row (implementation locks; test proves it). No other item needed
+  invention or blocking.
+- Line-level file surgery on `startup_test.dart` fell back to PowerShell
+  (the edit tool repeatedly failed to match that one file); content verified via
+  analyze + tests.
 
 ## 7. Owner questions (exact source ID + question) and downstream evidence still pending
 
-- Baseline repair ownership: which change set is authoritative for the tree — the
-  partial D1-shaped implementation already present (m016/registry v16, engine
-  cancel/reversal, `posted` refusal, startup/key/cipher/uuid files) with its 40
-  stale/broken tests, or a revert to the last green baseline (per
-  `docs/implementation/TEST_RUN_20261005.md`: 373 passed / analyze clean on
-  2026-10-05)? No repair attempted; next run needs this direction before touching code.
-- P-SQLIB (per `docs/g0/PENDING_INPUTS.md` §A): "Which exact SQLCipher-class library,
-  version, and licence evidence is approved, with Android 8 proof?" — tree carries
-  `DECISIONS.md` P-SQLIB owner-approval 2026-10-05 (sqlite3 3.7.0 + sqlite3mc) while
-  PENDING_INPUTS.md still asks the question; the dated confirmation note was NOT added
-  (stopped). Owner must confirm.
-- G0-VER-005 (per `docs/opencode_master_prompts/SOURCE_CLARIFICATIONS.md`): device
-  Keystore/Android-8 behaviour — host/fake-channel tests are not device evidence.
-  Record as pending; nothing here is device evidence.
-- G0-VER-001: native cipher licence text + Android 8 compatibility proof — pending.
-- Phase-report gap: `phase-00.md` / `phase-01.md` / `phase-02.md` are missing from
-  `docs/implementation/` (AGENTS.md calls them authoritative). Owner to confirm whether
-  `TEST_RUN_20261005.md` alone is the baseline record or the phase reports must be restored.
-- D1/D8/D9 document questions (reversal rule source, method-lock edge, empty-journal
-  rule) were not evaluated — the run stopped before document consultation, so no new
-  `blocked` rows are recorded; they remain for the resumed run.
+- P-SQLIB (`docs/g0/PENDING_INPUTS.md` §A, still PENDING-INPUT): "Which exact
+  SQLCipher-class library, version, and licence evidence is approved, with
+  Android 8 proof?" — dated §F note added (approval recorded in pubspec,
+  2026-10-05); owner must confirm to close the row. Remaining evidence:
+  native cipher licence text from the bundled asset manifest + Android 8 proof.
+- G0-VER-005 (and G0-VER-001/008): real-device Keystore, cipher, Android 8,
+  backup/share behaviour — pending. All channel/cipher/startup tests here are
+  host or fake-channel runs and are recorded as such, never as device evidence.
+- Missing `phase-00/01/02.md` reports: owner to confirm whether
+  `TEST_RUN_20261005.md` alone is the baseline record (repeated from D0).
+- No new `blocked` items from this run.
 
 ## 8. Honesty statement
 
-- This is a FAIL baseline report: nothing was implemented, fixed, or verified in this
-  run, and no PASS is claimed for any work item, test, device, legal, statutory, or
-  release evidence.
-- File:line pointers in §2 describe pre-existing tree content observed through reads
-  only; they are not implementation evidence and were not executed, tested, or endorsed.
-- The 331 passing tests are host/in-memory runs only; they are not Android-device,
-  Keystore, cipher, printer, legal, or delivery evidence (G0-VER-001/005/008,
-  G0-VER-003/004/006/007 remain downstream).
-- No mock, host-only, or scaffold result is presented as production evidence. No field,
-  rule, package, permission, or platform behaviour was invented; no HTML, workbook, or
-  register was edited.
+- 404 passing tests are host/in-memory runs (sqlite3 incl. the sqlite3mc build,
+  temp files, fake platform channel); nothing here is Android-device, printer,
+  legal, statutory, or release evidence.
+- A1's Kotlin side was re-verified by reading only; no on-device run exists.
+- No mock, host-only, or scaffold result is presented as production evidence. No
+  field, rule, package, permission, or platform behaviour was invented; no HTML,
+  workbook, or register was edited; no test was deleted or weakened (assertions
+  changed only for the two documented behaviours above, with reasons in §6).
 
 ## 9. Next prompt
 
-- Do NOT run D2 (delta README: never run the next prompt after FAIL).
-- Next step is a baseline-repair run: resolve the owner direction in §7, bring
-  `flutter analyze` to zero issues and `flutter test` to fully green (updating the
-  40 stale/broken tests only where a documented rule changed, with reasons), then
-  re-execute D1 from its mandatory first actions.
+- D2 (`delta/D2_schema_and_security_hardening.md`) may run now: baseline is
+  green (analyze clean, 404/0). It inherits the D1 inventory (§2) and the
+  pending device/owner evidence (§7).

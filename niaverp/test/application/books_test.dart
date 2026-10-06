@@ -10,6 +10,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:niaverp/application/queries/ledger.dart';
+import 'package:niaverp/application/services/voucher_engine.dart';
 import 'package:niaverp/core/result.dart';
 import 'package:niaverp/core/value_objects/ids.dart';
 import 'package:niaverp/core/value_objects/niav_date.dart';
@@ -21,6 +22,7 @@ import 'package:niaverp/data/repositories/operation_log.dart';
 import 'package:niaverp/data/repositories/repository.dart';
 import 'package:niaverp/data/repositories/voucher_repository.dart';
 
+import '../helpers/seeded_post.dart';
 import '../helpers/test_database.dart';
 
 void main() {
@@ -28,7 +30,7 @@ void main() {
   late RepositoryContext ctx;
   late OperationLog ops;
   late AuditLog audit;
-  late VoucherRepository vouchers;
+  late VoucherSeeder seeder;
   late LedgerBooks books;
   final CompanyId companyId = CompanyId('c-k');
 
@@ -43,7 +45,7 @@ void main() {
         AccountGroupRepository(ctx, ops: ops, audit: audit);
     final LedgerRepository ledgers =
         LedgerRepository(ctx, ops: ops, audit: audit);
-    vouchers = VoucherRepository(ctx, ops: ops, audit: audit);
+    seeder = VoucherSeeder(ctx, ops: ops, audit: audit);
     books = LedgerBooks(db);
     expect(
       companies
@@ -143,10 +145,44 @@ void main() {
 
   /// Journal fixtures go through the production path: draft → lines → engine
   /// post (D1-D4 forbids adding lines to a voucher created as posted).
-  /// Journal fixtures go through the production path: draft → lines → engine
-  /// post (D1-D4 forbids adding lines to a voucher created as posted).
+  /// With [post] false the voucher stays a draft (proves drafts never count).
   void createJournal(String id, String date, List<Map<String, Object>> arms,
       {bool post = true}) {
+    if (!post) {
+      final Result<Voucher> created = seeder.vouchers.create(
+        id: EntityId(id),
+        companyId: companyId,
+        type: 'Journal',
+        series: 'J',
+        no: id,
+        date: NiavDate(date),
+        deviceId: 'host-test',
+        opId: 'op-$id',
+        eventId: 'ev-$id',
+        actor: 'tester',
+      );
+      expect(created.isOk, isTrue);
+      int lineNo = 0;
+      for (final Map<String, Object> arm in arms) {
+        lineNo += 1;
+        final Result<VoucherLine> added = seeder.vouchers.addLine(
+          lineId: EntityId('$id-l$lineNo'),
+          voucherId: EntityId(id),
+          companyId: companyId,
+          lineNo: lineNo,
+          ledgerId: EntityId(arm['ledger'] as String),
+          drCr: arm['side'] as String,
+          qtyQ4: 10000,
+          ratePaise: arm['amount'] as int,
+          deviceId: 'host-test',
+          opId: 'op-$id-l$lineNo',
+          eventId: 'ev-$id-l$lineNo',
+          actor: 'tester',
+        );
+        expect(added.isOk, isTrue);
+      }
+      return;
+    }
     final Result<PostingResult> r = seeder.postVoucher(
       id: EntityId(id),
       companyId: companyId,

@@ -11,7 +11,8 @@
 // (FutureBuilder + retry block, the report pattern). Validation and
 // locked/conflict states are N/A — these screens take no business input and
 // post nothing; a period lock never hides history, it only blocks posting.
-// Main-app wiring waits on the production database engine (P-SQLIB).
+// Main-app wiring arrives through the D1 startup sequence (P-SQLIB approved
+// 2026-10-05; on-device proof stays G0-VER-001 evidence).
 // Traceability: M14.1 (day book / register / ledger account), M14.2 (trial
 // balance group-wise and ledger-wise), FR-M06-004, OD-UI-001.
 

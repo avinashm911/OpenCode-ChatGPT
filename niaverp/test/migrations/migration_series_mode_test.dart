@@ -24,7 +24,7 @@ void main() {
     test('mode column exists at v12', () {
       db = openTestDatabase();
       addTearDown(() => rawEngineOf(db).close());
-      expect(db.schemaVersion, 15);
+      expect(db.schemaVersion, 16); // registry ends at v16 (m016, D1-D5);
       expect(columns(db, 'voucher_series'), contains('mode'));
     });
 
@@ -49,7 +49,7 @@ void main() {
       v12.sqlByVersion = loadMigrationSql();
       v12.bootstrap();
       addTearDown(() => rawEngineOf(v12).close());
-      expect(v12.schemaVersion, 15);
+      expect(v12.schemaVersion, 16); // registry ends at v16 (m016, D1-D5);
       final List<Map<String, Object?>> rows = v12.queryArgs(
         'SELECT mode FROM voucher_series WHERE series_id = ?',
         <Object?>['s-u'],
@@ -70,7 +70,7 @@ void main() {
           NiavDatabase(rawEngineOf(v12), clock: testClock());
       again.sqlByVersion = loadMigrationSql();
       again.bootstrap();
-      expect(again.schemaVersion, 15);
+      expect(again.schemaVersion, 16); // registry ends at v16 (m016, D1-D5);
     });
   });
 }

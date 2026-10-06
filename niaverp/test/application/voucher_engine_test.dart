@@ -246,12 +246,40 @@ void main() {
       addLine('v-h', 'v-h-l1', 'c-e');
       expect(post('v-h').isErr, isTrue);
 
-      createDraft('v-r', 'c-e', 'Sales Invoice', status: 'resumed');
+      // A resumed voucher reaches posting through the held-bill queue
+      // (D1-D2: held → resumed via updateHeldStatus, then the engine posts;
+      // lines are added while held since D1-D4 keeps resumed non-editable).
+      createDraft('v-r', 'c-e', 'Sales Invoice', status: 'held');
       addLine('v-r', 'v-r-l1', 'c-e', party: 'p-e');
+      final Result<Voucher> resumed = vouchers.updateHeldStatus(
+        id: EntityId('v-r'),
+        companyId: CompanyId('c-e'),
+        status: 'resumed',
+        deviceId: 'host-test',
+        opId: 'op-resume-v-r',
+        eventId: 'ev-resume-v-r',
+        actor: 'tester',
+      );
+      expect(resumed.isOk, isTrue);
       expect(post('v-r').isOk, isTrue);
       final Result<PostedTotals> again = post('v-r');
       expect(again.isErr, isTrue);
       expect((again as Err<PostedTotals>).error.code, 'validation');
+    });
+
+    test('journal with no ledger lines still posts (D1-D9)', () {
+      // D1-D9: must-balance types (Journal, Contra, Debit/Credit Note without
+      // items) with zero ledger lines are NOT rejected. The documents allow
+      // empty: M06 accounting vouchers capture header amounts rather than
+      // item rows (no payment-line columns exist in the approved schema), so
+      // the profile sets requiresLines=false exactly for them and
+      // checkJournalBalance only constrains lines that carry Dr/Cr markers.
+      // DECISIONS.md names no non-empty rule for these types.
+      registerType('t-j', 'Journal', 'Journal');
+      createDraft('v-empty', 'c-e', 'Journal');
+      expect(post('v-empty').isOk, isTrue);
+      expect(vouchers.get(CompanyId('c-e'), EntityId('v-empty'))?.voucher.status,
+          'posted');
     });
 
     test('compensating cancellation needs a reason; terminal stays shut', () {

@@ -166,6 +166,10 @@ class ChannelKeyProvider implements KeyProvider {
         if (!unlocked.isOk) {
           return ChannelKeyResult.failed(unlocked.failure!);
         }
+        // The platform just proved the wrapped key exists and unwraps: record
+        // the provision so the lifecycle (and canOpenDatabase) reflects the
+        // available state instead of staying missing (D-06 states).
+        lifecycle.provision();
         return ChannelKeyResult.available(bytes);
       default:
         lifecycle.reportFailure(KeyFailure.corruptWrapper);

@@ -24,7 +24,7 @@ void main() {
     test('tables and key columns exist at v13', () {
       db = openTestDatabase();
       addTearDown(() => rawEngineOf(db).close());
-      expect(db.schemaVersion, 15);
+      expect(db.schemaVersion, 16); // registry ends at v16 (m016, D1-D5);
       for (final String t in <String>['account_group', 'ledger']) {
         final List<Map<String, Object?>> rows = db.query(
           "SELECT name FROM sqlite_master WHERE type = 'table' AND name = '$t'",
@@ -46,7 +46,7 @@ void main() {
       v13.sqlByVersion = loadMigrationSql();
       v13.bootstrap();
       addTearDown(() => rawEngineOf(v13).close());
-      expect(v13.schemaVersion, 15);
+      expect(v13.schemaVersion, 16); // registry ends at v16 (m016, D1-D5);
       v13.executeArgs(
         'INSERT INTO account_group (group_id, company_id, name, created_at) '
         'VALUES (?, ?, ?, ?)',
@@ -96,7 +96,7 @@ void main() {
           NiavDatabase(rawEngineOf(v13), clock: testClock());
       again.sqlByVersion = loadMigrationSql();
       again.bootstrap();
-      expect(again.schemaVersion, 15);
+      expect(again.schemaVersion, 16); // registry ends at v16 (m016, D1-D5);
     });
   });
 }

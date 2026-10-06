@@ -4,8 +4,9 @@
 // repositories (ids shown when a master row is absent — never invented).
 // States: loading, empty, success, recoverable-error with retry (FutureBuilder
 // + error block, onboarding pattern). Validation/locked states are N/A: this
-// screen takes no input and posts nothing. Main-app wiring waits on the
-// production database engine (P-SQLIB), like the phase-02 screens.
+// screen takes no input and posts nothing. Main-app wiring arrives through
+// the D1 startup sequence (P-SQLIB approved 2026-10-05), like the phase-02
+// screens.
 // Traceability: UI-009 (stock view); UI-010 (report view); M15.
 
 import 'package:flutter/material.dart';

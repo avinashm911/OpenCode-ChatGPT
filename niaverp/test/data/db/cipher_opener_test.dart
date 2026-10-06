@@ -90,5 +90,43 @@ void main() {
         throwsException,
       );
     });
+
+    test('wrong-key failure is code-only: the key hex never leaks (D1-B2)',
+        () {
+      final NiavDatabase first = opener('c1', keyOf(7)).openCompanyDatabase();
+      (first.engine as FfiDatabase).close();
+      final String hex = CipherDatabaseOpener.keyHex(keyOf(9));
+      Object? caught;
+      try {
+        opener('c1', keyOf(9)).openCompanyDatabase();
+      } catch (e) {
+        caught = e;
+      }
+      expect(caught, isA<CipherOpenException>());
+      final CipherOpenException failure = caught! as CipherOpenException;
+      // The cipher-proof read fails under the wrong key inside the guarded
+      // key-application step, so this surfaces as key-application-failed.
+      expect(failure.code, 'key-application-failed');
+      expect(failure.message.contains(hex), isFalse);
+      expect(failure.toString().contains(hex), isFalse);
+      expect(failure.toString(), 'CipherOpenException(key-application-failed)');
+    });
+
+    test('unreadable-file failure is code-only: the key hex never leaks',
+        () {
+      // A file that is not a database: the guarded open fails on first read.
+      File('${tmp.path}/junk.db').writeAsStringSync('not a database file');
+      final String hex = CipherDatabaseOpener.keyHex(keyOf(3));
+      Object? caught;
+      try {
+        opener('junk', keyOf(3)).openCompanyDatabase();
+      } catch (e) {
+        caught = e;
+      }
+      expect(caught, isA<CipherOpenException>());
+      final CipherOpenException failure = caught! as CipherOpenException;
+      expect(failure.message.contains(hex), isFalse);
+      expect(failure.toString().contains(hex), isFalse);
+    });
   });
 }

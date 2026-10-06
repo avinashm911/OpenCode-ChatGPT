@@ -133,7 +133,49 @@ void main() {
       );
     });
 
+    test('lines are refused on posted and cancelled vouchers (D1-D4)', () {
+      // Posted/cancelled history is immutable: corrections go through the
+      // engine's compensating cancellation, never through editing a line.
+      for (final String status in <String>['posted', 'cancelled']) {
+        final Result<Voucher> created = vouchers.create(
+          id: EntityId('v-$status'),
+          companyId: CompanyId('c-v'),
+          type: 'sales-invoice',
+          series: 'A',
+          no: 'n-$status',
+          date: NiavDate('2026-04-01'),
+          status: status,
+          deviceId: 'host-test',
+          opId: 'op-v-$status',
+          eventId: 'ev-v-$status',
+          actor: 'tester',
+        );
+        expect(created.isOk, isTrue);
+        final Result<VoucherLine> r = vouchers.addLine(
+          lineId: EntityId('l-$status'),
+          voucherId: EntityId('v-$status'),
+          companyId: CompanyId('c-v'),
+          lineNo: 1,
+          qtyQ4: 10000,
+          ratePaise: 100,
+          deviceId: 'host-test',
+          opId: 'op-l-$status',
+          eventId: 'ev-l-$status',
+          actor: 'tester',
+        );
+        expect(r.isErr, isTrue);
+        expect((r as Err<VoucherLine>).error.code, 'validation');
+        expect(
+          vouchers.get(CompanyId('c-v'), EntityId('v-$status'))!.lines,
+          isEmpty,
+        );
+      }
+    });
+
     test('line on a missing voucher fails atomically (no lineage left)', () {
+      // D1-D4: addLine checks the parent voucher first (it may only extend a
+      // draft or held working document), so a missing parent is reported as
+      // validation before any insert is attempted — never as a raw FK error.
       final Result<VoucherLine> r = vouchers.addLine(
         lineId: EntityId('l-ghost'),
         voucherId: EntityId('v-ghost'),
@@ -147,7 +189,7 @@ void main() {
         actor: 'tester',
       );
       expect(r.isErr, isTrue);
-      expect((r as Err<VoucherLine>).error.code, 'foreign-key');
+      expect((r as Err<VoucherLine>).error.code, 'validation');
       expect(ops.forEntity('c-v', 'voucher_line', 'l-ghost'), isEmpty);
       expect(audit.forEntity('c-v', 'voucher_line', 'l-ghost'), isEmpty);
     });
@@ -166,7 +208,7 @@ void main() {
         actor: 'tester',
       );
       final AppError e = (r as Err<VoucherLine>).error;
-      expect(e.code, 'foreign-key');
+      expect(e.code, 'validation');
       expect(e.message.contains('v-absent'), isFalse);
     });
   });

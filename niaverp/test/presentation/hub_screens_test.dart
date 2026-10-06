@@ -17,6 +17,7 @@ import 'package:niaverp/application/services/voucher_engine.dart';
 import 'package:niaverp/core/result.dart';
 import 'package:niaverp/core/value_objects/ids.dart';
 import 'package:niaverp/core/value_objects/niav_date.dart';
+import 'package:niaverp/data/accounting/stock_policy.dart';
 import 'package:niaverp/data/db/niav_database.dart';
 import 'package:niaverp/data/repositories/alias_repository.dart';
 import 'package:niaverp/data/repositories/audit_log.dart';
@@ -136,6 +137,7 @@ void main() {
           .isOk,
       isTrue,
     );
+    // Draft first: D1-D4 forbids adding lines to a voucher created as posted.
     final Result<Voucher> h = vouchers.create(
       id: EntityId('v-h'),
       companyId: companyId,
@@ -143,7 +145,6 @@ void main() {
       series: 'S',
       no: 'v-h',
       date: NiavDate('2026-03-20'),
-      status: 'posted',
       deviceId: 'host-test',
       opId: 'op-vh',
       eventId: 'ev-vh',
@@ -163,6 +164,22 @@ void main() {
             deviceId: 'host-test',
             opId: 'op-vh-l1',
             eventId: 'ev-vh-l1',
+            actor: 'tester',
+          )
+          .isOk,
+      isTrue,
+    );
+    // Posted through the engine (validation + status move in one
+    // transaction); the hubs read posted history.
+    expect(
+      scope.engine
+          .postWithStock(
+            id: EntityId('v-h'),
+            companyId: companyId,
+            policy: StockPolicy.block,
+            deviceId: 'host-test',
+            opId: 'op-post-vh',
+            eventId: 'ev-post-vh',
             actor: 'tester',
           )
           .isOk,

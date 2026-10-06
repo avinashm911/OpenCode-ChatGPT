@@ -24,8 +24,9 @@ import 'package:niaverp/data/repositories/voucher_repository.dart';
 import 'package:niaverp/data/repositories/voucher_type_repository.dart';
 import 'package:niaverp/presentation/shared/screen_wiring.dart';
 
-/// Repository/query surface behind the five tabs. Null scope means no
-/// backend is available (production engine pending P-SQLIB): tabs render
+/// Repository/query surface behind the five tabs. Null scope means the D1
+/// startup sequence has not delivered a backend yet (P-SQLIB approved
+/// 2026-10-05): tabs render
 /// the scope gate, never fake data.
 class CompanyScope {
   const CompanyScope({

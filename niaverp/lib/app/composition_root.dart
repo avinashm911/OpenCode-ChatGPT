@@ -3,7 +3,8 @@
 // Hand-rolled: Riverpod/go_router/PDF/Excel/barcode/ESC-POS remain UNVERIFIED
 // candidates (PROJECT_BASELINE.md §6; PENDING_INPUTS.md) and must not be
 // locked in until the owner confirms package + version + licence.
-// The encrypted engine itself stays pending (P-SQLIB): production callers
+// The encrypted engine is owner-approved (P-SQLIB, 2026-10-05: package:sqlite3
+// with build-hook source `sqlite3mc`): production callers inject any
 // inject any [MigrationDb] engine (today the test engine; after the cipher
 // decision, the SQLCipher/SQLite3MC engine via EncryptedDatabaseOpener) and
 // the root builds the database, repositories and queries over it. Widgets

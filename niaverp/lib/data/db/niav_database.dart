@@ -26,7 +26,12 @@ abstract class CloseableMigrationDb {
 /// Production database handle. Created by an engine opener (test factory,
 /// FfiDatabase over the encrypted file in production) and bootstrapped before
 /// use.
-class NiavDatabase implements MigrationDb {
+///
+/// Implements [CloseableMigrationDb] by delegating to [close]: wrappers such
+/// as `CompositionRoot.backend` close only the handle they own, and the close
+/// cascades to the wrapped engine, so a failed bootstrap never leaves a live
+/// native handle behind (D1-B4). Idempotent throughout the chain.
+class NiavDatabase implements MigrationDb, CloseableMigrationDb {
   NiavDatabase(this._engine, {required this._clock});
 
   final MigrationDb _engine;
@@ -72,6 +77,7 @@ class NiavDatabase implements MigrationDb {
   /// handle when the engine owns one (production FFI, test factory). Calling
   /// it twice is safe; any database use afterwards is rejected instead of
   /// touching a released handle. The opener keeps nothing else to clean up.
+  @override
   void close() {
     if (_closed) return;
     _closed = true;

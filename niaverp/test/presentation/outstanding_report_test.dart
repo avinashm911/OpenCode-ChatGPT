@@ -9,16 +9,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:niaverp/application/queries/outstanding.dart';
+import 'package:niaverp/application/services/voucher_engine.dart';
 import 'package:niaverp/core/result.dart';
 import 'package:niaverp/core/value_objects/ids.dart';
 import 'package:niaverp/core/value_objects/niav_date.dart';
+import 'package:niaverp/data/accounting/stock_policy.dart';
 import 'package:niaverp/data/db/niav_database.dart';
 import 'package:niaverp/data/repositories/audit_log.dart';
+import 'package:niaverp/data/repositories/bill_allocation_repository.dart';
 import 'package:niaverp/data/repositories/company_repository.dart';
 import 'package:niaverp/data/repositories/operation_log.dart';
 import 'package:niaverp/data/repositories/party_repository.dart';
 import 'package:niaverp/data/repositories/repository.dart';
 import 'package:niaverp/data/repositories/voucher_repository.dart';
+import 'package:niaverp/data/repositories/voucher_type_repository.dart';
 import 'package:niaverp/presentation/reports/outstanding_report_screen.dart';
 
 import '../helpers/test_database.dart';
@@ -27,6 +31,7 @@ void main() {
   late NiavDatabase db;
   late OutstandingReport report;
   late VoucherRepository vouchers;
+  late VoucherEngine engine;
   final CompanyId companyId = CompanyId('c-w');
   final NiavDate asOf = NiavDate('2026-04-01');
 
@@ -40,6 +45,16 @@ void main() {
     final PartyRepository parties =
         PartyRepository(ctx, ops: ops, audit: audit);
     vouchers = VoucherRepository(ctx, ops: ops, audit: audit);
+    final VoucherTypeRepository types =
+        VoucherTypeRepository(ctx, ops: ops, audit: audit);
+    engine = VoucherEngine(
+      ctx,
+      ops: ops,
+      audit: audit,
+      vouchers: vouchers,
+      types: types,
+      allocationRepo: BillAllocationRepository(ctx, ops: ops, audit: audit),
+    );
     report = OutstandingReport(db);
     expect(
       companies
@@ -75,6 +90,9 @@ void main() {
     rawEngineOf(db).close();
   });
 
+  /// Bills the report must see are built through the production path (D1-D4
+  /// forbids adding lines to a voucher created as posted): draft → line →
+  /// engine post.
   void createBill(String id, int amount) {
     final Result<Voucher> h = vouchers.create(
       id: EntityId(id),
@@ -83,7 +101,6 @@ void main() {
       series: 'S',
       no: id,
       date: NiavDate('2026-03-20'),
-      status: 'posted',
       deviceId: 'host-test',
       opId: 'op-$id',
       eventId: 'ev-$id',
@@ -104,6 +121,16 @@ void main() {
       actor: 'tester',
     );
     expect(l.isOk, isTrue);
+    final Result<PostingResult> posted = engine.postWithStock(
+      id: EntityId(id),
+      companyId: companyId,
+      policy: StockPolicy.block,
+      deviceId: 'host-test',
+      opId: 'op-post-$id',
+      eventId: 'ev-post-$id',
+      actor: 'tester',
+    );
+    expect(posted.isOk, isTrue);
   }
 
   Widget buildScreen() {

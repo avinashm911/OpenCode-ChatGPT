@@ -12,9 +12,11 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:niaverp/application/queries/outstanding.dart';
+import 'package:niaverp/application/services/voucher_engine.dart';
 import 'package:niaverp/core/result.dart';
 import 'package:niaverp/core/value_objects/ids.dart';
 import 'package:niaverp/core/value_objects/niav_date.dart';
+import 'package:niaverp/data/accounting/stock_policy.dart';
 import 'package:niaverp/data/db/niav_database.dart';
 import 'package:niaverp/data/repositories/audit_log.dart';
 import 'package:niaverp/data/repositories/bill_allocation_repository.dart';
@@ -35,6 +37,7 @@ void main() {
   late VoucherRepository vouchers;
   late VoucherTypeRepository types;
   late BillAllocationRepository allocs;
+  late VoucherEngine engine;
   late OutstandingReport report;
   final CompanyId companyId = CompanyId('c-r');
   final NiavDate asOf = NiavDate('2026-04-01');
@@ -51,6 +54,14 @@ void main() {
     final PartyRepository parties =
         PartyRepository(ctx, ops: ops, audit: audit);
     allocs = BillAllocationRepository(ctx, ops: ops, audit: audit);
+    engine = VoucherEngine(
+      ctx,
+      ops: ops,
+      audit: audit,
+      vouchers: vouchers,
+      types: types,
+      allocationRepo: allocs,
+    );
     report = OutstandingReport(db);
     for (final String c in <String>['c-r', 'c-other']) {
       expect(
@@ -110,6 +121,13 @@ void main() {
     rawEngineOf(db).close();
   });
 
+  /// Vouchers the report must see as posted are built through the production
+  /// path (D1-D4 forbids adding lines to a voucher created as posted):
+  /// created as a draft here, posted by [addLine] once its line exists.
+  /// Vouchers that must stay drafts pass `status: 'draft'` and are never
+  /// posted. Every fixture voucher currently carries exactly one line.
+  final Set<String> toPostIds = <String>{};
+
   void createVoucher(String id, String type, String date,
       {String status = 'posted'}) {
     final Result<Voucher> r = vouchers.create(
@@ -119,13 +137,14 @@ void main() {
       series: 'S',
       no: id,
       date: NiavDate(date),
-      status: status,
+      status: status == 'posted' ? 'draft' : status,
       deviceId: 'host-test',
       opId: 'op-$id',
       eventId: 'ev-$id',
       actor: 'tester',
     );
     expect(r.isOk, isTrue);
+    if (status == 'posted') toPostIds.add(id);
   }
 
   void addLine(String vid, String lid, int amount) {
@@ -143,6 +162,18 @@ void main() {
       actor: 'tester',
     );
     expect(r.isOk, isTrue);
+    if (toPostIds.remove(vid)) {
+      final Result<PostingResult> posted = engine.postWithStock(
+        id: EntityId(vid),
+        companyId: companyId,
+        policy: StockPolicy.block,
+        deviceId: 'host-test',
+        opId: 'op-post-$vid',
+        eventId: 'ev-post-$vid',
+        actor: 'tester',
+      );
+      expect(posted.isOk, isTrue);
+    }
   }
 
   void allocate(String id, String source, String settlement, int amount,

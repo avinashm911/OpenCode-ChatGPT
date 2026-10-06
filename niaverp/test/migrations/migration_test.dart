@@ -88,16 +88,17 @@ void main() {
   });
 
   group('registry (G0-SCH-001…007 traceability)', () {
-    test('versions are contiguous 1..15 with existing files', () {
+    test('versions are contiguous 1..16 with existing files', () {
       // G0 chain v1..v8 preserved exactly (G0 acceptance); v9 (M03 masters)
       // appended by implementation Phase 02; v10-13 (DSS transaction refs,
       // FY + Dr/Cr, series mode, ledger masters) appended for the
       // voucher-engine milestone; v14 (ledger detail + bank) for the
       // accounting-master milestone; v15 (valuation method + layer books)
-      // for the stock-valuation milestone.
+      // for the stock-valuation milestone; v16 (D1-D5 company scope on
+      // item_cost_state + stock_movement reversal/cost-method columns).
       expect(kMigrations.map((Migration m) => m.version).toList(),
-          <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
-      expect(kLatestVersion, 15);
+          <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
+      expect(kLatestVersion, 16);
       for (final Migration m in kMigrations) {
         expect(File('lib/data/migrations/${m.fileName}').existsSync(), isTrue,
             reason: m.fileName);
@@ -122,7 +123,7 @@ void main() {
   });
 
   group('clean install creates the complete schema', () {
-    test('migrates to v15 with ordered ledger and all deltas present', () {
+    test('migrates to v16 with ordered ledger and all deltas present', () {
       final Database raw = sqlite3.openInMemory();
       raw.execute('PRAGMA foreign_keys = ON');
       final SqliteMigrationDb db = SqliteMigrationDb(raw);
@@ -131,13 +132,13 @@ void main() {
       migrate(db, sql);
       expect(currentVersion(db), kLatestVersion);
 
-      // Ledger: 15 rows, ordered, one per version
+      // Ledger: 16 rows, ordered, one per version
       // (G0 v1..v8 + M03 v9 + DSS v10-13 + ledger detail/bank v14 +
-      // valuation v15).
+      // valuation v15 + D1-D5 company scope/reversal v16).
       final List<Map<String, Object?>> ledger =
           db.query('SELECT version FROM schema_migrations ORDER BY version');
       expect(ledger.map((Map<String, Object?> r) => r['version']).toList(),
-          <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+          <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
 
       // G0-SCH-001 tables.
       for (final String t in <String>[
@@ -184,6 +185,12 @@ void main() {
       // G0-SCH-007.
       expect(columnsOf(raw, 'voucher_line'),
           containsAll(<String>{'discount_amount_paise', 'discount_rate_bps'}));
+      // D1-D5 (v16): company scope on the cost state + reversal link and
+      // resolved costing method on movements (additive, backfilled).
+      expect(columnsOf(raw, 'item_cost_state'), contains('company_id'));
+      expect(
+          columnsOf(raw, 'stock_movement'),
+          containsAll(<String>{'reverses_movement_id', 'cost_method'}));
       // Representative indexes from the design.
       expect(
           indexesOf(raw),

@@ -5,7 +5,8 @@
 // unit stays engine-neutral and Flutter-free per the layering rule (D-M7).
 // The asset bundle is declared in pubspec.yaml and points at the audited
 // `lib/data/migrations/*.sql` files themselves: single source of truth,
-// no duplication. Traceability: DSS-C-007; P-SQLIB (engine still pending).
+// no duplication. Traceability: DSS-C-007; P-SQLIB (owner-approved 2026-10-05;
+// on-device cipher/Android 8 proof stays G0-VER-001 evidence).
 
 import 'package:niaverp/data/migrations/migration_registry.dart';
 

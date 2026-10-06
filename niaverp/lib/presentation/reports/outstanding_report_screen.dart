@@ -4,8 +4,8 @@
 // totals header (bill count + open total). States: loading, empty, success,
 // recoverable-error with retry (FutureBuilder + error block, onboarding
 // pattern). Validation/locked states are N/A: this screen takes no input
-// and posts nothing. Main-app wiring waits on the production database
-// engine (P-SQLIB), like the other report screens.
+// and posts nothing. Main-app wiring arrives through the D1 startup sequence
+// (P-SQLIB approved 2026-10-05), like the other report screens.
 // Traceability: FR-M14-001 (outstanding reports); FR-M06-001/002.
 
 import 'package:flutter/material.dart';

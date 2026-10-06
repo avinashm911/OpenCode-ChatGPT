@@ -5,7 +5,8 @@
 // bill list, the parties & items masters, the reports hub, and company
 // management (open/switch via onboarding). The shell stores only navigation
 // state (selected tab + selected company). No business state lives here.
-// Without a scope (production engine pending P-SQLIB) every tab renders
+// Without a scope (before the D1 startup sequence delivers the encrypted
+// backend; P-SQLIB approved 2026-10-05) every tab renders
 // the scope gate — honest unavailability, never fake data. Without a
 // selected company the shell shows onboarding (create/open) full-screen.
 // Traceability: OD-UI-001; G0-CON-005; DECISIONS.md.
@@ -45,8 +46,8 @@ class NiavShell extends StatefulWidget {
 
   final String title;
 
-  /// Backend surface behind the tabs. Null until the production engine is
-  /// ready (P-SQLIB): tabs render the scope gate instead of fake data.
+  /// Backend surface behind the tabs. Null until the D1 startup sequence
+  /// delivers the encrypted backend (P-SQLIB approved 2026-10-05): tabs render
   final CompanyScope? scope;
 
   /// Company selected before first build (tests, deep links). Null starts

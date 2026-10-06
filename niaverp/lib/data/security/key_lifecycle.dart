@@ -1,8 +1,9 @@
 // NiAvERP G0 key lifecycle — Phase 3.
 // Dart-side contract for the APPROVED D-06 shape (random 256-bit DB key,
-// wrapped by Android Keystore, PIN/biometric gates key use). The native
-// Keystore wiring and the SQLCipher-class library stay BLOCKED (G0-VER-001 /
-// G0-VER-005); this file defines states, failure handling and the
+// wrapped by Android Keystore, PIN/biometric gates key use). The SQLCipher-class
+// library is owner-approved (P-SQLIB 2026-10-05: package:sqlite3 + sqlite3mc);
+// native cipher licence text and on-device Keystore proof stay G0-VER-001 /
+// G0-VER-005 evidence. This file defines states, failure handling and the
 // no-plaintext-export invariant so behavior is frozen before wiring lands.
 // There is deliberately NO recovery/escrow API: a wiped key is gone and the
 // only path is re-provisioning (see backup.dart restore plan).

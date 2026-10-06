@@ -13,16 +13,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:niaverp/application/queries/ledger.dart';
+import 'package:niaverp/application/services/voucher_engine.dart';
 import 'package:niaverp/core/result.dart';
 import 'package:niaverp/core/value_objects/ids.dart';
 import 'package:niaverp/core/value_objects/niav_date.dart';
+import 'package:niaverp/data/accounting/stock_policy.dart';
 import 'package:niaverp/data/db/niav_database.dart';
 import 'package:niaverp/data/repositories/audit_log.dart';
+import 'package:niaverp/data/repositories/bill_allocation_repository.dart';
 import 'package:niaverp/data/repositories/company_repository.dart';
 import 'package:niaverp/data/repositories/ledger_masters.dart';
 import 'package:niaverp/data/repositories/operation_log.dart';
+import 'package:niaverp/data/repositories/party_repository.dart';
 import 'package:niaverp/data/repositories/repository.dart';
 import 'package:niaverp/data/repositories/voucher_repository.dart';
+import 'package:niaverp/data/repositories/voucher_type_repository.dart';
 import 'package:niaverp/presentation/reports/books_report_screen.dart';
 
 import '../helpers/test_database.dart';
@@ -32,6 +37,7 @@ void main() {
   late LedgerBooks books;
   late LedgerRepository ledgers;
   late VoucherRepository vouchers;
+  late VoucherEngine engine;
   final CompanyId companyId = CompanyId('c-b');
 
   setUp(() {
@@ -45,6 +51,18 @@ void main() {
         AccountGroupRepository(ctx, ops: ops, audit: audit);
     ledgers = LedgerRepository(ctx, ops: ops, audit: audit);
     vouchers = VoucherRepository(ctx, ops: ops, audit: audit);
+    final PartyRepository parties =
+        PartyRepository(ctx, ops: ops, audit: audit);
+    final VoucherTypeRepository types =
+        VoucherTypeRepository(ctx, ops: ops, audit: audit);
+    engine = VoucherEngine(
+      ctx,
+      ops: ops,
+      audit: audit,
+      vouchers: vouchers,
+      types: types,
+      allocationRepo: BillAllocationRepository(ctx, ops: ops, audit: audit),
+    );
     books = LedgerBooks(db);
     expect(
       companies
@@ -54,6 +72,24 @@ void main() {
             deviceId: 'host-test',
             opId: 'op-cb',
             eventId: 'ev-cb',
+            actor: 'tester',
+          )
+          .isOk,
+      isTrue,
+    );
+    // Party-requiring types (e.g. Sales Invoice) need a party on at least one
+    // line at post time; every seeded voucher carries it (harmless for
+    // Journal, which does not require one).
+    expect(
+      parties
+          .create(
+            id: EntityId('p-b'),
+            companyId: companyId,
+            name: 'Buyer',
+            role: 'customer',
+            deviceId: 'host-test',
+            opId: 'op-pb',
+            eventId: 'ev-pb',
             actor: 'tester',
           )
           .isOk,
@@ -122,8 +158,10 @@ void main() {
   });
 
   /// One posted voucher carrying [arms] as ledger lines (the Dr/Cr arms of a
-  /// balanced journal). Lines go through the real repository, so every entry
-  /// keeps its own drill id.
+  /// balanced journal). Goes through the production path (D1-D4 forbids
+  /// adding lines to a voucher created as posted): draft → lines → engine
+  /// post. Lines go through the real repository, so every entry keeps its
+  /// own drill id.
   void post(
     String id,
     String date,
@@ -137,7 +175,6 @@ void main() {
       series: 'J',
       no: id,
       date: NiavDate(date),
-      status: 'posted',
       deviceId: 'host-test',
       opId: 'op-$id',
       eventId: 'ev-$id',
@@ -155,6 +192,7 @@ void main() {
               companyId: companyId,
               lineNo: lineNo,
               ledgerId: EntityId(arm['ledger'] as String),
+              partyId: EntityId('p-b'),
               drCr: arm['side'] as String,
               qtyQ4: 10000,
               ratePaise: arm['amount'] as int,
@@ -167,6 +205,16 @@ void main() {
         isTrue,
       );
     }
+    final Result<PostingResult> posted = engine.postWithStock(
+      id: EntityId(id),
+      companyId: companyId,
+      policy: StockPolicy.block,
+      deviceId: 'host-test',
+      opId: 'op-post-$id',
+      eventId: 'ev-post-$id',
+      actor: 'tester',
+    );
+    expect(posted.isOk, isTrue);
   }
 
   /// The row with [key], if it renders exactly this signed amount.

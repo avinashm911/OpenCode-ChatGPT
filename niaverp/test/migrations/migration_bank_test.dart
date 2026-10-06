@@ -1,6 +1,7 @@
 // m014 migration tests: ledger detail + bank masters (gate G1).
 // Disposable databases only. Proves: bank_account table + ledger detail
-// columns exist at v15, staged v13→v15 upgrade preserves ledger rows,
+// columns exist at latest (v16), staged v13 upgrade to latest preserves
+// ledger rows,
 // UNIQUE (company, ledger) collides, credit CHECKs are enforced, and
 // re-bootstrap is repeat-safe.
 // Traceability: DB §3 (ledger, bank_account); FR-M03-002/004; DSS-C-007.
@@ -22,10 +23,10 @@ void main() {
   }
 
   group('m014 ledger detail + bank', () {
-    test('columns and bank table exist at v15', () {
+    test('columns and bank table exist at latest', () {
       db = openTestDatabase();
       addTearDown(() => rawEngineOf(db).close());
-      expect(db.schemaVersion, 15);
+      expect(db.schemaVersion, 16); // registry ends at v16 (m016, D1-D5)
       expect(
         columns(db, 'ledger'),
         containsAll(<String>[
@@ -53,7 +54,7 @@ void main() {
       );
     });
 
-    test('staged v13→v15 upgrade preserves rows; constraints enforced', () {
+    test('staged v13 upgrade to latest preserves rows; constraints enforced', () {
       final NiavDatabase v13 = openTestDatabase(upTo: 13);
       v13.executeArgs(
         'INSERT INTO company (company_id, name, created_at) VALUES (?, ?, ?)',
@@ -74,7 +75,7 @@ void main() {
       v14.sqlByVersion = loadMigrationSql();
       v14.bootstrap();
       addTearDown(() => rawEngineOf(v14).close());
-      expect(v14.schemaVersion, 15);
+      expect(v14.schemaVersion, 16); // staged v13, then full bootstrap to latest v16
       expect(
         v14
             .queryArgs(
@@ -118,7 +119,7 @@ void main() {
           NiavDatabase(rawEngineOf(v14), clock: testClock());
       again.sqlByVersion = loadMigrationSql();
       again.bootstrap();
-      expect(again.schemaVersion, 15);
+      expect(again.schemaVersion, 16); // re-bootstrap stays at latest v16
     });
   });
 }

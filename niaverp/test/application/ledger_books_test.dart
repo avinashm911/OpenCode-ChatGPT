@@ -9,6 +9,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:niaverp/application/queries/ledger.dart';
+import 'package:niaverp/application/services/voucher_engine.dart';
 import 'package:niaverp/core/result.dart';
 import 'package:niaverp/core/value_objects/ids.dart';
 import 'package:niaverp/core/value_objects/niav_date.dart';
@@ -20,6 +21,7 @@ import 'package:niaverp/data/repositories/operation_log.dart';
 import 'package:niaverp/data/repositories/repository.dart';
 import 'package:niaverp/data/repositories/voucher_repository.dart';
 
+import '../helpers/seeded_post.dart';
 import '../helpers/test_database.dart';
 
 void main() {
@@ -29,6 +31,7 @@ void main() {
   late AuditLog audit;
   late LedgerRepository ledgers;
   late VoucherRepository vouchers;
+  late VoucherSeeder seeder;
   late LedgerBooks books;
   final CompanyId companyId = CompanyId('c-b');
 
@@ -43,6 +46,7 @@ void main() {
         AccountGroupRepository(ctx, ops: ops, audit: audit);
     ledgers = LedgerRepository(ctx, ops: ops, audit: audit);
     vouchers = VoucherRepository(ctx, ops: ops, audit: audit);
+    seeder = VoucherSeeder(ctx, ops: ops, audit: audit);
     books = LedgerBooks(db);
     expect(
       companies
@@ -101,40 +105,26 @@ void main() {
     rawEngineOf(db).close();
   });
 
+  /// Journal fixtures go through the production path (D1-D4 forbids adding
+  /// lines to a voucher created as posted): draft → lines → engine post.
   void createJournal(String id, List<Map<String, Object>> arms) {
-    final Result<Voucher> h = vouchers.create(
+    final Result<PostingResult> r = seeder.postVoucher(
       id: EntityId(id),
       companyId: companyId,
       type: 'Journal',
       series: 'J',
-      no: id,
       date: NiavDate('2026-04-01'),
-      status: 'posted',
-      deviceId: 'host-test',
-      opId: 'op-$id',
-      eventId: 'ev-$id',
-      actor: 'tester',
+      lines: <SeedLine>[
+        for (final Map<String, Object> arm in arms)
+          SeedLine(
+            ledgerId: EntityId(arm['ledger'] as String),
+            drCr: arm['side'] as String,
+            qtyQ4: 10000,
+            ratePaise: arm['amount'] as int,
+          ),
+      ],
     );
-    expect(h.isOk, isTrue);
-    int lineNo = 0;
-    for (final Map<String, Object> arm in arms) {
-      lineNo += 1;
-      final Result<VoucherLine> l = vouchers.addLine(
-        lineId: EntityId('$id-l$lineNo'),
-        voucherId: EntityId(id),
-        companyId: companyId,
-        lineNo: lineNo,
-        ledgerId: EntityId(arm['ledger'] as String),
-        drCr: arm['side'] as String,
-        qtyQ4: 10000,
-        ratePaise: arm['amount'] as int,
-        deviceId: 'host-test',
-        opId: 'op-$id-l$lineNo',
-        eventId: 'ev-$id-l$lineNo',
-        actor: 'tester',
-      );
-      expect(l.isOk, isTrue);
-    }
+    expect(r.isOk, isTrue);
   }
 
   group('ledger books (M14 foundation)', () {

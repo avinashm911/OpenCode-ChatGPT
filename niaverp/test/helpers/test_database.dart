@@ -1,9 +1,9 @@
 // Deterministic test database factory — dev-only test helper.
 // Disposable in-memory SQLite via package:sqlite3 (dev_dependency). Never
 // production data, never shipped: production opens through
-// EncryptedDatabaseOpener once P-SQLIB closes. Foreign keys are enforced so
-// repository tests run with real SQLite semantics.
-// Traceability: strategy Slice 1; P-SQLIB/P-KEYSTORE (device/prod pending).
+// CipherDatabaseOpener (P-SQLIB owner-approved 2026-10-05). Foreign keys are
+// enforced so repository tests run with real SQLite semantics.
+// Traceability: strategy Slice 1; P-SQLIB (device/prod proof pending).
 
 import 'dart:io';
 
@@ -16,7 +16,11 @@ import 'package:niaverp/data/migrations/migration_runner.dart';
 import 'package:niaverp/data/repositories/repository.dart';
 
 /// MigrationDb over one disposable in-memory database.
-class TestDatabase implements MigrationDb {
+///
+/// Implements [CloseableMigrationDb] so close-cascading through
+/// [NiavDatabase] (D1-B4) is exercised by tests exactly as production
+/// FfiDatabase engines behave.
+class TestDatabase implements MigrationDb, CloseableMigrationDb {
   TestDatabase._(this.raw);
 
   /// Wrap an already-opened database (e.g. a temp-file database for
@@ -58,6 +62,7 @@ class TestDatabase implements MigrationDb {
     }
   }
 
+  @override
   void close() {
     if (!_closed) {
       _closed = true;

@@ -279,6 +279,37 @@ void main() {
       );
     });
 
+    test('item lines without a godown are rejected, never ignored (D1-D7)',
+        () {
+      // FR required-data rows name a godown/location for stock-moving
+      // documents; an item line without one would post without moving stock.
+      createVoucher('v-nogodown', 'Purchase Invoice');
+      final Result<VoucherLine> added = vouchers.addLine(
+        lineId: EntityId('v-nogodown-l1'),
+        voucherId: EntityId('v-nogodown'),
+        companyId: companyId,
+        lineNo: 1,
+        itemId: EntityId('i-p'),
+        partyId: EntityId('p-p'),
+        qtyQ4: 10000,
+        ratePaise: 1000,
+        deviceId: 'host-test',
+        opId: 'op-v-nogodown-l1',
+        eventId: 'ev-v-nogodown-l1',
+        actor: 'tester',
+      );
+      expect(added.isOk, isTrue);
+      final Result<PostingResult> posted =
+          postStock('v-nogodown', StockPolicy.block);
+      expect(posted.isErr, isTrue);
+      final AppError error = (posted as Err<PostingResult>).error;
+      expect(error.code, 'validation');
+      expect(error.message, contains('godown'));
+      expect(vouchers.get(companyId, EntityId('v-nogodown'))?.voucher.status,
+          'draft');
+      expect(movementCount(), 0);
+    });
+
     test('blocked policy aborts everything; warn approves with warning', () {
       createVoucher('v-neg', 'Sales Invoice');
       addStockLine('v-neg', 'v-neg-l1', 20000);

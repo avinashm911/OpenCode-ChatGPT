@@ -96,3 +96,12 @@ The following source selections are recorded but are not execution closures:
 All physical, delivery, compatibility, licence-selection, field-list and
 legal-review evidence rows remain `PENDING-INPUT`. Therefore this register is
 updated but G0 is **not unconditionally closed**.
+
+## F. D1 note (2026-10-06, addition only — no row status changed)
+
+P-SQLIB approval is recorded in `niaverp/pubspec.yaml` (owner-approved
+2026-10-05: package:sqlite3 3.7.0 with build-hook source `sqlite3mc`;
+DECISIONS.md P-SQLIB). The §A P-SQLIB row still reads as an open question, so
+it stays `PENDING-INPUT` until the owner confirms this approval and the
+remaining G0-VER-001 evidence (native cipher licence text from the bundled
+asset manifest + Android 8 compatibility proof on device) is attached.
