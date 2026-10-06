@@ -7,3 +7,5 @@ D1 | 2026-10-06 | PASS | tests 404/0 | Re-verification: all items present-and-te
 D2 | 2026-10-06 | PASS | tests 431/0 | Schema/security hardening: m017 triggers/vocab/index/checksum/chain/clock, MAC interface, Android guards; analyze clean.
 D3 | 2026-10-06 | PASS | tests 451/0 | Invoice ledger posting (MPL templates, round-off, cancel mirrors), GST subset, ledger forms, parser; tax split/material/journal/export blocked or boundary with questions.
 D4 | 2026-10-06 | PASS-WITH-BLOCKS | tests 449/1 | Localisation (en/hi/gu ARB), More tab (company/financial year/settings/period lock/language/about/disabled backup), formatter (Indian digit grouping), accessibility basics, lazy tabs/home caching, robustness; 1 pre-existing shell company-switch test blocked by lazy-tab C1; translator review list + deferred-feature list recorded.
+
+E1 | 2026-10-06 | BLOCKED-DEPENDENT | protect: A1 (device-id rule missing) + A9 (sqlite3mc pin doc); A2-A8/A10 host-verified; 450/1 preserved; G0-VER-005/008 still missing | docs/implementation/RESULT_E1_make_app_start_on_device.md
