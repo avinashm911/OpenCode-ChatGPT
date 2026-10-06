@@ -181,7 +181,9 @@ class BillAllocationRepository {
       throw TxFailure(AppError('validation', guardErrors.first));
     }
     final int now = ctx.clock.nowMs();
-    final Result<OperationRecord> op = ops.append(
+    final Result<void> lineage = recordLineage(
+      ops: ops,
+      audit: audit,
       opId: opId,
       companyId: companyId.value,
       deviceId: deviceId,
@@ -194,8 +196,15 @@ class BillAllocationRepository {
         'settlement': settlementLineId.value,
         'amount': amountPaise,
       }),
+      eventId: eventId,
+      newRow: <String, Object?>{
+        'source': sourceLineId.value,
+        'settlement': settlementLineId.value,
+        'amount': amountPaise,
+      },
+      actor: actor,
     );
-    if (op.isErr) throw TxFailure((op as Err<OperationRecord>).error);
+    if (lineage.isErr) throw TxFailure((lineage as Err<void>).error);
     try {
       _db.executeArgs(
         'INSERT INTO bill_allocation (allocation_id, company_id, '
@@ -217,19 +226,6 @@ class BillAllocationRepository {
     } catch (e) {
       throw TxFailure(dbError(e, 'bill-allocation-create'));
     }
-    final Result<AuditEvent> ev = audit.append(
-      eventId: eventId,
-      companyId: companyId.value,
-      entity: 'bill_allocation',
-      entityId: id.value,
-      newRow: <String, Object?>{
-        'source': sourceLineId.value,
-        'settlement': settlementLineId.value,
-        'amount': amountPaise,
-      },
-      actor: actor,
-    );
-    if (ev.isErr) throw TxFailure((ev as Err<AuditEvent>).error);
   }
 
   /// Reverse one active allocation inside a caller-held transaction: the
@@ -273,11 +269,14 @@ class BillAllocationRepository {
       throw TxFailure(AppError('validation', guardErrors.first));
     }
     _db.executeArgs(
-      "UPDATE bill_allocation SET status = 'reversed' "
+      "UPDATE bill_allocation SET status = 'reversed', "
+      'record_version = record_version + 1 '
       'WHERE company_id = ? AND allocation_id = ?',
       <Object?>[companyId.value, id.value],
     );
-    final Result<OperationRecord> op = ops.append(
+    final Result<void> lineage = recordLineage(
+      ops: ops,
+      audit: audit,
       opId: opId,
       companyId: companyId.value,
       deviceId: deviceId,
@@ -289,20 +288,20 @@ class BillAllocationRepository {
         'status': 'reversed',
         'reason': reason.trim(),
       }),
-    );
-    if (op.isErr) throw TxFailure((op as Err<OperationRecord>).error);
-    final Result<AuditEvent> ev = audit.append(
       eventId: eventId,
-      companyId: companyId.value,
-      entity: 'bill_allocation',
-      entityId: id.value,
+      oldRow: <String, Object?>{
+        'allocation_id': id.value,
+        'status': target.status,
+      },
       newRow: <String, Object?>{
         'status': 'reversed',
         'reason': reason.trim(),
       },
       actor: actor,
     );
-    if (ev.isErr) throw TxFailure((ev as Err<AuditEvent>).error);
+    if (lineage.isErr) {
+      throw TxFailure((lineage as Err<void>).error);
+    }
     // The status move, its operation row and its audit event share the
     // caller's transaction, so a later failure rolls the reversal back.
   }
@@ -372,11 +371,14 @@ class BillAllocationRepository {
     try {
       _db.runInTransaction(() {
         _db.executeArgs(
-          "UPDATE bill_allocation SET status = 'reversed' "
+          "UPDATE bill_allocation SET status = 'reversed', "
+          'record_version = record_version + 1 '
           'WHERE company_id = ? AND allocation_id = ?',
           <Object?>[companyId.value, id.value],
         );
-        final Result<OperationRecord> op = ops.append(
+        final Result<void> lineage = recordLineage(
+          ops: ops,
+          audit: audit,
           opId: opId,
           companyId: companyId.value,
           deviceId: deviceId,
@@ -388,24 +390,19 @@ class BillAllocationRepository {
             'status': 'reversed',
             'reason': reason.trim(),
           }),
-        );
-        if (op.isErr) {
-          txFailure = (op as Err<OperationRecord>).error;
-          throw const RepositoryAbort();
-        }
-        final Result<AuditEvent> ev = audit.append(
           eventId: eventId,
-          companyId: companyId.value,
-          entity: 'bill_allocation',
-          entityId: id.value,
+          oldRow: <String, Object?>{
+            'allocation_id': id.value,
+            'status': target!.status,
+          },
           newRow: <String, Object?>{
             'status': 'reversed',
             'reason': reason.trim(),
           },
           actor: actor,
         );
-        if (ev.isErr) {
-          txFailure = (ev as Err<AuditEvent>).error;
+        if (lineage.isErr) {
+          txFailure = (lineage as Err<void>).error;
           throw const RepositoryAbort();
         }
       });

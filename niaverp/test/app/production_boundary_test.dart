@@ -22,7 +22,7 @@ void main() {
       expect(migrationAssetPath(kMigrations.first),
           'lib/data/migrations/m001_base.sql');
       expect(migrationAssetPath(kMigrations.last),
-          'lib/data/migrations/m016_company_scope_and_reversal.sql');
+          'lib/data/migrations/m017_schema_hardening.sql');
     });
 
     test('loads every version; empty text throws', () async {
@@ -31,7 +31,7 @@ void main() {
         chain: kMigrations,
       );
       expect(sql.keys.toSet(), hasLength(kMigrations.length));
-      expect(sql[kLatestVersion], contains('m016_company_scope_and_reversal.sql'));
+      expect(sql[kLatestVersion], contains('m017_schema_hardening.sql'));
       expect(
         () => loadMigrationSqlAssets(
           loadString: (String path) async => '   ',

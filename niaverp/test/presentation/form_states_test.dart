@@ -36,6 +36,7 @@ import 'package:niaverp/presentation/shared/company_scope.dart';
 import 'package:niaverp/presentation/shared/screen_wiring.dart';
 import 'package:niaverp/presentation/shell/niav_shell.dart';
 
+import '../helpers/seeded_post.dart';
 import '../helpers/test_database.dart';
 
 void main() {
@@ -149,6 +150,10 @@ void main() {
       eventId: 'ev-sman',
       actor: 'tester',
     );
+    // D3-A1 posting fixture: role ledgers + party-ledger link.
+    VoucherSeeder(ctx, ops: ops, audit: audit)
+      ..ensurePostingLedgers(companyId)
+      ..linkPartyLedgers(companyId, <EntityId>[EntityId('p-fs')]);
   });
 
   tearDown(() {
@@ -264,7 +269,7 @@ void main() {
       await confirmPost(t);
       await revealRow(
           t, find.byKey(const ValueKey<String>('sale-error')), 'sale-form-list');
-      expect(find.textContaining('locked'), findsOneWidget);
+      expect(find.textContaining('saved as draft'), findsOneWidget);
       expect(
         scope.outstanding.bills(companyId, asOf: today),
         isEmpty,
@@ -320,7 +325,7 @@ void main() {
       await confirmPost(t);
       await revealRow(
           t, find.byKey(const ValueKey<String>('sale-error')), 'sale-form-list');
-      expect(find.textContaining('blocked'), findsOneWidget);
+      expect(find.textContaining('saved as draft'), findsOneWidget);
       expect(
           find.byKey(const ValueKey<String>('sale-line-qty-0')),
           findsOneWidget);
@@ -366,7 +371,7 @@ void main() {
       await revealRow(
           t, find.byKey(const ValueKey<String>('sale-totals')), 'sale-form-list');
       // Two identical lines: gross doubles the single-line amount.
-      expect(find.text('Gross: ₹2000.00 · Net: ₹2000.00'), findsOneWidget);
+      expect(find.text('Gross: ₹2,000.00 · Net: ₹2,000.00'), findsOneWidget);
     });
   });
 

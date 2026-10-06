@@ -22,6 +22,7 @@
 import 'package:niaverp/core/result.dart';
 import 'package:niaverp/core/value_objects/ids.dart';
 import 'package:niaverp/data/accounting/costing.dart';
+import 'package:niaverp/data/accounting/gst.dart';
 import 'package:niaverp/data/accounting/settlement.dart';
 import 'package:niaverp/data/accounting/stock_policy.dart';
 import 'package:niaverp/data/migrations/migration_runner.dart';
@@ -421,6 +422,9 @@ class VoucherEngine {
         _reverseStockEffects(companyId, current, deviceId, actor);
         // 4. Release the allocations this voucher's lines consumed.
         _reverseAllocationsOf(companyId, id, reason, deviceId, actor);
+        // 4b. Mirror every ledger-marked line with a compensating entry
+        // (D3-A6): same ledger/amount, opposite Dr/Cr, same transaction.
+        _reverseLedgerArms(companyId, current, deviceId, actor);
         // 5. Status move last: it is the commit point.
         done = _moveStatusInTx(
           id: id,
@@ -562,7 +566,8 @@ class VoucherEngine {
     _db.executeArgs(
       'UPDATE stock_cost_layer SET remaining_qty_q4 = '
       'COALESCE(remaining_qty_q4, qty_q4) - ?, remaining_value_paise = '
-      'COALESCE(remaining_value_paise, value_paise) - ? '
+      'COALESCE(remaining_value_paise, value_paise) - ?, '
+      'record_version = record_version + 1 '
       'WHERE company_id = ? AND layer_id = ?',
       <Object?>[
         r.layerQtyQ4,
@@ -628,7 +633,9 @@ class VoucherEngine {
       'cost_source': 'reversal',
       'reverses_movement_id': originalMovementId,
     };
-    final Result<OperationRecord> mop = ops.append(
+    final Result<void> mop = recordLineage(
+      ops: ops,
+      audit: audit,
       opId: 'op-$movementId',
       companyId: companyId.value,
       deviceId: deviceId,
@@ -636,8 +643,11 @@ class VoucherEngine {
       entityId: movementId,
       action: 'reverse',
       payloadHash: auditPayloadHash(moveRow),
+      eventId: 'ev-$movementId',
+      newRow: moveRow,
+      actor: actor,
     );
-    if (mop.isErr) throw TxFailure((mop as Err<OperationRecord>).error);
+    if (mop.isErr) throw TxFailure((mop as Err<void>).error);
     try {
       _db.executeArgs(
         'INSERT INTO stock_movement (movement_id, company_id, item_id, '
@@ -661,15 +671,7 @@ class VoucherEngine {
     } catch (e) {
       throw TxFailure(dbError(e, 'stock-reversal'));
     }
-    final Result<AuditEvent> mev = audit.append(
-      eventId: 'ev-$movementId',
-      companyId: companyId.value,
-      entity: 'stock_movement',
-      entityId: movementId,
-      newRow: moveRow,
-      actor: actor,
-    );
-    if (mev.isErr) throw TxFailure((mev as Err<AuditEvent>).error);
+    // (Audit rode along with the operation append above.)
   }
 
   /// Full posting pipeline in ONE database transaction: shared validation,
@@ -730,6 +732,11 @@ class VoucherEngine {
             actor: actor,
           );
         }
+        // Ledger posting arms (D3-A1, MPL section 8 templates): balanced
+        // voucher_line rows written in this same transaction, after stock and
+        // allocations, before the status move. Missing role ledgers refuse
+        // the whole post with a validation error naming the role.
+        _postLedgerArms(companyId, p, canonical, deviceId, actor);
         _moveStatusInTx(
           id: id,
           companyId: companyId,
@@ -807,6 +814,236 @@ class VoucherEngine {
       }
     }
     return out;
+  }
+
+  /// Documented income-ledger role per invoice type (MPL section 8 default
+  /// templates). Series-level configurability (REG M04.6) is downstream: no
+  /// series-ledger map exists in the schema, so resolution below is by exact
+  /// master name and a missing role ledger refuses the post — unspecified
+  /// ledgers are never auto-created (D3-A1).
+  static const Map<String, String> _postingIncomeLedger = <String, String>{
+    'Sales Invoice': 'Sales',
+    'Purchase Invoice': 'Purchases',
+    'Sales Return / Credit Note with items': 'Sales Return',
+    'Purchase Return / Debit Note with items': 'Purchase Return',
+  };
+
+  /// Round-off ledger role (MPL section 8 "± Round-off" arm, D-M4).
+  static const String kRoundOffLedgerName = 'Round Off';
+
+  /// Resolve a documented ledger role to its master. Throws [TxFailure]
+  /// naming the role when the company has no such ledger.
+  EntityId _roleLedger(CompanyId companyId, String role) {
+    final List<Map<String, Object?>> rows = _db.queryArgs(
+      'SELECT ledger_id FROM ledger WHERE company_id = ? AND name = ?',
+      <Object?>[companyId.value, role],
+    );
+    if (rows.isEmpty) {
+      throw TxFailure(AppError(
+          'validation', 'company lacks the required $role ledger for posting'));
+    }
+    return EntityId(rows.first['ledger_id'] as String);
+  }
+
+  /// The ledger behind the voucher's first party (DB section 3 party→ledger).
+  /// Throws [TxFailure] naming the role when the party links no ledger.
+  EntityId _partyPostingLedger(CompanyId companyId, EntityId partyId) {
+    final List<Map<String, Object?>> rows = _db.queryArgs(
+      'SELECT ledger_id FROM party WHERE company_id = ? AND party_id = ?',
+      <Object?>[companyId.value, partyId.value],
+    );
+    final Object? ledger = rows.isEmpty ? null : rows.first['ledger_id'];
+    if (ledger == null) {
+      throw TxFailure(const AppError('validation',
+          'voucher requires a party ledger for posting (role: party ledger)'));
+    }
+    return EntityId(ledger as String);
+  }
+
+  /// Balanced ledger arms for the four invoice types, written as voucher_line
+  /// rows (ledger + Dr/Cr, no item — the documented VoucherLedgerLine shape:
+  /// m010 refs, books derive from posted lines) in the caller's transaction,
+  /// after stock and allocations, before the status move. Types without a
+  /// documented arm template post no arms. Tax arms are NOT written: the
+  /// CGST+SGST-vs-IGST determination is undefined in the documents
+  /// (D3-A2 blocked, G0-VER-003), so invoices post tax-free with the pending
+  /// effect below. Round-off (D-M4 + F-GST-006) persists as its own arm; a
+  /// zero amount writes no arm. Throws [TxFailure] on any rule breach, so a
+  /// refused post leaves no stock, no allocations and no arms behind.
+  void _postLedgerArms(
+    CompanyId companyId,
+    _Postable p,
+    String? canonical,
+    String deviceId,
+    String actor,
+  ) {
+    final String? incomeName =
+        canonical == null ? null : _postingIncomeLedger[canonical];
+    if (incomeName == null) return;
+    final int net = p.totals.netPaise;
+    final int ro = invoiceRoundOff(net);
+    EntityId? partyId;
+    for (final VoucherLine l in p.lines) {
+      if (l.partyId != null) {
+        partyId = l.partyId;
+        break;
+      }
+    }
+    if (partyId == null) {
+      throw TxFailure(const AppError(
+          'validation', 'voucher requires a party for ledger posting'));
+    }
+    final EntityId partyLedger = _partyPostingLedger(companyId, partyId);
+    final EntityId incomeLedger = _roleLedger(companyId, incomeName);
+    final EntityId? roLedger =
+        ro == 0 ? null : _roleLedger(companyId, kRoundOffLedgerName);
+    // Sales Invoice and Purchase Return collect from the party (Dr Party);
+    // Purchase Invoice and Sales Return owe the party (Cr Party).
+    final bool drParty = canonical == 'Sales Invoice' ||
+        canonical == 'Purchase Return / Debit Note with items';
+    final List<_LedgerArm> arms = <_LedgerArm>[
+      _LedgerArm(
+        suffix: 'party',
+        ledgerId: partyLedger,
+        drCr: drParty ? 'Dr' : 'Cr',
+        amountPaise: net + ro,
+      ),
+      _LedgerArm(
+        suffix: 'income',
+        ledgerId: incomeLedger,
+        drCr: drParty ? 'Cr' : 'Dr',
+        amountPaise: net,
+      ),
+      if (roLedger != null)
+        _LedgerArm(
+          suffix: 'roundoff',
+          ledgerId: roLedger,
+          drCr: (ro > 0) == drParty ? 'Cr' : 'Dr',
+          amountPaise: ro.abs(),
+        ),
+    ];
+    int lineNo = 0;
+    for (final VoucherLine l in p.lines) {
+      if (l.lineNo > lineNo) lineNo = l.lineNo;
+    }
+    int dr = 0;
+    int cr = 0;
+    for (final _LedgerArm arm in arms) {
+      if (arm.amountPaise == 0) continue;
+      lineNo += 1;
+      if (arm.drCr == 'Dr') {
+        dr += arm.amountPaise;
+      } else {
+        cr += arm.amountPaise;
+      }
+      _writeLedgerArm(
+        companyId: companyId,
+        voucherId: p.voucher.id,
+        lineNo: lineNo,
+        armId: 'la-${p.voucher.id.value}-${arm.suffix}',
+        ledgerId: arm.ledgerId,
+        drCr: arm.drCr,
+        amountPaise: arm.amountPaise,
+        deviceId: deviceId,
+        actor: actor,
+      );
+    }
+    if (dr != cr) {
+      throw TxFailure(
+          const AppError('db', 'ledger arms do not balance (Dr must equal Cr)'));
+    }
+  }
+
+  /// Write one ledger arm line with operation + audit lineage.
+  void _writeLedgerArm({
+    required CompanyId companyId,
+    required EntityId voucherId,
+    required int lineNo,
+    required String armId,
+    required EntityId ledgerId,
+    required String drCr,
+    required int amountPaise,
+    required String deviceId,
+    required String actor,
+  }) {
+    final int now = ctx.clock.nowMs();
+    final Map<String, Object?> row = <String, Object?>{
+      'voucher_line_id': armId,
+      'voucher_id': voucherId.value,
+      'ledger_id': ledgerId.value,
+      'dr_cr': drCr,
+      'amount_paise': amountPaise,
+    };
+    try {
+      _db.executeArgs(
+        'INSERT INTO voucher_line (voucher_line_id, voucher_id, '
+        'company_id, line_no, item_id, qty_q4, rate_paise, amount_paise, '
+        'discount_amount_paise, discount_rate_bps, ledger_id, party_id, '
+        'godown_id, batch_id, dr_cr, created_at) '
+        'VALUES (?, ?, ?, ?, NULL, 0, 0, ?, 0, 0, ?, NULL, NULL, NULL, ?, ?)',
+        <Object?>[
+          armId,
+          voucherId.value,
+          companyId.value,
+          lineNo,
+          amountPaise,
+          ledgerId.value,
+          drCr,
+          now,
+        ],
+      );
+    } catch (e) {
+      throw TxFailure(dbError(e, 'ledger-arm'));
+    }
+    final Result<void> lineage = recordLineage(
+      ops: ops,
+      audit: audit,
+      opId: 'op-$armId',
+      companyId: companyId.value,
+      deviceId: deviceId,
+      entity: 'voucher_line',
+      entityId: armId,
+      action: 'create',
+      payloadHash: auditPayloadHash(row),
+      eventId: 'ev-$armId',
+      newRow: row,
+      actor: actor,
+    );
+    if (lineage.isErr) throw TxFailure((lineage as Err<void>).error);
+  }
+
+  /// Compensating ledger entries for a cancellation (D3-A6): every Dr/Cr
+  /// line of the voucher gains a mirror line (same ledger/amount, opposite
+  /// marker) in this same transaction. Original rows are untouched; reports
+  /// read posted vouchers only, so the cancelled document (with its mirrors)
+  /// drops out of every book consistently.
+  void _reverseLedgerArms(
+    CompanyId companyId,
+    VoucherWithLines voucher,
+    String deviceId,
+    String actor,
+  ) {
+    int lineNo = 0;
+    for (final VoucherLine l in voucher.lines) {
+      if (l.lineNo > lineNo) lineNo = l.lineNo;
+    }
+    for (final VoucherLine l in voucher.lines) {
+      final String? marker = l.drCr;
+      final EntityId? ledger = l.ledgerId;
+      if (marker == null || ledger == null) continue;
+      lineNo += 1;
+      _writeLedgerArm(
+        companyId: companyId,
+        voucherId: voucher.voucher.id,
+        lineNo: lineNo,
+        armId: 'lr-${l.id.value}',
+        ledgerId: ledger,
+        drCr: marker == 'Dr' ? 'Cr' : 'Dr',
+        amountPaise: l.amountPaise,
+        deviceId: deviceId,
+        actor: actor,
+      );
+    }
   }
 
   /// Effects the pipeline deliberately does NOT produce (explicit per post,
@@ -1301,7 +1538,9 @@ class VoucherEngine {
       'cost_source': w.costSource,
       'cost_method': w.costMethod,
     };
-    final Result<OperationRecord> mop = ops.append(
+    final Result<void> mop = recordLineage(
+      ops: ops,
+      audit: audit,
       opId: 'op-${w.movementId}',
       companyId: companyId.value,
       deviceId: deviceId,
@@ -1309,8 +1548,11 @@ class VoucherEngine {
       entityId: w.movementId,
       action: 'create',
       payloadHash: auditPayloadHash(moveRow),
+      eventId: 'ev-${w.movementId}',
+      newRow: moveRow,
+      actor: actor,
     );
-    if (mop.isErr) throw TxFailure((mop as Err<OperationRecord>).error);
+    if (mop.isErr) throw TxFailure((mop as Err<void>).error);
     _db.executeArgs(
       'INSERT INTO stock_movement (movement_id, company_id, item_id, '
       'godown_id, qty_delta_q4, cost_paise, cost_source, voucher_line_id, '
@@ -1330,22 +1572,16 @@ class VoucherEngine {
         now,
       ],
     );
-    final Result<AuditEvent> mev = audit.append(
-      eventId: 'ev-${w.movementId}',
-      companyId: companyId.value,
-      entity: 'stock_movement',
-      entityId: w.movementId,
-      newRow: moveRow,
-      actor: actor,
-    );
-    if (mev.isErr) throw TxFailure((mev as Err<AuditEvent>).error);
+    // (Audit for this movement rode along with the operation append above, so
+    // a failing insert rolls both back together in the caller's transaction.)
     // Layer consumption: decrement remaining balances (the receipt record
     // qty_q4/value_paise is never rewritten — no retro revaluation).
     for (final _LayerConsume c in w.consumes) {
       _db.executeArgs(
         'UPDATE stock_cost_layer SET remaining_qty_q4 = '
         'COALESCE(remaining_qty_q4, qty_q4) - ?, remaining_value_paise = '
-        'COALESCE(remaining_value_paise, value_paise) - ? '
+        'COALESCE(remaining_value_paise, value_paise) - ?, '
+        'record_version = record_version + 1 '
         'WHERE company_id = ? AND layer_id = ?',
         <Object?>[c.qtyQ4, c.valuePaise, companyId.value, c.layerId],
       );
@@ -1376,7 +1612,9 @@ class VoucherEngine {
       'entity': entity,
       'entity_id': entityId,
     };
-    final Result<OperationRecord> op = ops.append(
+    final Result<void> lineage = recordLineage(
+      ops: ops,
+      audit: audit,
       opId: opId,
       companyId: companyId.value,
       deviceId: deviceId,
@@ -1384,17 +1622,11 @@ class VoucherEngine {
       entityId: entityId,
       action: action,
       payloadHash: auditPayloadHash(row),
-    );
-    if (op.isErr) throw TxFailure((op as Err<OperationRecord>).error);
-    final Result<AuditEvent> ev = audit.append(
       eventId: eventId,
-      companyId: companyId.value,
-      entity: entity,
-      entityId: entityId,
       newRow: row,
       actor: actor,
     );
-    if (ev.isErr) throw TxFailure((ev as Err<AuditEvent>).error);
+    if (lineage.isErr) throw TxFailure((lineage as Err<void>).error);
   }
 
   /// Status move assuming the caller already holds the transaction (used by
@@ -1411,8 +1643,13 @@ class VoucherEngine {
     required String actor,
     String? reason,
   }) {
+    final List<Map<String, Object?>> before = _db.queryArgs(
+      'SELECT status FROM voucher WHERE company_id = ? AND voucher_id = ?',
+      <Object?>[companyId.value, id.value],
+    );
     _db.executeArgs(
-      'UPDATE voucher SET status = ? WHERE company_id = ? AND voucher_id = ?',
+      'UPDATE voucher SET status = ?, record_version = record_version + 1 '
+      'WHERE company_id = ? AND voucher_id = ?',
       <Object?>[status, companyId.value, id.value],
     );
     final Map<String, Object?> row = <String, Object?>{
@@ -1420,7 +1657,9 @@ class VoucherEngine {
       'status': status,
     };
     if (reason != null) row['reason'] = reason;
-    final Result<OperationRecord> op = ops.append(
+    final Result<void> lineage = recordLineage(
+      ops: ops,
+      audit: audit,
       opId: opId,
       companyId: companyId.value,
       deviceId: deviceId,
@@ -1428,17 +1667,15 @@ class VoucherEngine {
       entityId: id.value,
       action: action,
       payloadHash: auditPayloadHash(row),
-    );
-    if (op.isErr) throw TxFailure((op as Err<OperationRecord>).error);
-    final Result<AuditEvent> ev = audit.append(
       eventId: eventId,
-      companyId: companyId.value,
-      entity: 'voucher',
-      entityId: id.value,
+      oldRow: <String, Object?>{
+        'voucher_id': id.value,
+        'status': before.isEmpty ? null : before.first['status'],
+      },
       newRow: row,
       actor: actor,
     );
-    if (ev.isErr) throw TxFailure((ev as Err<AuditEvent>).error);
+    if (lineage.isErr) throw TxFailure((lineage as Err<void>).error);
     final Voucher? done = vouchers.get(companyId, id)?.voucher;
     if (done == null) {
       throw TxFailure(const AppError('db', 'voucher vanished mid-move'));
@@ -1455,6 +1692,22 @@ class _Postable {
   final Voucher voucher;
   final List<VoucherLine> lines;
   final PostedTotals totals;
+}
+
+/// One computed ledger arm (Dr xor Cr, non-negative paise).
+class _LedgerArm {
+  const _LedgerArm({
+    required this.suffix,
+    required this.ledgerId,
+    required this.drCr,
+    required this.amountPaise,
+  });
+
+  /// Id suffix: arm ids read `la-<voucherId>-<suffix>`.
+  final String suffix;
+  final EntityId ledgerId;
+  final String drCr;
+  final int amountPaise;
 }
 
 /// One planned stock write (movement, plus layer + cost-state on inbound,

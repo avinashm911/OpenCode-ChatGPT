@@ -20,6 +20,7 @@ import 'package:niaverp/data/accounting/stock_policy.dart';
 import 'package:niaverp/data/repositories/item_repository.dart';
 import 'package:niaverp/data/repositories/voucher_repository.dart';
 import 'package:niaverp/data/repositories/voucher_type_repository.dart';
+import 'package:niaverp/presentation/localization/app_localizations.dart';
 import 'package:niaverp/presentation/shared/company_scope.dart';
 
 /// One transfer row (ephemeral draft state; the posted legs are the record).
@@ -139,28 +140,30 @@ class NewTransferScreenState extends State<NewTransferScreen> {
     return id.value;
   }
 
-  String? _validate() {
-    if (_rows.isEmpty) return 'Add at least one transfer row.';
+  String? _validate(AppLocalizations l10n) {
+    if (_rows.isEmpty) return l10n.t('invNeedTransferRow');
     for (int i = 0; i < _rows.length; i++) {
       final _TransferRow r = _rows[i];
       if (_parseQty(r.qty.text) <= 0) {
-        return 'Row ${i + 1}: quantity must be a positive number.';
+        return l10n.numberedRow(i + 1, l10n.t('vfQtyPositive'));
       }
       if (r.fromId == null || r.toId == null) {
-        return 'Row ${i + 1}: select source and destination godowns.';
+        return l10n.numberedRow(i + 1, l10n.t('invLegsSel'));
       }
       if (r.fromId == r.toId) {
-        return 'Row ${i + 1}: source must differ from destination.';
+        return l10n.numberedRow(i + 1, l10n.t('invLegsDiffer'));
       }
     }
     try {
       NiavDate(_date.text.trim());
     } on ArgumentError {
-      return 'Date must be YYYY-MM-DD.';
+      return l10n.t('lvBadDate');
     }
-    if (_voucherType == null) return 'No Stock Transfer type is registered.';
+    if (_voucherType == null) {
+      return l10n.noTypeRegistered('Stock Transfer');
+    }
     if (_series == null && _manualNo.text.trim().isEmpty) {
-      return 'Enter the voucher number.';
+      return l10n.t('vfNeedVoucherNo');
     }
     return null;
   }
@@ -169,25 +172,28 @@ class NewTransferScreenState extends State<NewTransferScreen> {
     final TextEditingController name = TextEditingController();
     final String? created = await showDialog<String>(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('New item'),
-        content: TextField(
-          key: const ValueKey<String>('transfer-new-item-name'),
-          controller: name,
-          decoration: const InputDecoration(labelText: 'Name (unit pcs)'),
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+      builder: (BuildContext context) {
+        final AppLocalizations l10n = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(l10n.t('vfNewItem')),
+          content: TextField(
+            key: const ValueKey<String>('transfer-new-item-name'),
+            controller: name,
+            decoration: InputDecoration(labelText: l10n.t('piUnitName')),
           ),
-          TextButton(
-            key: const ValueKey<String>('transfer-new-item-create'),
-            onPressed: () => Navigator.of(context).pop(name.text.trim()),
-            child: const Text('Create'),
-          ),
-        ],
-      ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(l10n.t('commonCancel')),
+            ),
+            TextButton(
+              key: const ValueKey<String>('transfer-new-item-create'),
+              onPressed: () => Navigator.of(context).pop(name.text.trim()),
+              child: Text(l10n.t('commonCreate')),
+            ),
+          ],
+        );
+      },
     );
     name.dispose();
     if (created == null || created.isEmpty || !mounted) return;
@@ -217,7 +223,8 @@ class NewTransferScreenState extends State<NewTransferScreen> {
   }
 
   Future<void> _post() async {
-    final String? problem = _validate();
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final String? problem = _validate(l10n);
     if (problem != null) {
       _fail(problem);
       return;
@@ -301,7 +308,7 @@ class NewTransferScreenState extends State<NewTransferScreen> {
     );
     if (posted.isErr) {
       final AppError e = (posted as Err<PostingResult>).error;
-      _fail('${e.code}: ${e.message} (saved as draft)');
+      _fail('${l10n.errorFor(e.code)}${l10n.t('vfSavedAsDraft')}');
       return;
     }
     if (!mounted) return;
@@ -330,6 +337,7 @@ class NewTransferScreenState extends State<NewTransferScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final List<VoucherType> transferTypes = _transferTypes();
     if (_voucherType != null) {
       final String want = _voucherType!.id.value;
@@ -358,7 +366,7 @@ class NewTransferScreenState extends State<NewTransferScreen> {
         _scope.search.searchItems(_company, _itemQuery.text);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('New Stock Transfer')),
+      appBar: AppBar(title: Text(l10n.t('invNewTransfer'))),
       body: ListView(
         key: const ValueKey<String>('transfer-form-list'),
         padding: const EdgeInsets.all(16),
@@ -373,12 +381,12 @@ class NewTransferScreenState extends State<NewTransferScreen> {
                 child: Text(_error!),
               ),
             ),
-          const Text('Items (legs carry no price; value moves with the goods)'),
+          Text(l10n.t('invTransferNote')),
           TextField(
             key: const ValueKey<String>('transfer-item-field'),
             controller: _itemQuery,
             decoration:
-                const InputDecoration(labelText: 'Search item by name/code'),
+                InputDecoration(labelText: l10n.t('vfSearchItem')),
             onChanged: (_) => setState(() {}),
           ),
           for (final Item item in itemHits)
@@ -397,7 +405,7 @@ class NewTransferScreenState extends State<NewTransferScreen> {
           TextButton(
             key: const ValueKey<String>('transfer-new-item'),
             onPressed: _quickAddItem,
-            child: const Text('New item'),
+            child: Text(l10n.t('vfNewItem')),
           ),
           for (int i = 0; i < _rows.length; i++)
             _TransferRowEditor(
@@ -421,11 +429,11 @@ class NewTransferScreenState extends State<NewTransferScreen> {
               onChanged: () => setState(() {}),
             ),
           const Divider(),
-          const Text('Numbering'),
+          Text(l10n.t('vfNumbering')),
           if (transferTypes.isEmpty)
-            const Text(
-              'No Stock Transfer type is registered. Register one with an '
-              'auto series (or enter the number manually).',
+            Text(
+              '${l10n.noTypeRegistered('Stock Transfer')} '
+              "${l10n.t('vfRegisterAuto')}",
             )
           else ...<Widget>[
             DropdownButton<VoucherType>(
@@ -454,35 +462,35 @@ class NewTransferScreenState extends State<NewTransferScreen> {
                     setState(() => _series = v),
               ),
             if (autoSeries.isNotEmpty)
-              Text('Auto-numbered on post (${_series?.name ?? ''}).'),
+              Text(l10n.autoNumbered(_series?.name ?? '')),
             if (autoSeries.isEmpty)
               TextField(
                 key: const ValueKey<String>('transfer-manual-no'),
                 controller: _manualNo,
                 decoration:
-                    const InputDecoration(labelText: 'Voucher number'),
+                    InputDecoration(labelText: l10n.t('vfVoucherNo')),
               ),
           ],
           if (transferTypes.isEmpty)
             TextField(
               key: const ValueKey<String>('transfer-manual-no'),
               controller: _manualNo,
-              decoration: const InputDecoration(labelText: 'Voucher number'),
+              decoration: InputDecoration(labelText: l10n.t('vfVoucherNo')),
             ),
           TextField(
             key: const ValueKey<String>('transfer-date'),
             controller: _date,
             decoration:
-                const InputDecoration(labelText: 'Date (YYYY-MM-DD)'),
+                InputDecoration(labelText: l10n.t('vfDate')),
           ),
           TextField(
             key: const ValueKey<String>('transfer-narration'),
             controller: _narration,
             decoration:
-                const InputDecoration(labelText: 'Narration (optional)'),
+                InputDecoration(labelText: l10n.t('vfNarrationOpt')),
           ),
           const Divider(),
-          const Text('Negative-stock policy'),
+          Text(l10n.t('vfNegStock')),
           RadioGroup<StockPolicy>(
             groupValue: _policy,
             onChanged: (StockPolicy? v) =>
@@ -508,7 +516,9 @@ class NewTransferScreenState extends State<NewTransferScreen> {
           child: FilledButton(
             key: const ValueKey<String>('transfer-post'),
             onPressed: _posting ? null : _post,
-            child: Text(_posting ? 'Posting…' : 'Post transfer'),
+            child: Text(_posting
+                ? l10n.t('vfPosting')
+                : l10n.t('invPostTransfer')),
           ),
         ),
       ),
@@ -536,6 +546,7 @@ class _TransferRowEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Card(
       key: ValueKey<String>('transfer-row-$index'),
       child: Padding(
@@ -549,12 +560,13 @@ class _TransferRowEditor extends StatelessWidget {
                 IconButton(
                   key: ValueKey<String>('transfer-row-dupe-$index'),
                   icon: const Icon(Icons.copy),
-                  tooltip: 'Duplicate row',
+                  tooltip: l10n.t('commonDuplicate'),
                   onPressed: onDuplicate,
                 ),
                 IconButton(
                   key: ValueKey<String>('transfer-row-remove-$index'),
                   icon: const Icon(Icons.delete),
+                  tooltip: l10n.t('commonDeleteRow'),
                   onPressed: onRemove,
                 ),
               ],
@@ -565,7 +577,7 @@ class _TransferRowEditor extends StatelessWidget {
                   child: DropdownButton<EntityId>(
                     key: ValueKey<String>('transfer-from-$index'),
                     value: row.fromId,
-                    hint: const Text('From'),
+                    hint: Text(l10n.t('invFrom')),
                     items: <DropdownMenuItem<EntityId>>[
                       for (final Godown g in godowns)
                         DropdownMenuItem<EntityId>(
@@ -582,7 +594,7 @@ class _TransferRowEditor extends StatelessWidget {
                   child: DropdownButton<EntityId>(
                     key: ValueKey<String>('transfer-to-$index'),
                     value: row.toId,
-                    hint: const Text('To'),
+                    hint: Text(l10n.t('invTo')),
                     items: <DropdownMenuItem<EntityId>>[
                       for (final Godown g in godowns)
                         DropdownMenuItem<EntityId>(
@@ -599,7 +611,7 @@ class _TransferRowEditor extends StatelessWidget {
             TextField(
               key: ValueKey<String>('transfer-qty-$index'),
               controller: row.qty,
-              decoration: const InputDecoration(labelText: 'Qty'),
+              decoration: InputDecoration(labelText: l10n.t('vfQty')),
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),
               onChanged: (_) => onChanged(),
@@ -628,14 +640,15 @@ class TransferViewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text('Transfer $voucherNo')),
+      appBar: AppBar(title: Text(l10n.transferTitle(voucherNo))),
       body: ListView(
         key: const ValueKey<String>('transfer-view'),
         padding: const EdgeInsets.all(16),
         children: <Widget>[
-          Text('No: $voucherNo · Date: $dateIso'),
-          for (final String w in warnings) Text('Note: $w'),
+          Text(l10n.noDate(voucherNo, dateIso)),
+          for (final String w in warnings) Text(l10n.noteLine(w)),
           const Divider(),
           for (int i = 0; i < legs.length; i++)
             ListTile(

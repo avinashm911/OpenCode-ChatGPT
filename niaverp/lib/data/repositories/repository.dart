@@ -12,6 +12,27 @@ import 'package:niaverp/data/migrations/migration_runner.dart';
 /// Maps a database engine exception to a stable [AppError].
 AppError dbError(Object e, String op) {
   final String text = e.toString();
+  // D2 integrity-guard rejections (m017 triggers) raise controlled,
+  // value-free markers: they are rule breaches, not database failures.
+  const List<String> guardMarkers = <String>[
+    'audit-event-append-only',
+    'operation-append-only',
+    'voucher-posted-immutable',
+    'voucher-line-posted-immutable',
+    'voucher-status-vocab',
+    'period-lock-status-vocab',
+    'bill-allocation-status-vocab',
+    'document-link-status-vocab',
+    'movement-cost-source-vocab',
+    'operation-action-vocab',
+    'voucher-line-foreign-company',
+    'party-ledger-foreign-company',
+  ];
+  for (final String marker in guardMarkers) {
+    if (text.contains(marker)) {
+      return AppError('validation', marker);
+    }
+  }
   if (text.contains('UNIQUE constraint failed')) {
     return const AppError('conflict', 'duplicate record (unique constraint)');
   }

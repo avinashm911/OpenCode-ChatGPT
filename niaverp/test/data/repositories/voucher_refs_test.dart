@@ -193,7 +193,9 @@ void main() {
       final Result<VoucherLine> ghost = addLine('v-1', 'l-3',
           godown: 'g-ghost', line: 3);
       expect(ghost.isErr, isTrue);
-      expect((ghost as Err<VoucherLine>).error.code, 'foreign-key');
+      // D2-B2: the company guard rejects the dangling godown before the raw
+      // FK does (fail fast, same direction as the D1-D4 parent pre-check).
+      expect((ghost as Err<VoucherLine>).error.code, 'validation');
     });
   });
 }

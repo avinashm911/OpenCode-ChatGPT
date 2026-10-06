@@ -28,6 +28,21 @@ int invoiceRoundOff(int totalPaise) {
   return (cgst: half + (totalPaise % 2), sgst: half);
 }
 
+/// Per-line GST for posting displays (D3-A2 documented subset): the rate is
+/// the item's documented GST rate; the math is D-M4 (gstTotal) with the
+/// P-DISC-PREC odd-to-CGST split. This is intra-state CGST/SGST ONLY — the
+/// CGST+SGST-vs-IGST determination (place of supply) is NOT defined by the
+/// documents (G0-VER-003), so no IGST arm is produced anywhere from this.
+/// Callers must treat the result as a calculation aid behind that boundary.
+({int gst, int cgst, int sgst}) lineGstPaise({
+  required int netPaise,
+  required int rateBps,
+}) {
+  final int gst = gstTotal(netPaise, rateBps);
+  final ({int cgst, int sgst}) split = splitCgstSgst(gst);
+  return (gst: gst, cgst: split.cgst, sgst: split.sgst);
+}
+
 /// Render integer paise as a decimal rupee string (always ≤ 2 decimals).
 String formatRupees(int paise) {
   final String sign = paise < 0 ? '-' : '';

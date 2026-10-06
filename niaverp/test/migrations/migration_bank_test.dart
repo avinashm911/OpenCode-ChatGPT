@@ -1,6 +1,6 @@
 // m014 migration tests: ledger detail + bank masters (gate G1).
 // Disposable databases only. Proves: bank_account table + ledger detail
-// columns exist at latest (v16), staged v13 upgrade to latest preserves
+// columns exist at latest (v17), staged v13 upgrade to latest preserves
 // ledger rows,
 // UNIQUE (company, ledger) collides, credit CHECKs are enforced, and
 // re-bootstrap is repeat-safe.
@@ -26,7 +26,7 @@ void main() {
     test('columns and bank table exist at latest', () {
       db = openTestDatabase();
       addTearDown(() => rawEngineOf(db).close());
-      expect(db.schemaVersion, 16); // registry ends at v16 (m016, D1-D5)
+      expect(db.schemaVersion, 17); // registry ends at v17 (m017, D2)
       expect(
         columns(db, 'ledger'),
         containsAll(<String>[
@@ -75,7 +75,7 @@ void main() {
       v14.sqlByVersion = loadMigrationSql();
       v14.bootstrap();
       addTearDown(() => rawEngineOf(v14).close());
-      expect(v14.schemaVersion, 16); // staged v13, then full bootstrap to latest v16
+      expect(v14.schemaVersion, 17); // staged v13, then full bootstrap to latest v17
       expect(
         v14
             .queryArgs(
@@ -119,7 +119,7 @@ void main() {
           NiavDatabase(rawEngineOf(v14), clock: testClock());
       again.sqlByVersion = loadMigrationSql();
       again.bootstrap();
-      expect(again.schemaVersion, 16); // re-bootstrap stays at latest v16
+      expect(again.schemaVersion, 17); // re-bootstrap stays at latest v17
     });
   });
 }

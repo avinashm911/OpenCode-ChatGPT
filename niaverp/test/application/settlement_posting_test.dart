@@ -26,6 +26,7 @@ import 'package:niaverp/data/repositories/repository.dart';
 import 'package:niaverp/data/repositories/voucher_repository.dart';
 import 'package:niaverp/data/repositories/voucher_type_repository.dart';
 
+import '../helpers/seeded_post.dart';
 import '../helpers/test_database.dart';
 
 void main() {
@@ -106,6 +107,9 @@ void main() {
           .isOk,
       isTrue,
     );
+    VoucherSeeder(ctx, ops: ops, audit: audit)
+      ..ensurePostingLedgers(companyId)
+      ..linkPartyLedgers(companyId, <EntityId>[EntityId('p-s')]);
   });
 
   tearDown(() {

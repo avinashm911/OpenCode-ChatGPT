@@ -30,6 +30,7 @@ import 'package:niaverp/data/repositories/voucher_repository.dart';
 import 'package:niaverp/data/repositories/voucher_type_repository.dart';
 import 'package:niaverp/presentation/reports/books_report_screen.dart';
 
+import '../helpers/seeded_post.dart';
 import '../helpers/test_database.dart';
 
 void main() {
@@ -149,6 +150,11 @@ void main() {
         isTrue,
       );
     }
+    // D3-A1 posting fixture: role ledgers + party-ledger link (Sales
+    // Invoice v-2 posts through the ledger arms).
+    VoucherSeeder(ctx, ops: ops, audit: audit)
+      ..ensurePostingLedgers(companyId)
+      ..linkPartyLedgers(companyId, <EntityId>[EntityId('p-b')]);
   });
 
   tearDown(() {
@@ -272,7 +278,9 @@ void main() {
           type: 'Sales Invoice');
       await t.pumpWidget(buildScreen());
       await t.pumpAndSettle();
-      expect(find.text('2 vouchers · gross ₹30.00'), findsOneWidget);
+      // v-1 (journal 1000 + 1000) + v-2 (content 500 + 500 plus D3-A1
+      // posting arms Dr Party 1000 + Cr Sales 1000): SUM over all lines.
+      expect(find.text('2 vouchers · gross ₹50.00'), findsOneWidget);
       await t.tap(find.byKey(const ValueKey<String>('daybook-type-filter')));
       await t.pumpAndSettle();
       await t.tap(find
@@ -281,7 +289,7 @@ void main() {
       await t.pumpAndSettle();
       expect(find.text('v-1 · Journal'), findsNothing);
       expect(find.text('v-2 · Sales Invoice'), findsOneWidget);
-      expect(find.text('1 vouchers · gross ₹10.00'), findsOneWidget);
+      expect(find.text('1 vouchers · gross ₹30.00'), findsOneWidget);
 
       // Back to all types: both rows again.
       await t.tap(find.byKey(const ValueKey<String>('daybook-type-filter')));
@@ -319,15 +327,33 @@ void main() {
           find.byKey(const ValueKey<String>('trial-list')), findsOneWidget);
       // Cash: 10000 opening + 3000 Dr; Capital: 10000 opening + 3000 Cr.
       // A ledger row and its group row carry the same signed total, so
-      // each assertion is scoped to the row it names.
+      // each assertion is scoped to the row it names. Group rows sit below
+      // the fold once posting fixtures add masters, so each is scrolled
+      // into view before asserting (finders skip offstage widgets).
       expect(rowWith('trial-ledger-l-cash', 'Dr ₹130.00'), findsOneWidget);
-      expect(rowWith('trial-group-g-cash', 'Dr ₹130.00'), findsOneWidget);
       expect(rowWith('trial-ledger-l-cap', 'Cr ₹130.00'), findsOneWidget);
       expect(find.text('Dr = Cr'), findsOneWidget);
       expect(find.text('Group summary'), findsOneWidget);
-      // Two groups hold one ledger each; Suspense holds none.
-      expect(find.text('1 ledgers'), findsNWidgets(2));
+      await t.scrollUntilVisible(
+          find.byKey(const ValueKey<String>('trial-group-g-cash')), 300.0);
+      await t.pumpAndSettle();
+      expect(rowWith('trial-group-g-cash', 'Dr ₹130.00'), findsOneWidget);
+      expect(rowWith('trial-group-g-cash', '1 ledgers'), findsOneWidget);
+      await t.scrollUntilVisible(
+          find.byKey(const ValueKey<String>('trial-group-g-cap')), 300.0);
+      await t.pumpAndSettle();
+      expect(rowWith('trial-group-g-cap', 'Cr ₹130.00'), findsOneWidget);
+      expect(rowWith('trial-group-g-cap', '1 ledgers'), findsOneWidget);
+      await t.scrollUntilVisible(
+          find.byKey(const ValueKey<String>('trial-group-g-sus')), 300.0);
+      await t.pumpAndSettle();
       expect(rowWith('trial-group-g-sus', 'Dr ₹0.00'), findsOneWidget);
+      expect(rowWith('trial-group-g-sus', '0 ledgers'), findsOneWidget);
+      await t.scrollUntilVisible(
+          find.byKey(const ValueKey<String>('trial-group-g-post')), 300.0);
+      await t.pumpAndSettle();
+      expect(rowWith('trial-group-g-post', 'Dr ₹0.00'), findsOneWidget);
+      expect(rowWith('trial-group-g-post', '6 ledgers'), findsOneWidget);
     });
 
     testWidgets('cancelled vouchers drop out of the books',

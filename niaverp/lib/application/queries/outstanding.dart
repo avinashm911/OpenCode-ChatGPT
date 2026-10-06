@@ -29,9 +29,11 @@ int voucherOpenBalance(
   CompanyId companyId,
   EntityId voucherId,
 ) {
+  // Bill economics live in the document lines (no Dr/Cr marker); ledger arms
+  // (D3-A1) are excluded exactly as in bills() below.
   final List<Map<String, Object?>> lines = db.queryArgs(
     'SELECT voucher_line_id, amount_paise FROM voucher_line '
-    'WHERE company_id = ? AND voucher_id = ?',
+    'WHERE company_id = ? AND voucher_id = ? AND dr_cr IS NULL',
     <Object?>[companyId.value, voucherId.value],
   );
   if (lines.isEmpty) return 0;
@@ -305,8 +307,13 @@ class OutstandingReport {
         continue;
       }
       final List<Map<String, Object?>> lines = _db.queryArgs(
+        // Bill economics live in the document lines (no Dr/Cr marker).
+        // Engine-posted ledger arms (D3-A1, ledger + Dr/Cr) are the ledger
+        // books' representation of the same money — counting them here would
+        // double the bill, so they are excluded (partyOutstanding needs no
+        // filter: arms never carry a party).
         'SELECT voucher_line_id, amount_paise, party_id FROM voucher_line '
-        'WHERE company_id = ? AND voucher_id = ?',
+        'WHERE company_id = ? AND voucher_id = ? AND dr_cr IS NULL',
         <Object?>[companyId.value, voucherId.value],
       );
       if (lines.isEmpty) continue;

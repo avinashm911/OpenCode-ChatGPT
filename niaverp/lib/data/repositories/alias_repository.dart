@@ -93,7 +93,9 @@ class AliasRepository {
           'entity_id': entityId.value,
           'alias': alias,
         };
-        final Result<OperationRecord> op = ops.append(
+        final Result<void> lineage = recordLineage(
+          ops: ops,
+          audit: audit,
           opId: opId,
           companyId: companyId.value,
           deviceId: deviceId,
@@ -101,21 +103,12 @@ class AliasRepository {
           entityId: id.value,
           action: 'create',
           payloadHash: auditPayloadHash(row),
-        );
-        if (op.isErr) {
-          txFailure = (op as Err<OperationRecord>).error;
-          throw const RepositoryAbort();
-        }
-        final Result<AuditEvent> ev = audit.append(
           eventId: eventId,
-          companyId: companyId.value,
-          entity: 'search_alias',
-          entityId: id.value,
           newRow: row,
           actor: actor,
         );
-        if (ev.isErr) {
-          txFailure = (ev as Err<AuditEvent>).error;
+        if (lineage.isErr) {
+          txFailure = (lineage as Err<void>).error;
           throw const RepositoryAbort();
         }
         done = SearchAlias(

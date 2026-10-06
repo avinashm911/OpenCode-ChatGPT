@@ -111,12 +111,14 @@ class OperationLog {
     }
   }
 
-  /// Operations for one entity, oldest first (replay order).
+  /// Operations for one entity, oldest first (replay order). Deterministic:
+  /// sequence ties (multi-device writes) break by operation id (D2-C1).
   List<OperationRecord> forEntity(String companyId, String entity, String entityId) {
     final List<Map<String, Object?>> rows = _db.queryArgs(
       'SELECT op_id, company_id, device_id, seq, entity, entity_id, action, '
       'base_version, created_at FROM operation '
-      'WHERE company_id = ? AND entity = ? AND entity_id = ? ORDER BY seq',
+      'WHERE company_id = ? AND entity = ? AND entity_id = ? '
+      'ORDER BY seq, op_id',
       <Object?>[companyId, entity, entityId],
     );
     return <OperationRecord>[

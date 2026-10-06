@@ -38,6 +38,7 @@ import 'package:niaverp/presentation/inventory/new_stock_journal_screen.dart';
 import 'package:niaverp/presentation/shared/company_scope.dart';
 import 'package:niaverp/presentation/shared/screen_wiring.dart';
 
+import '../helpers/seeded_post.dart';
 import '../helpers/test_database.dart';
 
 void main() {
@@ -198,6 +199,10 @@ void main() {
       );
     }
     // Stock the shelf: 10.0 @ ₹1000 via a posted purchase.
+    // D3-A1 posting fixture: role ledgers + party-ledger link.
+    VoucherSeeder(ctx, ops: ops, audit: audit)
+      ..ensurePostingLedgers(companyId)
+      ..linkPartyLedgers(companyId, <EntityId>[EntityId('p-dj')]);
     final Result<Voucher> buy = vouchers.create(
       id: EntityId('v-buy'),
       companyId: companyId,
@@ -306,7 +311,7 @@ void main() {
       expect(find.text('Invoice DN-0001'), findsOneWidget);
       await revealRow(
           t, find.byKey(const ValueKey<String>('invoice-totals')), 'invoice-view');
-      expect(find.text('Gross: ₹3000.00 · Net: ₹3000.00'),
+      expect(find.text('Gross: ₹3,000.00 · Net: ₹3,000.00'),
           findsOneWidget);
       expect(
         scope.stock

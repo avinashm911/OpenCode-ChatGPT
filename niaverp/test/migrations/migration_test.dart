@@ -88,17 +88,19 @@ void main() {
   });
 
   group('registry (G0-SCH-001…007 traceability)', () {
-    test('versions are contiguous 1..16 with existing files', () {
+    test('versions are contiguous 1..17 with existing files', () {
       // G0 chain v1..v8 preserved exactly (G0 acceptance); v9 (M03 masters)
       // appended by implementation Phase 02; v10-13 (DSS transaction refs,
       // FY + Dr/Cr, series mode, ledger masters) appended for the
       // voucher-engine milestone; v14 (ledger detail + bank) for the
       // accounting-master milestone; v15 (valuation method + layer books)
       // for the stock-valuation milestone; v16 (D1-D5 company scope on
-      // item_cost_state + stock_movement reversal/cost-method columns).
+      // item_cost_state + stock_movement reversal/cost-method columns);
+      // v17 (D2 hardening: triggers, vocabulary guards, indexes, audit
+      // chain columns, migration checksums, trial clock mark).
       expect(kMigrations.map((Migration m) => m.version).toList(),
-          <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
-      expect(kLatestVersion, 16);
+          <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]);
+      expect(kLatestVersion, 17);
       for (final Migration m in kMigrations) {
         expect(File('lib/data/migrations/${m.fileName}').existsSync(), isTrue,
             reason: m.fileName);
@@ -123,7 +125,7 @@ void main() {
   });
 
   group('clean install creates the complete schema', () {
-    test('migrates to v16 with ordered ledger and all deltas present', () {
+    test('migrates to v17 with ordered ledger and all deltas present', () {
       final Database raw = sqlite3.openInMemory();
       raw.execute('PRAGMA foreign_keys = ON');
       final SqliteMigrationDb db = SqliteMigrationDb(raw);
@@ -132,13 +134,54 @@ void main() {
       migrate(db, sql);
       expect(currentVersion(db), kLatestVersion);
 
-      // Ledger: 16 rows, ordered, one per version
+      // Ledger: 17 rows, ordered, one per version
       // (G0 v1..v8 + M03 v9 + DSS v10-13 + ledger detail/bank v14 +
-      // valuation v15 + D1-D5 company scope/reversal v16).
+      // valuation v15 + D1-D5 company scope/reversal v16 + D2 hardening v17).
       final List<Map<String, Object?>> ledger =
           db.query('SELECT version FROM schema_migrations ORDER BY version');
       expect(ledger.map((Map<String, Object?> r) => r['version']).toList(),
-          <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
+          <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]);
+      // D2: every applied migration carries a checksum of its SQL text.
+      final List<Map<String, Object?>> checksums = db.query(
+          'SELECT COUNT(*) AS n FROM schema_migrations WHERE checksum IS NULL');
+      expect(checksums.single['n'], 0);
+      // D2 hardening objects: audit chain columns, checksum + clock columns,
+      // posted-history and vocabulary triggers, company-scoped indexes.
+      expect(columnsOf(raw, 'audit_event'),
+          containsAll(<String>{'prev_hash', 'row_hash'}));
+      expect(columnsOf(raw, 'trial_anchor'), contains('last_seen_at'));
+      expect(
+          indexesOf(raw),
+          containsAll(<String>{
+            'idx_voucher_line_company_item',
+            'idx_voucher_line_company_party',
+            'idx_voucher_line_company_ledger',
+            'idx_voucher_line_company_godown',
+            'idx_voucher_company_fy',
+            'idx_voucher_company_type_date',
+            'idx_party_company_name_gstin',
+            'idx_audit_company_time',
+            'idx_operation_company_time',
+          }));
+      final Set<String> triggers = <String>{
+        for (final Row r in raw.select(
+            "SELECT name FROM sqlite_master WHERE type = 'trigger'"))
+          r['name'] as String,
+      };
+      expect(
+          triggers,
+          containsAll(<String>{
+            'trg_audit_event_no_update',
+            'trg_audit_event_no_delete',
+            'trg_operation_no_update',
+            'trg_operation_no_delete',
+            'trg_voucher_posted_update',
+            'trg_voucher_posted_delete',
+            'trg_voucher_line_posted_update',
+            'trg_voucher_line_posted_delete',
+            'trg_voucher_line_company_ins',
+            'trg_party_ledger_ins',
+          }));
 
       // G0-SCH-001 tables.
       for (final String t in <String>[

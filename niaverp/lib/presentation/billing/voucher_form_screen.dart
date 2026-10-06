@@ -10,8 +10,9 @@
 // Explicit boundaries (never silent, never invented):
 // - GST shows a gated note (verified schemas pending G3); no tax is
 //   computed or persisted by this form.
-// - Round-off posts exact paise totals; a separate round-off ledger line
-//   waits on negative-line storage (the G0 amount CHECK stores >= 0).
+// - Round-off persists as its own Dr/Cr ledger arm at post time (D-M4, D3-A3:
+//   a negative round-off is stored as a positive amount on the opposite side,
+//   so the G0 amount CHECK (>= 0) always holds).
 // - Payment/receipt is recorded after posting from the invoice view.
 // - A registered type matching the configured canonical with an auto
 //   series numbers the voucher; otherwise the number is entered manually
@@ -22,10 +23,11 @@
 
 import 'package:flutter/material.dart';
 
+import 'package:niaverp/application/formatting/niav_format.dart';
+import 'package:niaverp/application/parsing/entry_parsing.dart';
 import 'package:niaverp/application/services/voucher_engine.dart';
 import 'package:niaverp/core/result.dart';
 import 'package:niaverp/core/value_objects/ids.dart';
-import 'package:niaverp/core/value_objects/money.dart';
 import 'package:niaverp/core/value_objects/niav_date.dart';
 import 'package:niaverp/data/accounting/stock_policy.dart';
 import 'package:niaverp/data/migrations/validators.dart';
@@ -34,22 +36,26 @@ import 'package:niaverp/data/repositories/party_repository.dart';
 import 'package:niaverp/data/repositories/voucher_repository.dart';
 import 'package:niaverp/data/repositories/voucher_type_repository.dart';
 import 'package:niaverp/presentation/billing/invoice_view_screen.dart';
+import 'package:niaverp/presentation/localization/app_localizations.dart';
 import 'package:niaverp/presentation/shared/company_scope.dart';
 
 /// What differs between the sales and purchase entry screens. Widget keys
 /// are `<keyPrefix>-...`, so each flow keeps stable test keys.
 class VoucherFormConfig {
   const VoucherFormConfig({
-    required this.title,
+    required this.titleKey,
     required this.keyPrefix,
     required this.typeCanonical,
     required this.partyRole,
-    required this.partyLabel,
+    required this.partyWordKey,
+    required this.searchHintKey,
+    required this.newPartyKey,
+    required this.selectFirstKey,
     required this.settlementCanonical,
   });
 
-  /// Screen title, e.g. 'New Sales Invoice'.
-  final String title;
+  /// ARB key for the screen title, e.g. 'vfTitleSale'.
+  final String titleKey;
 
   /// Key prefix, e.g. 'sale' (stable: existing tests bind to these keys).
   final String keyPrefix;
@@ -60,8 +66,17 @@ class VoucherFormConfig {
   /// Party role for picker and quick-add, 'customer' or 'supplier'.
   final String partyRole;
 
-  /// Human party word, e.g. 'Customer'.
-  final String partyLabel;
+  /// ARB key for the human party word, e.g. 'vfCustomer'.
+  final String partyWordKey;
+
+  /// ARB key for the party search hint, e.g. 'vfSearchCustomer'.
+  final String searchHintKey;
+
+  /// ARB key for the quick-add party label, e.g. 'vfNewCustomer'.
+  final String newPartyKey;
+
+  /// ARB key for the select-party-first validation, e.g. 'vfSelectCustomer'.
+  final String selectFirstKey;
 
   /// Settlement voucher posted from the invoice view afterwards, or null
   /// when the document type is never settled directly (e.g. delivery
@@ -71,21 +86,27 @@ class VoucherFormConfig {
 
 /// Sales entry configuration (keys `sale-*`).
 const VoucherFormConfig saleFormConfig = VoucherFormConfig(
-  title: 'New Sales Invoice',
+  titleKey: 'vfTitleSale',
   keyPrefix: 'sale',
   typeCanonical: 'Sales Invoice',
   partyRole: 'customer',
-  partyLabel: 'Customer',
+  partyWordKey: 'vfCustomer',
+  searchHintKey: 'vfSearchCustomer',
+  newPartyKey: 'vfNewCustomer',
+  selectFirstKey: 'vfSelectCustomer',
   settlementCanonical: 'Receipt',
 );
 
 /// Purchase entry configuration (keys `buy-*`).
 const VoucherFormConfig purchaseFormConfig = VoucherFormConfig(
-  title: 'New Purchase Invoice',
+  titleKey: 'vfTitlePurchase',
   keyPrefix: 'buy',
   typeCanonical: 'Purchase Invoice',
   partyRole: 'supplier',
-  partyLabel: 'Supplier',
+  partyWordKey: 'vfSupplier',
+  searchHintKey: 'vfSearchSupplier',
+  newPartyKey: 'vfNewSupplier',
+  selectFirstKey: 'vfSelectSupplier',
   settlementCanonical: 'Payment',
 );
 
@@ -93,11 +114,14 @@ const VoucherFormConfig purchaseFormConfig = VoucherFormConfig(
 /// settled directly — they convert to invoices (M09) — so no settlement
 /// button is offered afterwards.
 const VoucherFormConfig deliveryFormConfig = VoucherFormConfig(
-  title: 'New Delivery Note',
+  titleKey: 'vfTitleDelivery',
   keyPrefix: 'dn',
   typeCanonical: 'Delivery Note / Delivery Challan',
   partyRole: 'customer',
-  partyLabel: 'Customer',
+  partyWordKey: 'vfCustomer',
+  searchHintKey: 'vfSearchCustomer',
+  newPartyKey: 'vfNewCustomer',
+  selectFirstKey: 'vfSelectCustomer',
   settlementCanonical: null,
 );
 
@@ -205,27 +229,11 @@ class VoucherFormScreenState extends State<VoucherFormScreen> {
     });
   }
 
-  int _parseQty(String raw) {
-    final double? units = double.tryParse(raw.trim());
-    if (units == null || units <= 0) return -1;
-    return (units * 10000).round();
-  }
+  int _parseQty(String raw) => parseQuantityQ4(raw);
 
-  int _parsePaise(String raw) {
-    final String t = raw.trim();
-    if (t.isEmpty) return 0;
-    final double? rupees = double.tryParse(t);
-    if (rupees == null || rupees < 0) return -1;
-    return (rupees * 100).round();
-  }
+  int _parsePaise(String raw) => parsePaise(raw);
 
-  int _parseBps(String raw) {
-    final String t = raw.trim();
-    if (t.isEmpty) return 0;
-    final double? pct = double.tryParse(t);
-    if (pct == null || pct < 0 || pct > 100) return -1;
-    return (pct * 100).round();
-  }
+  int _parseBps(String raw) => parsePercentBps(raw);
 
   /// Draft totals over valid lines only (invalid rows show 0 until fixed).
   ({int gross, int net}) _draftTotals() {
@@ -247,25 +255,28 @@ class VoucherFormScreenState extends State<VoucherFormScreen> {
     final TextEditingController name = TextEditingController();
     final String? created = await showDialog<String>(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text('New ${_cfg.partyLabel.toLowerCase()}'),
-        content: TextField(
-          key: ValueKey<String>(_k('new-party-name')),
-          controller: name,
-          decoration: const InputDecoration(labelText: 'Name'),
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+      builder: (BuildContext context) {
+        final AppLocalizations l10n = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(l10n.t(_cfg.newPartyKey)),
+          content: TextField(
+            key: ValueKey<String>(_k('new-party-name')),
+            controller: name,
+            decoration: InputDecoration(labelText: l10n.t('vfName')),
           ),
-          TextButton(
-            key: ValueKey<String>(_k('new-party-create')),
-            onPressed: () => Navigator.of(context).pop(name.text.trim()),
-            child: const Text('Create'),
-          ),
-        ],
-      ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(l10n.t('commonCancel')),
+            ),
+            TextButton(
+              key: ValueKey<String>(_k('new-party-create')),
+              onPressed: () => Navigator.of(context).pop(name.text.trim()),
+              child: Text(l10n.t('commonCreate')),
+            ),
+          ],
+        );
+      },
     );
     name.dispose();
     if (created == null || created.isEmpty || !mounted) return;
@@ -294,25 +305,28 @@ class VoucherFormScreenState extends State<VoucherFormScreen> {
     final TextEditingController name = TextEditingController();
     final String? created = await showDialog<String>(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('New item'),
-        content: TextField(
-          key: ValueKey<String>(_k('new-item-name')),
-          controller: name,
-          decoration: const InputDecoration(labelText: 'Name (unit pcs)'),
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+      builder: (BuildContext context) {
+        final AppLocalizations l10n = AppLocalizations.of(context);
+        return AlertDialog(
+          title: Text(l10n.t('vfNewItem')),
+          content: TextField(
+            key: ValueKey<String>(_k('new-item-name')),
+            controller: name,
+            decoration: InputDecoration(labelText: l10n.t('piUnitName')),
           ),
-          TextButton(
-            key: ValueKey<String>(_k('new-item-create')),
-            onPressed: () => Navigator.of(context).pop(name.text.trim()),
-            child: const Text('Create'),
-          ),
-        ],
-      ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(l10n.t('commonCancel')),
+            ),
+            TextButton(
+              key: ValueKey<String>(_k('new-item-create')),
+              onPressed: () => Navigator.of(context).pop(name.text.trim()),
+              child: Text(l10n.t('commonCreate')),
+            ),
+          ],
+        );
+      },
     );
     name.dispose();
     if (created == null || created.isEmpty || !mounted) return;
@@ -336,41 +350,42 @@ class VoucherFormScreenState extends State<VoucherFormScreen> {
     });
   }
 
-  String? _validate() {
-    if (_party == null) return 'Select a ${_cfg.partyLabel.toLowerCase()} first.';
-    if (_lines.isEmpty) return 'Add at least one item line.';
-    if (_godownId == null) return 'Select a godown.';
+  String? _validate(AppLocalizations l10n) {
+    if (_party == null) return l10n.t(_cfg.selectFirstKey);
+    if (_lines.isEmpty) return l10n.t('vfNeedItemLine');
+    if (_godownId == null) return l10n.t('vfNeedGodown');
     for (int i = 0; i < _lines.length; i++) {
       final _DraftLine l = _lines[i];
       if (_parseQty(l.qty.text) <= 0) {
-        return 'Line ${i + 1}: quantity must be a positive number.';
+        return l10n.numberedLine(i + 1, l10n.t('vfQtyPositive'));
       }
       if (_parsePaise(l.rate.text) < 0) {
-        return 'Line ${i + 1}: rate must be a non-negative amount.';
+        return l10n.numberedLine(i + 1, l10n.t('vfRateNonNeg'));
       }
       if (_parsePaise(l.discAmt.text) < 0) {
-        return 'Line ${i + 1}: discount amount must be non-negative.';
+        return l10n.numberedLine(i + 1, l10n.t('vfDiscAmtNonNeg'));
       }
       if (_parseBps(l.discRate.text) < 0) {
-        return 'Line ${i + 1}: discount % must be 0–100.';
+        return l10n.numberedLine(i + 1, l10n.t('vfDiscPctRange'));
       }
     }
     try {
       NiavDate(_date.text.trim());
     } on ArgumentError {
-      return 'Date must be YYYY-MM-DD.';
+      return l10n.t('lvBadDate');
     }
     if (_voucherType == null) {
-      return 'No ${_cfg.typeCanonical} type is registered.';
+      return l10n.noTypeRegistered(_cfg.typeCanonical);
     }
     if (_series == null && _manualNo.text.trim().isEmpty) {
-      return 'Enter the voucher number.';
+      return l10n.t('vfNeedVoucherNo');
     }
     return null;
   }
 
   Future<void> _post() async {
-    final String? problem = _validate();
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final String? problem = _validate(l10n);
     if (problem != null) {
       _fail(problem);
       return;
@@ -451,7 +466,7 @@ class VoucherFormScreenState extends State<VoucherFormScreen> {
     );
     if (posted.isErr) {
       final AppError e = (posted as Err<PostingResult>).error;
-      _fail('${e.code}: ${e.message} (saved as draft)');
+      _fail('${l10n.errorFor(e.code)}${l10n.t('vfSavedAsDraft')}');
       return;
     }
     if (!mounted) return;
@@ -470,7 +485,8 @@ class VoucherFormScreenState extends State<VoucherFormScreen> {
   }
 
   Future<void> _confirmAndPost() async {
-    final String? problem = _validate();
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final String? problem = _validate(l10n);
     if (problem != null) {
       _fail(problem);
       return;
@@ -478,33 +494,38 @@ class VoucherFormScreenState extends State<VoucherFormScreen> {
     final ({int gross, int net}) totals = _draftTotals();
     final bool? go = await showDialog<bool>(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
-        key: ValueKey<String>(_k('confirm-dialog')),
-        title: Text('Post ${_cfg.typeCanonical}?'),
-        content: Text(
-          '${_cfg.partyLabel}: ${_party?.name ?? '—'}\n'
-          'Lines: ${_lines.length}\n'
-          'Gross: ₹${MoneyPaise(totals.gross).toRupeesString()}\n'
-          'Net: ₹${MoneyPaise(totals.net).toRupeesString()}',
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Review'),
+      builder: (BuildContext context) {
+        final AppLocalizations l10n = AppLocalizations.of(context);
+        final NiavFormat fmt = NiavFormat(l10n.localeCode);
+        return AlertDialog(
+          key: ValueKey<String>(_k('confirm-dialog')),
+          title: Text(l10n.confirmPost(_cfg.typeCanonical)),
+          content: Text(
+            '${l10n.t(_cfg.partyWordKey)}: ${_party?.name ?? '—'}\n'
+            '${l10n.linesCount(_lines.length)}\n'
+            '${l10n.grossNet(fmt.paise(totals.gross), fmt.paise(totals.net))}',
           ),
-          TextButton(
-            key: ValueKey<String>(_k('confirm-post')),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Post'),
-          ),
-        ],
-      ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(l10n.t('commonReview')),
+            ),
+            TextButton(
+              key: ValueKey<String>(_k('confirm-post')),
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(l10n.t('commonPost')),
+            ),
+          ],
+        );
+      },
     );
     if (go == true && mounted) await _post();
   }
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final NiavFormat fmt = NiavFormat(l10n.localeCode);
     final List<VoucherType> matching = _matchingTypes();
     // Dropdowns match by identity: rebind selections to this build's
     // instances (repositories return fresh objects per read).
@@ -542,7 +563,7 @@ class VoucherFormScreenState extends State<VoucherFormScreen> {
     final ({int gross, int net}) totals = _draftTotals();
 
     return Scaffold(
-      appBar: AppBar(title: Text(_cfg.title)),
+      appBar: AppBar(title: Text(l10n.t(_cfg.titleKey))),
       body: ListView(
         key: ValueKey<String>(_k('form-list')),
         padding: const EdgeInsets.all(16),
@@ -557,13 +578,13 @@ class VoucherFormScreenState extends State<VoucherFormScreen> {
                 child: Text(_error!),
               ),
             ),
-          Text(_cfg.partyLabel),
+          Text(l10n.t(_cfg.partyWordKey)),
           if (_party == null) ...<Widget>[
             TextField(
               key: ValueKey<String>(_k('customer-field')),
               controller: _partyQuery,
-              decoration: InputDecoration(
-                  labelText: 'Search ${_cfg.partyLabel.toLowerCase()} by name'),
+              decoration:
+                  InputDecoration(labelText: l10n.t(_cfg.searchHintKey)),
               onChanged: (_) => setState(() {}),
             ),
             for (final Party p in partyHits)
@@ -580,7 +601,7 @@ class VoucherFormScreenState extends State<VoucherFormScreen> {
             TextButton(
               key: ValueKey<String>(_k('new-party')),
               onPressed: _quickAddParty,
-              child: Text('New ${_cfg.partyLabel.toLowerCase()}'),
+              child: Text(l10n.t(_cfg.newPartyKey)),
             ),
           ] else
             ListTile(
@@ -589,16 +610,16 @@ class VoucherFormScreenState extends State<VoucherFormScreen> {
               trailing: TextButton(
                 key: ValueKey<String>(_k('customer-change')),
                 onPressed: () => setState(() => _party = null),
-                child: const Text('Change'),
+                child: Text(l10n.t('commonChange')),
               ),
             ),
           const Divider(),
-          const Text('Items'),
+          Text(l10n.t('vfItems')),
           TextField(
             key: ValueKey<String>(_k('item-field')),
             controller: _itemQuery,
             decoration:
-                const InputDecoration(labelText: 'Search item by name/code'),
+                InputDecoration(labelText: l10n.t('vfSearchItem')),
             onChanged: (_) => setState(() {}),
           ),
           for (final Item item in itemHits)
@@ -614,7 +635,7 @@ class VoucherFormScreenState extends State<VoucherFormScreen> {
           TextButton(
             key: ValueKey<String>(_k('new-item')),
             onPressed: _quickAddItem,
-            child: const Text('New item'),
+            child: Text(l10n.t('vfNewItem')),
           ),
           for (int i = 0; i < _lines.length; i++)
             _LineEditor(
@@ -637,11 +658,11 @@ class VoucherFormScreenState extends State<VoucherFormScreen> {
               onChanged: () => setState(() {}),
             ),
           const Divider(),
-          const Text('Godown'),
+          Text(l10n.t('wordGodown')),
           DropdownButton<EntityId>(
             key: ValueKey<String>(_k('godown')),
             value: _godownId,
-            hint: const Text('Select godown'),
+            hint: Text(l10n.t('vfSelectGodown')),
             items: <DropdownMenuItem<EntityId>>[
               for (final Godown g in godowns)
                 DropdownMenuItem<EntityId>(value: g.id, child: Text(g.name)),
@@ -649,11 +670,11 @@ class VoucherFormScreenState extends State<VoucherFormScreen> {
             onChanged: (EntityId? v) => setState(() => _godownId = v),
           ),
           const Divider(),
-          const Text('Numbering'),
+          Text(l10n.t('vfNumbering')),
           if (matching.isEmpty)
             Text(
-              'No ${_cfg.typeCanonical} type is registered. Register one with an '
-              'auto series (or enter the number manually).',
+              '${l10n.noTypeRegistered(_cfg.typeCanonical)} '
+              '${l10n.t('vfRegisterAuto')}',
             )
           else ...<Widget>[
             DropdownButton<VoucherType>(
@@ -682,35 +703,33 @@ class VoucherFormScreenState extends State<VoucherFormScreen> {
                     setState(() => _series = v),
               ),
             if (autoSeries.isNotEmpty)
-              Text('Auto-numbered on post (${_series?.name ?? ''}).'),
+              Text(l10n.autoNumbered(_series?.name ?? '')),
             if (autoSeries.isEmpty)
               TextField(
                 key: ValueKey<String>(_k('manual-no')),
                 controller: _manualNo,
                 decoration:
-                    const InputDecoration(labelText: 'Voucher number'),
+                    InputDecoration(labelText: l10n.t('vfVoucherNo')),
               ),
           ],
           if (matching.isEmpty)
             TextField(
               key: ValueKey<String>(_k('manual-no')),
               controller: _manualNo,
-              decoration: const InputDecoration(labelText: 'Voucher number'),
+              decoration: InputDecoration(labelText: l10n.t('vfVoucherNo')),
             ),
           TextField(
             key: ValueKey<String>(_k('date')),
             controller: _date,
-            decoration:
-                const InputDecoration(labelText: 'Date (YYYY-MM-DD)'),
+            decoration: InputDecoration(labelText: l10n.t('vfDate')),
           ),
           TextField(
             key: ValueKey<String>(_k('narration')),
             controller: _narration,
-            decoration:
-                const InputDecoration(labelText: 'Narration (optional)'),
+            decoration: InputDecoration(labelText: l10n.t('vfNarrationOpt')),
           ),
           const Divider(),
-          const Text('Negative-stock policy'),
+          Text(l10n.t('vfNegStock')),
           RadioGroup<StockPolicy>(
             groupValue: _policy,
             onChanged: (StockPolicy? v) =>
@@ -729,15 +748,10 @@ class VoucherFormScreenState extends State<VoucherFormScreen> {
           ),
           const Divider(),
           Text(
-            'Gross: ₹${MoneyPaise(totals.gross).toRupeesString()} · '
-            'Net: ₹${MoneyPaise(totals.net).toRupeesString()}',
+            l10n.grossNet(fmt.paise(totals.gross), fmt.paise(totals.net)),
             key: ValueKey<String>(_k('totals')),
           ),
-          const Text(
-            'GST is not computed here: tax fields wait on verified schemas '
-            '(G3). Round-off posts exact paise; a separate round-off line '
-            'waits on negative-line storage.',
-          ),
+          Text(l10n.t('vfGstNoteFull')),
           const SizedBox(height: 12),
         ],
       ),
@@ -748,7 +762,8 @@ class VoucherFormScreenState extends State<VoucherFormScreen> {
           child: FilledButton(
             key: ValueKey<String>(_k('post')),
             onPressed: _posting ? null : _confirmAndPost,
-            child: Text(_posting ? 'Posting…' : 'Preview & Post'),
+            child: Text(
+                _posting ? l10n.t('vfPosting') : l10n.t('vfPreviewPost')),
           ),
         ),
       ),
@@ -776,6 +791,7 @@ class _LineEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Card(
       key: ValueKey<String>('$prefix-line-$index'),
       child: Padding(
@@ -789,12 +805,13 @@ class _LineEditor extends StatelessWidget {
                 IconButton(
                   key: ValueKey<String>('$prefix-line-dupe-$index'),
                   icon: const Icon(Icons.copy),
-                  tooltip: 'Duplicate row',
+                  tooltip: l10n.t('commonDuplicate'),
                   onPressed: onDuplicate,
                 ),
                 IconButton(
                   key: ValueKey<String>('$prefix-line-remove-$index'),
                   icon: const Icon(Icons.delete),
+                  tooltip: l10n.t('commonDeleteRow'),
                   onPressed: onRemove,
                 ),
               ],
@@ -806,7 +823,7 @@ class _LineEditor extends StatelessWidget {
                     key: ValueKey<String>('$prefix-line-qty-$index'),
                     controller: line.qty,
                     decoration:
-                        const InputDecoration(labelText: 'Qty'),
+                        InputDecoration(labelText: l10n.t('vfQty')),
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
                     onChanged: (_) => onChanged(),
@@ -817,8 +834,8 @@ class _LineEditor extends StatelessWidget {
                   child: TextField(
                     key: ValueKey<String>('$prefix-line-rate-$index'),
                     controller: line.rate,
-                    decoration: const InputDecoration(
-                        labelText: 'Rate (₹)'),
+                    decoration: InputDecoration(
+                        labelText: l10n.t('vfRate')),
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
                     onChanged: (_) => onChanged(),
@@ -832,8 +849,8 @@ class _LineEditor extends StatelessWidget {
                   child: TextField(
                     key: ValueKey<String>('$prefix-line-discamt-$index'),
                     controller: line.discAmt,
-                    decoration: const InputDecoration(
-                        labelText: 'Discount (₹)'),
+                    decoration: InputDecoration(
+                        labelText: l10n.t('vfDiscAmt')),
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
                     onChanged: (_) => onChanged(),
@@ -844,8 +861,8 @@ class _LineEditor extends StatelessWidget {
                   child: TextField(
                     key: ValueKey<String>('$prefix-line-discrate-$index'),
                     controller: line.discRate,
-                    decoration: const InputDecoration(
-                        labelText: 'Discount (%)'),
+                    decoration: InputDecoration(
+                        labelText: l10n.t('vfDiscPct')),
                     keyboardType:
                         const TextInputType.numberWithOptions(decimal: true),
                     onChanged: (_) => onChanged(),

@@ -6,6 +6,10 @@
 // install previous APK, restore external backup); no DOWN migrations exist.
 // Traceability: DSS §6 migration spec; DB §8; DSS-C-007; RSP 5 / G0-CON-003.
 
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
+
 import 'migration_registry.dart';
 
 /// Minimal database surface the runner needs. Implemented by the test
@@ -78,8 +82,15 @@ const String _ledgerDdl = '''
 CREATE TABLE IF NOT EXISTS schema_migrations (
   version      INTEGER PRIMARY KEY,
   applied_at   INTEGER NOT NULL,
-  description  TEXT NOT NULL
+  description  TEXT NOT NULL,
+  checksum     TEXT NULL
 )''';
+
+/// Deterministic SHA-256 hex of one migration's SQL text (D2-B5). The exact
+/// bundled bytes are checksummed, so any edit to an applied migration is
+/// detected on the next bootstrap.
+String migrationChecksum(String sql) =>
+    sha256.convert(utf8.encode(sql)).toString();
 
 /// Highest applied version recorded in the ledger (0 when empty/absent).
 int currentVersion(MigrationDb db) {
@@ -104,6 +115,13 @@ void migrate(
   int upTo = kLatestVersion,
 }) {
   final int now = clockMs != null ? clockMs() : DateTime.now().millisecondsSinceEpoch;
+  // D2-B5: verify already-applied migrations before running anything. A stored
+  // checksum that differs from the bundled text refuses the whole run (an
+  // edited migration must never silently re-apply or be skipped); a NULL
+  // checksum is a legacy row and is backfilled once (trust-on-first-use,
+  // documented in m017). Ledgers predating the checksum column skip
+  // verification on this pass — m017 adds the column, the next run verifies.
+  _verifyApplied(db, sqlByVersion);
   // Refuse gaps: registry order is the only legal order.
   int expected = currentVersion(db) + 1;
   for (final Migration m in kMigrations) {
@@ -130,9 +148,39 @@ void migrate(
       }
       final String safeDesc = m.description.replaceAll("'", "''");
       db.execute(
-          "INSERT INTO schema_migrations (version, applied_at, description) "
-          "VALUES (${m.version}, $now, '$safeDesc')");
+          "INSERT INTO schema_migrations (version, applied_at, description, "
+          "checksum) VALUES (${m.version}, $now, '$safeDesc', "
+          "'${migrationChecksum(sql)}')");
     });
     expected = m.version + 1;
+  }
+}
+
+/// Verify applied-ledger checksums against the bundled SQL (D2-B5). See the
+/// call-site comment for the trust-on-first-use backfill rule.
+void _verifyApplied(MigrationDb db, Map<int, String> sqlByVersion) {
+  final List<Map<String, Object?>> rows;
+  try {
+    rows = db.query('SELECT version, checksum FROM schema_migrations');
+  } catch (_) {
+    return; // Pre-checksum ledger: m017 adds the column; verified next run.
+  }
+  for (final Map<String, Object?> row in rows) {
+    final int version = row['version'] as int;
+    final String? sql = sqlByVersion[version];
+    if (sql == null) continue; // No bundled text to compare against.
+    final String current = migrationChecksum(sql);
+    final Object? stored = row['checksum'];
+    if (stored == null) {
+      db.executeArgs(
+        'UPDATE schema_migrations SET checksum = ? WHERE version = ?',
+        <Object?>[current, version],
+      );
+    } else if (stored != current) {
+      throw StateError(
+        'Migration v$version text differs from the applied checksum: '
+        'refusing to run (restore from backup, never edit applied migrations)',
+      );
+    }
   }
 }

@@ -10,10 +10,11 @@
 
 import 'package:flutter/material.dart';
 
+import 'package:niaverp/application/formatting/niav_format.dart';
 import 'package:niaverp/application/queries/outstanding.dart';
 import 'package:niaverp/core/value_objects/ids.dart';
-import 'package:niaverp/core/value_objects/money.dart';
 import 'package:niaverp/core/value_objects/niav_date.dart';
+import 'package:niaverp/presentation/localization/app_localizations.dart';
 
 /// One rendered bill row (open amount, state and age).
 class OutstandingBillRow {
@@ -31,7 +32,8 @@ class OutstandingBillRow {
   final String state;
   final int ageDays;
 
-  String get openText => '₹${MoneyPaise(openPaise).toRupeesString()}';
+  String openAmount(String localeCode) =>
+      NiavFormat(localeCode).paise(openPaise);
   String get metaText => '$voucherType · $state · ${ageDays}d';
 }
 
@@ -64,7 +66,6 @@ class OutstandingReportScreenState
   }
 
   Future<List<OutstandingBillRow>> _load() async {
-    await Future<void>.delayed(Duration.zero);
     if (!mounted) return <OutstandingBillRow>[];
     final List<OutstandingBill> bills =
         widget.report.bills(widget.companyId, asOf: widget.asOf);
@@ -95,13 +96,16 @@ class OutstandingReportScreenState
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final NiavFormat fmt = NiavFormat(l10n.localeCode);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Outstanding report'),
+        title: Text(l10n.t('reportsOutstanding')),
         actions: <Widget>[
           IconButton(
             key: const ValueKey<String>('outstanding-refresh-button'),
             icon: const Icon(Icons.refresh),
+            tooltip: l10n.t('commonRefresh'),
             onPressed: _refresh,
           ),
         ],
@@ -117,15 +121,15 @@ class OutstandingReportScreenState
           }
           if (snap.hasError) {
             return _ReportErrorBlock(
-              message: 'Could not load outstanding',
+              message: l10n.t('errLoadOutstanding'),
               onRetry: _refresh,
             );
           }
           final List<OutstandingBillRow> rows = snap.data ?? <OutstandingBillRow>[];
           if (rows.isEmpty) {
-            return const Center(
-              key: ValueKey<String>('outstanding-empty'),
-              child: Text('No outstanding bills.'),
+            return Center(
+              key: const ValueKey<String>('outstanding-empty'),
+              child: Text(l10n.t('outNoBills')),
             );
           }
           final int total =
@@ -135,8 +139,7 @@ class OutstandingReportScreenState
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  '${rows.length} bills · '
-                  '₹${MoneyPaise(total).toRupeesString()} open',
+                  l10n.billsOpen(rows.length, fmt.paise(total)),
                   key: const ValueKey<String>('outstanding-total'),
                 ),
               ),
@@ -149,7 +152,7 @@ class OutstandingReportScreenState
                     return ListTile(
                       title: Text(r.voucherNo),
                       subtitle: Text(r.metaText),
-                      trailing: Text(r.openText),
+                      trailing: Text(r.openAmount(l10n.localeCode)),
                     );
                   },
                 ),
@@ -171,12 +174,13 @@ class _ReportErrorBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text(message),
-          TextButton(onPressed: () => onRetry(), child: const Text('Retry')),
+          TextButton(onPressed: () => onRetry(), child: Text(l10n.t('commonRetry'))),
         ],
       ),
     );

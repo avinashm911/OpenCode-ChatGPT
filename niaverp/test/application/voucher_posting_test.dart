@@ -29,6 +29,7 @@ import 'package:niaverp/data/repositories/repository.dart';
 import 'package:niaverp/data/repositories/voucher_repository.dart';
 import 'package:niaverp/data/repositories/voucher_type_repository.dart';
 
+import '../helpers/seeded_post.dart';
 import '../helpers/test_database.dart';
 
 void main() {
@@ -156,6 +157,10 @@ void main() {
           .isOk,
       isTrue,
     );
+    // D3-A1 posting fixtures: role ledgers + party ledger link.
+    VoucherSeeder(ctx, ops: ops, audit: audit)
+      ..ensurePostingLedgers(companyId)
+      ..linkPartyLedgers(companyId, <EntityId>[EntityId('p-p')]);
   });
 
   tearDown(() {
@@ -261,10 +266,10 @@ void main() {
         80000,
       );
       // Consumption decremented remaining balances; the receipt record
-      // itself is immutable (no retro revaluation).
+      // itself is immutable (no retro revaluation). Versions advance.
       final List<Map<String, Object?>> layers = db.queryArgs(
         'SELECT qty_q4, value_paise, remaining_qty_q4, '
-        'remaining_value_paise FROM stock_cost_layer '
+        'remaining_value_paise, record_version FROM stock_cost_layer '
         'WHERE voucher_line_id = ?',
         <Object?>['v-buy-l1'],
       );
@@ -272,6 +277,7 @@ void main() {
       expect(layers.single['value_paise'], 10000);
       expect(layers.single['remaining_qty_q4'], 80000);
       expect(layers.single['remaining_value_paise'], 8000);
+      expect(layers.single['record_version'], 2);
       expect(
         stock.layerValuePaise(
             companyId, EntityId('i-p'), EntityId('g-p')),

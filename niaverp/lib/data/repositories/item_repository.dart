@@ -117,7 +117,9 @@ class ItemRepository {
           'unit': unit,
         };
         final String hash = auditPayloadHash(row);
-        final Result<OperationRecord> op = ops.append(
+        final Result<void> lineage = recordLineage(
+          ops: ops,
+          audit: audit,
           opId: opId,
           companyId: companyId.value,
           deviceId: deviceId,
@@ -125,21 +127,12 @@ class ItemRepository {
           entityId: id.value,
           action: 'create',
           payloadHash: hash,
-        );
-        if (op.isErr) {
-          txFailure = (op as Err<OperationRecord>).error;
-          throw const RepositoryAbort();
-        }
-        final Result<AuditEvent> ev = audit.append(
           eventId: eventId,
-          companyId: companyId.value,
-          entity: 'item',
-          entityId: id.value,
           newRow: row,
           actor: actor,
         );
-        if (ev.isErr) {
-          txFailure = (ev as Err<AuditEvent>).error;
+        if (lineage.isErr) {
+          txFailure = (lineage as Err<void>).error;
           throw const RepositoryAbort();
         }
         created = Item(
@@ -207,11 +200,14 @@ class ItemRepository {
     try {
       _db.runInTransaction(() {
         _db.executeArgs(
-          'UPDATE item SET name = ?, unit = ? '
+          'UPDATE item SET name = ?, unit = ?, '
+          'record_version = record_version + 1 '
           'WHERE company_id = ? AND item_id = ?',
           <Object?>[name, unit, companyId.value, id.value],
         );
-        final Result<OperationRecord> op = ops.append(
+        final Result<void> lineage = recordLineage(
+          ops: ops,
+          audit: audit,
           opId: opId,
           companyId: companyId.value,
           deviceId: deviceId,
@@ -222,16 +218,7 @@ class ItemRepository {
             'item_id': id.value,
             'name': name,
           }),
-        );
-        if (op.isErr) {
-          txFailure = (op as Err<OperationRecord>).error;
-          throw const RepositoryAbort();
-        }
-        final Result<AuditEvent> ev = audit.append(
           eventId: eventId,
-          companyId: companyId.value,
-          entity: 'item',
-          entityId: id.value,
           oldRow: <String, Object?>{
             'item_id': id.value,
             'name': before.name,
@@ -242,8 +229,8 @@ class ItemRepository {
           },
           actor: actor,
         );
-        if (ev.isErr) {
-          txFailure = (ev as Err<AuditEvent>).error;
+        if (lineage.isErr) {
+          txFailure = (lineage as Err<void>).error;
           throw const RepositoryAbort();
         }
         done = get(companyId, id);
@@ -323,7 +310,8 @@ class ItemRepository {
         _db.executeArgs(
           'UPDATE item SET code = ?, barcode = ?, hsn_code = ?, '
           'gst_rate_bps = ?, tax_rate_id = ?, group_id = ?, unit_id = ?, '
-          'cost_method = ? WHERE company_id = ? AND item_id = ?',
+          'cost_method = ?, record_version = record_version + 1 '
+          'WHERE company_id = ? AND item_id = ?',
           <Object?>[
             code,
             barcode,
@@ -349,7 +337,9 @@ class ItemRepository {
           if (gstRateBps case final int b) 'gst_rate_bps': b,
           if (costMethod case final String m) 'cost_method': m,
         };
-        final Result<OperationRecord> op = ops.append(
+        final Result<void> lineage = recordLineage(
+          ops: ops,
+          audit: audit,
           opId: opId,
           companyId: companyId.value,
           deviceId: deviceId,
@@ -357,22 +347,13 @@ class ItemRepository {
           entityId: id.value,
           action: 'update',
           payloadHash: auditPayloadHash(newRow),
-        );
-        if (op.isErr) {
-          txFailure = (op as Err<OperationRecord>).error;
-          throw const RepositoryAbort();
-        }
-        final Result<AuditEvent> ev = audit.append(
           eventId: eventId,
-          companyId: companyId.value,
-          entity: 'item',
-          entityId: id.value,
           oldRow: oldRow,
           newRow: newRow,
           actor: actor,
         );
-        if (ev.isErr) {
-          txFailure = (ev as Err<AuditEvent>).error;
+        if (lineage.isErr) {
+          txFailure = (lineage as Err<void>).error;
           throw const RepositoryAbort();
         }
         done = get(companyId, id);

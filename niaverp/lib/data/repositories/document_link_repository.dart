@@ -128,7 +128,9 @@ class DocumentLinkRepository {
           'qty_q4': qtyQ4,
           'status': status,
         };
-        final Result<OperationRecord> op = ops.append(
+        final Result<void> lineage = recordLineage(
+          ops: ops,
+          audit: audit,
           opId: opId,
           companyId: companyId.value,
           deviceId: deviceId,
@@ -136,21 +138,12 @@ class DocumentLinkRepository {
           entityId: id.value,
           action: 'create',
           payloadHash: auditPayloadHash(row),
-        );
-        if (op.isErr) {
-          txFailure = (op as Err<OperationRecord>).error;
-          throw const RepositoryAbort();
-        }
-        final Result<AuditEvent> ev = audit.append(
           eventId: eventId,
-          companyId: companyId.value,
-          entity: 'document_link',
-          entityId: id.value,
           newRow: row,
           actor: actor,
         );
-        if (ev.isErr) {
-          txFailure = (ev as Err<AuditEvent>).error;
+        if (lineage.isErr) {
+          txFailure = (lineage as Err<void>).error;
           throw const RepositoryAbort();
         }
         done = DocumentLink(
@@ -239,11 +232,14 @@ class DocumentLinkRepository {
     try {
       _db.runInTransaction(() {
         _db.executeArgs(
-          "UPDATE document_link SET status = 'reversed' "
+          "UPDATE document_link SET status = 'reversed', "
+          'record_version = record_version + 1 '
           'WHERE company_id = ? AND link_id = ?',
           <Object?>[companyId.value, id.value],
         );
-        final Result<OperationRecord> op = ops.append(
+        final Result<void> lineage = recordLineage(
+          ops: ops,
+          audit: audit,
           opId: opId,
           companyId: companyId.value,
           deviceId: deviceId,
@@ -255,24 +251,19 @@ class DocumentLinkRepository {
             'status': 'reversed',
             'reason': reason.trim(),
           }),
-        );
-        if (op.isErr) {
-          txFailure = (op as Err<OperationRecord>).error;
-          throw const RepositoryAbort();
-        }
-        final Result<AuditEvent> ev = audit.append(
           eventId: eventId,
-          companyId: companyId.value,
-          entity: 'document_link',
-          entityId: id.value,
+          oldRow: <String, Object?>{
+            'link_id': id.value,
+            'status': current.first['status'],
+          },
           newRow: <String, Object?>{
             'status': 'reversed',
             'reason': reason.trim(),
           },
           actor: actor,
         );
-        if (ev.isErr) {
-          txFailure = (ev as Err<AuditEvent>).error;
+        if (lineage.isErr) {
+          txFailure = (lineage as Err<void>).error;
           throw const RepositoryAbort();
         }
         final List<Map<String, Object?>> reloaded = _db.queryArgs(

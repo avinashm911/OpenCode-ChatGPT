@@ -238,5 +238,8 @@ CompanyScope scopeOfBackend(
     engine: backend.engine,
     write: write,
     today: today,
+    layouts: backend.layoutProfiles,
+    fyYears: backend.fyYears,
+    periodLocks: backend.periodLocks,
   );
 }

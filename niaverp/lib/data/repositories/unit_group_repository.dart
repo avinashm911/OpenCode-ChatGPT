@@ -140,7 +140,9 @@ class UnitRepository {
           'name': name,
           'factor': factor,
         };
-        final Result<OperationRecord> op = ops.append(
+        final Result<void> lineage = recordLineage(
+          ops: ops,
+          audit: audit,
           opId: opId,
           companyId: companyId.value,
           deviceId: deviceId,
@@ -148,21 +150,12 @@ class UnitRepository {
           entityId: id.value,
           action: 'create',
           payloadHash: auditPayloadHash(row),
-        );
-        if (op.isErr) {
-          txFailure = (op as Err<OperationRecord>).error;
-          throw const RepositoryAbort();
-        }
-        final Result<AuditEvent> ev = audit.append(
           eventId: eventId,
-          companyId: companyId.value,
-          entity: 'unit',
-          entityId: id.value,
           newRow: row,
           actor: actor,
         );
-        if (ev.isErr) {
-          txFailure = (ev as Err<AuditEvent>).error;
+        if (lineage.isErr) {
+          txFailure = (lineage as Err<void>).error;
           throw const RepositoryAbort();
         }
         done = Unit(
@@ -299,7 +292,9 @@ class ItemGroupRepository {
           'company_id': companyId.value,
           'name': name,
         };
-        final Result<OperationRecord> op = ops.append(
+        final Result<void> lineage = recordLineage(
+          ops: ops,
+          audit: audit,
           opId: opId,
           companyId: companyId.value,
           deviceId: deviceId,
@@ -307,21 +302,12 @@ class ItemGroupRepository {
           entityId: id.value,
           action: 'create',
           payloadHash: auditPayloadHash(row),
-        );
-        if (op.isErr) {
-          txFailure = (op as Err<OperationRecord>).error;
-          throw const RepositoryAbort();
-        }
-        final Result<AuditEvent> ev = audit.append(
           eventId: eventId,
-          companyId: companyId.value,
-          entity: 'item_group',
-          entityId: id.value,
           newRow: row,
           actor: actor,
         );
-        if (ev.isErr) {
-          txFailure = (ev as Err<AuditEvent>).error;
+        if (lineage.isErr) {
+          txFailure = (lineage as Err<void>).error;
           throw const RepositoryAbort();
         }
         done = ItemGroup(

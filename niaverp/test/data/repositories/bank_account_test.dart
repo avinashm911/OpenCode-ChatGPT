@@ -320,9 +320,11 @@ void main() {
             .isOk,
         isTrue,
       );
-      expect(
-        vouchers
-            .addLine(
+      // Ghost ledger line: refused at write time by the D2 company guard
+      // (voucher_line.ledger must resolve in the voucher's company — DB section 3
+      // catalogue FK, enforced without a table rebuild). The engine keeps its
+      // own unknown-ledger grounding as defence in depth.
+      final Result<VoucherLine> ghostLine = vouchers.addLine(
               lineId: EntityId('v-ghost-l1'),
               voucherId: EntityId('v-ghost'),
               companyId: companyId,
@@ -334,21 +336,10 @@ void main() {
               opId: 'op-v-ghost-l1',
               eventId: 'ev-v-ghost-l1',
               actor: 'tester',
-            )
-            .isOk,
-        isTrue,
-      );
-      final Result<PostedTotals> ghostPost = engine.postDraft(
-        id: EntityId('v-ghost'),
-        companyId: companyId,
-        deviceId: 'host-test',
-        opId: 'op-post-ghost',
-        eventId: 'ev-post-ghost',
-        actor: 'tester',
-      );
-      expect(ghostPost.isErr, isTrue);
-      expect(
-          (ghostPost as Err<PostedTotals>).error.message, contains('unknown ledger'));
+            );
+      expect(ghostLine.isErr, isTrue);
+      expect((ghostLine as Err<VoucherLine>).error.code, 'validation');
+      expect(ghostLine.error.message, contains('voucher-line-foreign-company'));
 
       // Real ledger line: posts.
       expect(

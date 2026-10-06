@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:niaverp/core/result.dart';
 import 'package:niaverp/core/value_objects/ids.dart';
 import 'package:niaverp/data/repositories/company_repository.dart';
+import 'package:niaverp/presentation/localization/app_localizations.dart';
 
 import '../shared/screen_wiring.dart';
 
@@ -45,9 +46,8 @@ class OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<List<Company>> _load() async {
-    // Repository reads are synchronous; the Future models load latency so
-    // loading/empty states are real widget states, not skipped.
-    await Future<void>.delayed(Duration.zero);
+    // Repository reads are synchronous; the Future keeps loading/empty/error
+    // as real widget states instead of resolving inline.
     if (!mounted) return <Company>[];
     // listByCompany needs a scope; onboarding lists across the single local
     // store via a direct scope-free read below (see _allCompanies).
@@ -71,12 +71,14 @@ class OnboardingScreenState extends State<OnboardingScreen> {
       _existing = _load();
     });
     await _existing;
+    if (!mounted) return;
   }
 
   Future<void> _create() async {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final String name = _name.text.trim();
     if (name.isEmpty) {
-      setState(() => _formError = 'Company name is required');
+      setState(() => _formError = l10n.t('obNeedName'));
       return;
     }
     setState(() {
@@ -98,11 +100,12 @@ class OnboardingScreenState extends State<OnboardingScreen> {
     if (result.isOk) {
       _name.clear();
       await _refresh();
+      if (!mounted) return;
       widget.onOpen(id);
     } else {
       // Failure messages carry codes only (repository contract).
       final AppError e = (result as Err<Company>).error;
-      setState(() => _saveError = '${e.code}: ${e.message}');
+      setState(() => _saveError = l10n.errorFor(e.code));
     }
   }
 
@@ -114,8 +117,9 @@ class OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Set up your company')),
+      appBar: AppBar(title: Text(l10n.t('obSetupTitle'))),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -125,7 +129,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
               key: const ValueKey<String>('company-name-field'),
               controller: _name,
               decoration: InputDecoration(
-                labelText: 'Company name',
+                labelText: l10n.t('obCompanyName'),
                 errorText: _formError,
               ),
               enabled: !_creating,
@@ -145,10 +149,10 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Create company'),
+                  : Text(l10n.t('obCreateCompany')),
             ),
             const SizedBox(height: 24),
-            const Text('Existing companies'),
+            Text(l10n.t('obExisting')),
             const SizedBox(height: 8),
             Expanded(
               child: FutureBuilder<List<Company>>(
@@ -162,14 +166,14 @@ class OnboardingScreenState extends State<OnboardingScreen> {
                   }
                   if (snap.hasError) {
                     return _ErrorBlock(
-                      message: 'Could not load companies',
+                      message: l10n.t('errLoadCompanies'),
                       onRetry: _refresh,
                     );
                   }
                   final List<Company> list = snap.data ?? <Company>[];
                   if (list.isEmpty) {
-                    return const Center(
-                      child: Text('No companies yet — create the first one.'),
+                    return Center(
+                      child: Text(l10n.t('obEmpty')),
                     );
                   }
                   return ListView.builder(
@@ -201,12 +205,13 @@ class _ErrorBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: <Widget>[
           Expanded(child: Text(message)),
-          TextButton(onPressed: () => onRetry(), child: const Text('Retry')),
+          TextButton(onPressed: () => onRetry(), child: Text(l10n.t('commonRetry'))),
         ],
       ),
     );

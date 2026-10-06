@@ -18,10 +18,11 @@
 
 import 'package:flutter/material.dart';
 
+import 'package:niaverp/application/formatting/niav_format.dart';
 import 'package:niaverp/application/queries/ledger.dart';
 import 'package:niaverp/core/value_objects/ids.dart';
-import 'package:niaverp/core/value_objects/money.dart';
 import 'package:niaverp/data/repositories/ledger_masters.dart';
+import 'package:niaverp/presentation/localization/app_localizations.dart';
 
 /// Books screen for one company: registers, trial balance, ledger account.
 class BooksReportScreen extends StatefulWidget {
@@ -47,7 +48,6 @@ class BooksReportScreenState extends State<BooksReportScreen> {
   /// filter options (read together so a failing database only fails the tab
   /// that asked for it).
   Future<_DayBookView> _loadDayBook() async {
-    await Future<void>.delayed(Duration.zero);
     return _DayBookView(
       rows: widget.books.dayBook(
         widget.companyId,
@@ -58,7 +58,6 @@ class BooksReportScreenState extends State<BooksReportScreen> {
   }
 
   Future<_TrialView> _loadTrial() async {
-    await Future<void>.delayed(Duration.zero);
     final List<LedgerBalance> ledgers =
         widget.books.trialBalance(widget.companyId);
     int sum = 0;
@@ -76,12 +75,14 @@ class BooksReportScreenState extends State<BooksReportScreen> {
     return FutureBuilder<_DayBookView>(
       future: _loadDayBook(),
       builder: (BuildContext context, AsyncSnapshot<_DayBookView> snap) {
+        final AppLocalizations l10n = AppLocalizations.of(context);
+        final NiavFormat fmt = NiavFormat(l10n.localeCode);
         if (snap.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
         if (snap.hasError) {
           return BooksErrorBlock(
-            message: 'Could not load day book',
+            message: l10n.t('errLoadDaybook'),
             onRetry: () => setState(() {}),
           );
         }
@@ -97,18 +98,23 @@ class BooksReportScreenState extends State<BooksReportScreen> {
                     child: Text(
                       rows.isEmpty
                           ? ''
-                          : '${rows.length} vouchers · gross '
-                              '₹${MoneyPaise(rows.fold(0, (int s, DayBookEntry e) => s + e.totalPaise)).toRupeesString()}',
+                          : l10n.vouchersGross(
+                              rows.length,
+                              fmt.paise(rows.fold(
+                                  0,
+                                  (int s, DayBookEntry e) =>
+                                      s + e.totalPaise)),
+                            ),
                       key: const ValueKey<String>('daybook-total'),
                     ),
                   ),
                   DropdownButton<String>(
                     key: const ValueKey<String>('daybook-type-filter'),
                     value: _typeFilter.isEmpty ? null : _typeFilter,
-                    hint: const Text('All types'),
+                    hint: Text(l10n.t('booksAllTypes')),
                     items: <DropdownMenuItem<String>>[
-                      const DropdownMenuItem<String>(
-                          value: '', child: Text('All types')),
+                      DropdownMenuItem<String>(
+                          value: '', child: Text(l10n.t('booksAllTypes'))),
                       for (final String t in view?.types ?? <String>[])
                         DropdownMenuItem<String>(
                           key: ValueKey<String>('daybook-filter-$t'),
@@ -127,9 +133,9 @@ class BooksReportScreenState extends State<BooksReportScreen> {
             ),
             Expanded(
               child: rows.isEmpty
-                  ? const Center(
-                      key: ValueKey<String>('daybook-empty'),
-                      child: Text('No posted vouchers.'),
+                  ? Center(
+                      key: const ValueKey<String>('daybook-empty'),
+                      child: Text(l10n.t('booksNoPosted')),
                     )
                   : ListView.builder(
                       key: const ValueKey<String>('daybook-list'),
@@ -139,10 +145,9 @@ class BooksReportScreenState extends State<BooksReportScreen> {
                         return ListTile(
                           key: ValueKey<String>('daybook-row-${e.voucherNo}'),
                           title: Text('${e.voucherNo} · ${e.voucherType}'),
-                          subtitle: Text(
-                              '${e.dateIso} · ${e.series} · ${e.lineCount} lines'),
-                          trailing: Text(
-                              '₹${MoneyPaise(e.totalPaise).toRupeesString()}'),
+                          subtitle:
+                              Text(l10n.dayRowSub(e.dateIso, e.series, e.lineCount)),
+                          trailing: Text(fmt.paise(e.totalPaise)),
                         );
                       },
                     ),
@@ -157,20 +162,22 @@ class BooksReportScreenState extends State<BooksReportScreen> {
     return FutureBuilder<_TrialView>(
       future: _loadTrial(),
       builder: (BuildContext context, AsyncSnapshot<_TrialView> snap) {
+        final AppLocalizations l10n = AppLocalizations.of(context);
+        final NiavFormat fmt = NiavFormat(l10n.localeCode);
         if (snap.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
         if (snap.hasError) {
           return BooksErrorBlock(
-            message: 'Could not load trial balance',
+            message: l10n.t('errLoadTrial'),
             onRetry: () => setState(() {}),
           );
         }
         final _TrialView? view = snap.data;
         if (view == null || view.ledgers.isEmpty) {
-          return const Center(
-            key: ValueKey<String>('trial-empty'),
-            child: Text('No ledgers yet.'),
+          return Center(
+            key: const ValueKey<String>('trial-empty'),
+            child: Text(l10n.t('booksNoLedgers')),
           );
         }
         return ListView(
@@ -180,9 +187,8 @@ class BooksReportScreenState extends State<BooksReportScreen> {
               padding: const EdgeInsets.all(12),
               child: Text(
                 view.difference == 0
-                    ? 'Dr = Cr'
-                    : 'Out of balance by '
-                        '₹${MoneyPaise(view.difference!.abs()).toRupeesString()}',
+                    ? l10n.t('booksBalanced')
+                    : l10n.outOfBalance(fmt.paise(view.difference!.abs())),
                 key: const ValueKey<String>('trial-difference'),
                 style: TextStyle(
                   color: view.difference == 0
@@ -197,8 +203,8 @@ class BooksReportScreenState extends State<BooksReportScreen> {
                 key: ValueKey<String>('trial-ledger-${b.ledgerId.value}'),
                 title: Text(b.name),
                 trailing: Text(
-                  '${b.balancePaise < 0 ? 'Cr' : 'Dr'} '
-                  '₹${MoneyPaise(b.balancePaise.abs()).toRupeesString()}',
+                  '${b.balancePaise < 0 ? l10n.t('wordCr') : l10n.t('wordDr')} '
+                  '${fmt.paise(b.balancePaise.abs())}',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 onTap: () => Navigator.of(context).push(
@@ -214,7 +220,7 @@ class BooksReportScreenState extends State<BooksReportScreen> {
             const Divider(height: 1),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-              child: Text('Group summary',
+              child: Text(l10n.t('booksGroupSummary'),
                   style: Theme.of(context).textTheme.titleMedium),
             ),
             for (final GroupBalance g in view.groups)
@@ -222,10 +228,10 @@ class BooksReportScreenState extends State<BooksReportScreen> {
                 key: ValueKey<String>('trial-group-${g.groupId.value}'),
                 dense: true,
                 title: Text(g.name),
-                subtitle: Text('${g.ledgerCount} ledgers'),
+                subtitle: Text(l10n.ledgersCount(g.ledgerCount)),
                 trailing: Text(
-                  '${g.balancePaise < 0 ? 'Cr' : 'Dr'} '
-                  '₹${MoneyPaise(g.balancePaise.abs()).toRupeesString()}',
+                  '${g.balancePaise < 0 ? l10n.t('wordCr') : l10n.t('wordDr')} '
+                  '${fmt.paise(g.balancePaise.abs())}',
                 ),
               ),
           ],
@@ -236,13 +242,17 @@ class BooksReportScreenState extends State<BooksReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Books'),
-          bottom: const TabBar(
-            tabs: <Widget>[Tab(text: 'Day Book'), Tab(text: 'Trial Balance')],
+          title: Text(l10n.t('reportsBooks')),
+          bottom: TabBar(
+            tabs: <Widget>[
+              Tab(text: l10n.t('booksDayBook')),
+              Tab(text: l10n.t('booksTrial'))
+            ],
           ),
         ),
         // Only the selected tab is built, so one failed read cannot leak
@@ -306,7 +316,6 @@ class LedgerAccountScreen extends StatefulWidget {
 
 class LedgerAccountScreenState extends State<LedgerAccountScreen> {
   Future<LedgerAccount?> _load() async {
-    await Future<void>.delayed(Duration.zero);
     return widget.books.ledgerAccount(widget.companyId, widget.ledgerId);
   }
 
@@ -317,28 +326,30 @@ class LedgerAccountScreenState extends State<LedgerAccountScreen> {
       body: FutureBuilder<LedgerAccount?>(
         future: _load(),
         builder: (BuildContext context, AsyncSnapshot<LedgerAccount?> snap) {
+          final AppLocalizations l10n = AppLocalizations.of(context);
+          final NiavFormat fmt = NiavFormat(l10n.localeCode);
           if (snap.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
           if (snap.hasError) {
             return BooksErrorBlock(
-              message: 'Could not load ledger account',
+              message: l10n.t('errLoadLedger'),
               onRetry: () => setState(() {}),
             );
           }
           final LedgerAccount? account = snap.data;
           if (account == null) {
-            return const Center(
-              key: ValueKey<String>('ledger-missing'),
-              child: Text('Ledger not found.'),
+            return Center(
+              key: const ValueKey<String>('ledger-missing'),
+              child: Text(l10n.t('booksLedgerNotFound')),
             );
           }
           if (account.entries.isEmpty) {
             return Center(
               key: const ValueKey<String>('ledger-empty'),
               child: Text(
-                'No entries. Opening '
-                '₹${MoneyPaise(account.openingPaise).toRupeesString()}',
+                l10n.t('booksNoEntriesOpening') +
+                    fmt.paise(account.openingPaise),
               ),
             );
           }
@@ -346,9 +357,8 @@ class LedgerAccountScreenState extends State<LedgerAccountScreen> {
             key: const ValueKey<String>('ledger-entries-list'),
             children: <Widget>[
               ListTile(
-                title: const Text('Opening'),
-                trailing: Text(
-                    '₹${MoneyPaise(account.openingPaise).toRupeesString()}'),
+                title: Text(l10n.t('booksOpening')),
+                trailing: Text(fmt.paise(account.openingPaise)),
               ),
               for (final LedgerEntry e in account.entries)
                 ListTile(
@@ -357,16 +367,18 @@ class LedgerAccountScreenState extends State<LedgerAccountScreen> {
                   title: Text('${e.voucherNo} · ${e.dateIso}'),
                   subtitle: Text(e.drCr ?? '—'),
                   trailing: Text(
-                    '₹${MoneyPaise(e.amountPaise).toRupeesString()} · bal '
-                    '₹${MoneyPaise(e.balanceAfterPaise).toRupeesString()}',
+                    l10n.ledgerBalLine(
+                      fmt.paise(e.amountPaise),
+                      fmt.paise(e.balanceAfterPaise),
+                    ),
                   ),
                 ),
               const Divider(height: 1),
               ListTile(
                 key: const ValueKey<String>('ledger-closing'),
-                title: const Text('Closing'),
+                title: Text(l10n.t('booksClosing')),
                 trailing: Text(
-                  '₹${MoneyPaise(account.closingPaise).toRupeesString()}',
+                  fmt.paise(account.closingPaise),
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -391,12 +403,13 @@ class BooksErrorBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text(message),
-          TextButton(onPressed: onRetry, child: const Text('Retry')),
+          TextButton(onPressed: onRetry, child: Text(l10n.t('commonRetry'))),
         ],
       ),
     );

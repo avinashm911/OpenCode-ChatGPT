@@ -31,6 +31,7 @@ import 'package:niaverp/data/repositories/voucher_repository.dart';
 import 'package:niaverp/data/repositories/voucher_type_repository.dart';
 
 import '../helpers/test_database.dart';
+import '../helpers/seeded_post.dart';
 
 void main() {
   late NiavDatabase db;
@@ -147,6 +148,9 @@ void main() {
           .isOk,
       isTrue,
     );
+    VoucherSeeder(ctx, ops: ops, audit: audit)
+      ..ensurePostingLedgers(companyId)
+      ..linkPartyLedgers(companyId, <EntityId>[EntityId('p-g')]);
   });
 
   tearDown(() {
@@ -478,8 +482,15 @@ void main() {
       final VoucherWithLines? after =
           vouchers.get(companyId, EntityId('v-inv'));
       expect(after?.voucher.status, 'cancelled');
-      expect(after?.lines.single.amountPaise,
-          before?.lines.single.amountPaise);
+      // Original rows are untouched (first by line order); the cancel appends
+      // compensating ledger arms (D3-A6), so the voucher carries more lines.
+      expect(after?.lines.first.amountPaise,
+          before?.lines.first.amountPaise);
+      expect(
+          after?.lines
+              .where((VoucherLine l) => l.drCr != null)
+              .map((VoucherLine l) => l.drCr),
+          containsAll(<String>['Dr', 'Cr']));
       final List<AuditEvent> trail =
           audit.forEntity('c-g', 'voucher', 'v-inv');
       expect(

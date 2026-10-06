@@ -25,6 +25,7 @@ import 'package:niaverp/data/repositories/voucher_repository.dart';
 import 'package:niaverp/data/repositories/voucher_type_repository.dart';
 import 'package:niaverp/presentation/reports/outstanding_report_screen.dart';
 
+import '../helpers/seeded_post.dart';
 import '../helpers/test_database.dart';
 
 void main() {
@@ -84,6 +85,10 @@ void main() {
           .isOk,
       isTrue,
     );
+    // D3-A1 posting fixture: role ledgers + party-ledger link.
+    VoucherSeeder(ctx, ops: ops, audit: audit)
+      ..ensurePostingLedgers(companyId)
+      ..linkPartyLedgers(companyId, <EntityId>[EntityId('p-w')]);
   });
 
   tearDown(() {

@@ -31,6 +31,7 @@ import 'package:niaverp/data/repositories/voucher_repository.dart';
 import 'package:niaverp/data/repositories/voucher_type_repository.dart';
 
 import '../helpers/test_database.dart';
+import '../helpers/seeded_post.dart';
 
 void main() {
   late NiavDatabase db;
@@ -207,6 +208,9 @@ void main() {
         isTrue,
       );
     }
+    VoucherSeeder(ctx, ops: ops, audit: audit)
+      ..ensurePostingLedgers(companyId)
+      ..linkPartyLedgers(companyId, <EntityId>[EntityId('p-x')]);
   });
 
   tearDown(() {
@@ -346,7 +350,10 @@ void main() {
       expect(bills.single.openPaise, 10000);
       expect(outstanding.advances(companyId), isEmpty);
 
-      // Day book: four posted vouchers, gross sums agree.
+      // Day book: four posted vouchers, gross sums agree. Posted invoice
+      // lines include the D3-A1 ledger arms (journal-consistent SUM over all
+      // stored lines): v-buy 10000 + 20000 arms, v-j 6000, v-pay 2000,
+      // v-sell 2000 + 4000 arms.
       final List<DayBookEntry> day = books.dayBook(companyId);
       expect(
         day.map((DayBookEntry e) => e.voucherNo),
@@ -354,13 +361,13 @@ void main() {
       );
       expect(
         day.fold(0, (int s, DayBookEntry e) => s + e.totalPaise),
-        10000 + 6000 + 2000 + 2000,
+        10000 + 6000 + 2000 + 2000 + 20000 + 4000,
       );
 
-      // Sales register: the sale alone.
+      // Sales register: the sale alone, content plus its posting arms.
       final List<DayBookEntry> sales = books.dayBook(companyId,
           types: <String>['Sales Invoice']);
-      expect(sales.single.totalPaise, 2000);
+      expect(sales.single.totalPaise, 2000 + 4000);
 
       // Ledgers: cash 10000 + 3000, capital −10000 − 3000.
       expect(books.ledgerBalance(companyId, EntityId('l-cash')), 13000);

@@ -38,6 +38,7 @@ import 'package:niaverp/presentation/inventory/new_transfer_screen.dart';
 import 'package:niaverp/presentation/shared/company_scope.dart';
 import 'package:niaverp/presentation/shared/screen_wiring.dart';
 
+import '../helpers/seeded_post.dart';
 import '../helpers/test_database.dart';
 
 void main() {
@@ -199,6 +200,10 @@ void main() {
         isTrue,
       );
     }
+    // D3-A1 posting fixture: role ledgers + party-ledger link.
+    VoucherSeeder(ctx, ops: ops, audit: audit)
+      ..ensurePostingLedgers(companyId)
+      ..linkPartyLedgers(companyId, <EntityId>[EntityId('p-pt')]);
   });
 
   tearDown(() {
@@ -260,9 +265,9 @@ void main() {
       expect(find.text('Invoice PUR-0001'), findsOneWidget);
       await revealRow(
           t, find.byKey(const ValueKey<String>('invoice-totals')), 'invoice-view');
-      expect(find.text('Gross: ₹10000.00 · Net: ₹10000.00'),
+      expect(find.text('Gross: ₹10,000.00 · Net: ₹10,000.00'),
           findsOneWidget);
-      expect(find.text('Open: ₹10000.00'), findsOneWidget);
+      expect(find.text('Open: ₹10,000.00'), findsOneWidget);
       expect(
         scope.stock
             .balances(companyId, itemId: EntityId('i-pt'))

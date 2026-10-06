@@ -17,9 +17,12 @@ import 'package:niaverp/application/services/voucher_engine.dart';
 import 'package:niaverp/core/value_objects/niav_date.dart';
 import 'package:niaverp/data/repositories/alias_repository.dart';
 import 'package:niaverp/data/repositories/company_repository.dart';
+import 'package:niaverp/data/repositories/financial_year_repository.dart';
 import 'package:niaverp/data/repositories/item_repository.dart';
+import 'package:niaverp/data/repositories/layout_profile_repository.dart';
 import 'package:niaverp/data/repositories/ledger_masters.dart';
 import 'package:niaverp/data/repositories/party_repository.dart';
+import 'package:niaverp/data/repositories/period_lock.dart';
 import 'package:niaverp/data/repositories/voucher_repository.dart';
 import 'package:niaverp/data/repositories/voucher_type_repository.dart';
 import 'package:niaverp/presentation/shared/screen_wiring.dart';
@@ -46,6 +49,11 @@ class CompanyScope {
     required this.engine,
     required this.write,
     required this.today,
+    // D4 More-tab surfaces (nullable so pre-D4 test scopes keep compiling;
+    // production always supplies them via scopeOfBackend).
+    this.layouts,
+    this.fyYears,
+    this.periodLocks,
   });
 
   final CompanyRepository companies;
@@ -64,4 +72,13 @@ class CompanyScope {
   final VoucherEngine engine;
   final WriteContext write;
   final NiavDate today;
+
+  /// UI-preference store (FR-M23-001) backing language + feature toggles.
+  final LayoutProfileRepository? layouts;
+
+  /// Financial-year administration (M01.3).
+  final FinancialYearRepository? fyYears;
+
+  /// Period-lock administration (M01.7 security setup, D-M5).
+  final PeriodLockRepository? periodLocks;
 }

@@ -15,6 +15,7 @@ import 'package:niaverp/core/value_objects/ids.dart';
 import 'package:niaverp/data/repositories/alias_repository.dart';
 import 'package:niaverp/data/repositories/item_repository.dart';
 import 'package:niaverp/data/repositories/party_repository.dart';
+import 'package:niaverp/presentation/localization/app_localizations.dart';
 
 import '../shared/screen_wiring.dart';
 
@@ -44,13 +45,14 @@ class PartiesItemsScreen extends StatefulWidget {
 class PartiesItemsScreenState extends State<PartiesItemsScreen> {
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Parties & Items'),
-          bottom: const TabBar(
-            tabs: <Widget>[Tab(text: 'Parties'), Tab(text: 'Items')],
+          title: Text(l10n.t('piTitle')),
+          bottom: TabBar(
+            tabs: <Widget>[Tab(text: l10n.t('homeParties')), Tab(text: l10n.t('homeItems'))],
           ),
         ),
         body: TabBarView(
@@ -77,8 +79,9 @@ class PartiesItemsScreenState extends State<PartiesItemsScreen> {
 }
 
 void _showFailure(BuildContext context, String code, String message) {
+  final AppLocalizations l10n = AppLocalizations.of(context);
   ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('$code: $message')),
+    SnackBar(content: Text(l10n.errorFor(code))),
   );
 }
 
@@ -149,6 +152,7 @@ class _PartyTabState extends State<_PartyTab> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Column(
       children: <Widget>[
         Padding(
@@ -156,9 +160,9 @@ class _PartyTabState extends State<_PartyTab> {
           child: TextField(
             key: const ValueKey<String>('party-search-field'),
             controller: _query,
-            decoration: const InputDecoration(
-              labelText: 'Search name, GSTIN, mobile or alias',
-              prefixIcon: Icon(Icons.search),
+            decoration: InputDecoration(
+              labelText: l10n.t('piSearchParty'),
+              prefixIcon: const Icon(Icons.search),
             ),
             onChanged: _runSearch,
           ),
@@ -168,8 +172,8 @@ class _PartyTabState extends State<_PartyTab> {
               ? Center(
                   child: Text(
                     _searching
-                        ? 'No parties match.'
-                        : 'No parties yet — add the first one.',
+                        ? l10n.t('piNoMatchParty')
+                        : l10n.t('piEmptyParty'),
                   ),
                 )
               : ListView.builder(
@@ -192,7 +196,7 @@ class _PartyTabState extends State<_PartyTab> {
             key: const ValueKey<String>('party-add-button'),
             onPressed: () => _openForm(),
             icon: const Icon(Icons.add),
-            label: const Text('Add party'),
+            label: Text(l10n.t('piAddParty')),
           ),
         ),
       ],
@@ -328,9 +332,10 @@ class _PartyFormDialogState extends State<_PartyFormDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final bool editing = widget.existing != null;
     return AlertDialog(
-      title: Text(editing ? 'Edit party' : 'Add party'),
+      title: Text(editing ? l10n.t('piEditParty') : l10n.t('piAddParty')),
       content: SingleChildScrollView(
         child: Form(
           key: _form,
@@ -340,13 +345,13 @@ class _PartyFormDialogState extends State<_PartyFormDialog> {
               TextFormField(
                 key: const ValueKey<String>('party-name-field'),
                 controller: _name,
-                decoration: const InputDecoration(labelText: 'Name *'),
+                decoration: InputDecoration(labelText: l10n.t('piNameStar')),
                 validator: (String? v) =>
-                    (v == null || v.trim().isEmpty) ? 'Name is required' : null,
+                    (v == null || v.trim().isEmpty) ? l10n.t('piNeedName') : null,
               ),
               DropdownButtonFormField<String>(
                 initialValue: _role,
-                decoration: const InputDecoration(labelText: 'Role'),
+                decoration: InputDecoration(labelText: l10n.t('piRole')),
                 items: <DropdownMenuItem<String>>[
                   for (final String r in kPartyRoles)
                     DropdownMenuItem<String>(value: r, child: Text(r)),
@@ -357,32 +362,32 @@ class _PartyFormDialogState extends State<_PartyFormDialog> {
               ),
               TextFormField(
                 controller: _gstin,
-                decoration: const InputDecoration(
-                  labelText: 'GSTIN (as printed)',
+                decoration: InputDecoration(
+                  labelText: l10n.t('piGstin'),
                 ),
               ),
               TextFormField(
                 controller: _mobile,
-                decoration: const InputDecoration(labelText: 'Mobile'),
+                decoration: InputDecoration(labelText: l10n.t('piMobile')),
                 keyboardType: TextInputType.phone,
               ),
               TextFormField(
                 controller: _state,
-                decoration: const InputDecoration(labelText: 'State'),
+                decoration: InputDecoration(labelText: l10n.t('piState')),
               ),
               TextFormField(
                 controller: _address,
-                decoration: const InputDecoration(labelText: 'Address'),
+                decoration: InputDecoration(labelText: l10n.t('piAddress')),
               ),
               TextFormField(
                 controller: _terms,
-                decoration: const InputDecoration(labelText: 'Credit terms'),
+                decoration: InputDecoration(labelText: l10n.t('piTerms')),
               ),
               TextFormField(
                 key: const ValueKey<String>('party-alias-field'),
                 controller: _alias,
-                decoration: const InputDecoration(
-                  labelText: 'Alias (optional, stored as typed)',
+                decoration: InputDecoration(
+                  labelText: l10n.t('piAlias'),
                 ),
               ),
             ],
@@ -392,12 +397,12 @@ class _PartyFormDialogState extends State<_PartyFormDialog> {
       actions: <Widget>[
         TextButton(
           onPressed: _saving ? null : () => Navigator.of(context).pop(false),
-          child: const Text('Cancel'),
+          child: Text(l10n.t('commonCancel')),
         ),
         FilledButton(
           key: const ValueKey<String>('party-save-button'),
           onPressed: _saving ? null : _save,
-          child: Text(_saving ? 'Saving…' : 'Save'),
+          child: Text(_saving ? l10n.t('commonSaving') : l10n.t('commonSave')),
         ),
       ],
     );
@@ -471,6 +476,7 @@ class _ItemTabState extends State<_ItemTab> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Column(
       children: <Widget>[
         Padding(
@@ -478,9 +484,9 @@ class _ItemTabState extends State<_ItemTab> {
           child: TextField(
             key: const ValueKey<String>('item-search-field'),
             controller: _query,
-            decoration: const InputDecoration(
-              labelText: 'Search name, code, barcode or alias',
-              prefixIcon: Icon(Icons.search),
+            decoration: InputDecoration(
+              labelText: l10n.t('piSearchItem'),
+              prefixIcon: const Icon(Icons.search),
             ),
             onChanged: _runSearch,
           ),
@@ -490,8 +496,8 @@ class _ItemTabState extends State<_ItemTab> {
               ? Center(
                   child: Text(
                     _searching
-                        ? 'No items match.'
-                        : 'No items yet — add the first one.',
+                        ? l10n.t('piNoMatchItem')
+                        : l10n.t('piEmptyItem'),
                   ),
                 )
               : ListView.builder(
@@ -515,7 +521,7 @@ class _ItemTabState extends State<_ItemTab> {
             key: const ValueKey<String>('item-add-button'),
             onPressed: () => _openForm(),
             icon: const Icon(Icons.add),
-            label: const Text('Add item'),
+            label: Text(l10n.t('piAddItem')),
           ),
         ),
       ],
@@ -583,11 +589,12 @@ class _ItemFormDialogState extends State<_ItemFormDialog> {
 
   Future<void> _save() async {
     if (!(_form.currentState?.validate() ?? false)) return;
+    final AppLocalizations l10n = AppLocalizations.of(context);
     int? bps;
     if (_gstBps.text.trim().isNotEmpty) {
       bps = int.tryParse(_gstBps.text.trim());
       if (bps == null || bps < 0 || bps > 10000) {
-        _showFailure(context, 'validation', 'GST bps must be 0..10000');
+        _showFailure(context, 'validation', l10n.t('piNeedGstBps'));
         return;
       }
     }

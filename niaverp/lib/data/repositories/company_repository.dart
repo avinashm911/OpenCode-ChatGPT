@@ -66,7 +66,9 @@ class CompanyRepository {
           'name': name,
         };
         final String hash = auditPayloadHash(row);
-        final Result<OperationRecord> op = ops.append(
+        final Result<void> lineage = recordLineage(
+          ops: ops,
+          audit: audit,
           opId: opId,
           companyId: id.value,
           deviceId: deviceId,
@@ -74,21 +76,12 @@ class CompanyRepository {
           entityId: id.value,
           action: 'create',
           payloadHash: hash,
-        );
-        if (op.isErr) {
-          txFailure = (op as Err<OperationRecord>).error;
-          throw const RepositoryAbort();
-        }
-        final Result<AuditEvent> ev = audit.append(
           eventId: eventId,
-          companyId: id.value,
-          entity: 'company',
-          entityId: id.value,
           newRow: row,
           actor: actor,
         );
-        if (ev.isErr) {
-          txFailure = (ev as Err<AuditEvent>).error;
+        if (lineage.isErr) {
+          txFailure = (lineage as Err<void>).error;
           throw const RepositoryAbort();
         }
         created = Company(id: id, name: name, createdAt: now);

@@ -232,7 +232,9 @@ class VoucherRepository {
           'voucher_date': date.iso,
           'status': status,
         };
-        final Result<OperationRecord> op = ops.append(
+        final Result<void> lineage = recordLineage(
+          ops: ops,
+          audit: audit,
           opId: opId,
           companyId: companyId.value,
           deviceId: deviceId,
@@ -240,21 +242,12 @@ class VoucherRepository {
           entityId: id.value,
           action: 'create',
           payloadHash: auditPayloadHash(row),
-        );
-        if (op.isErr) {
-          txFailure = (op as Err<OperationRecord>).error;
-          throw const RepositoryAbort();
-        }
-        final Result<AuditEvent> ev = audit.append(
           eventId: eventId,
-          companyId: companyId.value,
-          entity: 'voucher',
-          entityId: id.value,
           newRow: row,
           actor: actor,
         );
-        if (ev.isErr) {
-          txFailure = (ev as Err<AuditEvent>).error;
+        if (lineage.isErr) {
+          txFailure = (lineage as Err<void>).error;
           throw const RepositoryAbort();
         }
         created = Voucher(
@@ -386,7 +379,9 @@ class VoucherRepository {
           'rate_paise': ratePaise,
           'amount_paise': amount,
         };
-        final Result<OperationRecord> op = ops.append(
+        final Result<void> lineage = recordLineage(
+          ops: ops,
+          audit: audit,
           opId: opId,
           companyId: companyId.value,
           deviceId: deviceId,
@@ -394,21 +389,12 @@ class VoucherRepository {
           entityId: lineId.value,
           action: 'create',
           payloadHash: auditPayloadHash(row),
-        );
-        if (op.isErr) {
-          txFailure = (op as Err<OperationRecord>).error;
-          throw const RepositoryAbort();
-        }
-        final Result<AuditEvent> ev = audit.append(
           eventId: eventId,
-          companyId: companyId.value,
-          entity: 'voucher_line',
-          entityId: lineId.value,
           newRow: row,
           actor: actor,
         );
-        if (ev.isErr) {
-          txFailure = (ev as Err<AuditEvent>).error;
+        if (lineage.isErr) {
+          txFailure = (lineage as Err<void>).error;
           throw const RepositoryAbort();
         }
         created = VoucherLine(
@@ -526,10 +512,13 @@ class VoucherRepository {
     try {
       _db.runInTransaction(() {
         _db.executeArgs(
-          'UPDATE voucher SET status = ? WHERE company_id = ? AND voucher_id = ?',
+          'UPDATE voucher SET status = ?, record_version = record_version + 1 '
+          'WHERE company_id = ? AND voucher_id = ?',
           <Object?>[status, companyId.value, id.value],
         );
-        final Result<OperationRecord> op = ops.append(
+        final Result<void> lineage = recordLineage(
+          ops: ops,
+          audit: audit,
           opId: opId,
           companyId: companyId.value,
           deviceId: deviceId,
@@ -540,21 +529,16 @@ class VoucherRepository {
             'voucher_id': id.value,
             'status': status,
           }),
-        );
-        if (op.isErr) {
-          txFailure = (op as Err<OperationRecord>).error;
-          throw const RepositoryAbort();
-        }
-        final Result<AuditEvent> ev = audit.append(
           eventId: eventId,
-          companyId: companyId.value,
-          entity: 'voucher',
-          entityId: id.value,
+          oldRow: <String, Object?>{
+            'voucher_id': id.value,
+            'status': current.first['status'],
+          },
           newRow: <String, Object?>{'status': status},
           actor: actor,
         );
-        if (ev.isErr) {
-          txFailure = (ev as Err<AuditEvent>).error;
+        if (lineage.isErr) {
+          txFailure = (lineage as Err<void>).error;
           throw const RepositoryAbort();
         }
         final VoucherWithLines? reloaded = get(companyId, id);

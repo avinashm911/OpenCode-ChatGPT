@@ -41,6 +41,7 @@ import 'package:niaverp/presentation/billing/new_sale_screen.dart';
 import 'package:niaverp/presentation/shared/company_scope.dart';
 import 'package:niaverp/presentation/shared/screen_wiring.dart';
 
+import '../helpers/seeded_post.dart';
 import '../helpers/test_database.dart';
 
 void main() {
@@ -199,6 +200,10 @@ void main() {
         isTrue,
       );
     }
+    // D3-A1 posting fixture: role ledgers + party-ledger link.
+    VoucherSeeder(ctx, ops: ops, audit: audit)
+      ..ensurePostingLedgers(companyId)
+      ..linkPartyLedgers(companyId, <EntityId>[EntityId('p-f')]);
     // Stock the shelf first: 10.0 @ ₹1000 via a posted purchase.
     final Result<Voucher> buy = vouchers.create(
       id: EntityId('v-buy'),
@@ -319,9 +324,9 @@ void main() {
           t,
           find.byKey(const ValueKey<String>('invoice-totals')),
           'invoice-view');
-      expect(find.text('Gross: ₹2000.00 · Net: ₹2000.00'),
+      expect(find.text('Gross: ₹2,000.00 · Net: ₹2,000.00'),
           findsOneWidget);
-      expect(find.text('Open: ₹2000.00'), findsOneWidget);
+      expect(find.text('Open: ₹2,000.00'), findsOneWidget);
       expect(find.text('Widget'), findsOneWidget);
 
       // Engine consequences through the report queries.

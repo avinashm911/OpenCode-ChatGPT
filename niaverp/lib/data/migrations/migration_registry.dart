@@ -137,7 +137,17 @@ const List<Migration> kMigrations = <Migration>[
         'method (additive, no retro revaluation)',
     fileName: 'm016_company_scope_and_reversal.sql',
   ),
+  Migration(
+    version: 17,
+    g0Id: 'D2',
+    description: 'Schema and security hardening: append-only and posted-history '
+        'triggers, status/cost-source/action vocabulary triggers, '
+        'voucher-line and party company guards, read indexes, audit hash '
+        'columns, migration checksums, trial clock high-water mark '
+        '(all additive, repeat-safe)',
+    fileName: 'm017_schema_hardening.sql',
+  ),
 ];
 
 /// Highest approved schema version.
-const int kLatestVersion = 16;
+const int kLatestVersion = 17;

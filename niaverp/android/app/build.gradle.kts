@@ -30,9 +30,31 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // D2-F2: the debug key stays for local runs, but a release build
+            // refuses to sign with it silently. Supply the release keystore
+            // out-of-band, e.g.:
+            //   flutter build apk --release `
+            //     -PNIAV_RELEASE_STORE_FILE=/secure/path/niav-release.jks `
+            //     -PNIAV_RELEASE_STORE_PASSWORD=... `
+            //     -PNIAV_RELEASE_KEY_ALIAS=niav `
+            //     -PNIAV_RELEASE_KEY_PASSWORD=...
+            // Never create or commit keystores (G0-VER-004 pending; the key
+            // questions below are owner input, not invented values).
+            val releaseStoreFile =
+                project.findProperty("NIAV_RELEASE_STORE_FILE") as String?
+            if (releaseStoreFile == null) {
+                throw GradleException(
+                    "NiAvERP release signing is not configured: re-run with " +
+                    "-PNIAV_RELEASE_STORE_FILE (plus STORE_PASSWORD, KEY_ALIAS, " +
+                    "KEY_PASSWORD). The debug key is never used for releases."
+                )
+            }
+            signingConfig = signingConfigs.create("niavRelease") {
+                storeFile = file(releaseStoreFile)
+                storePassword = project.findProperty("NIAV_RELEASE_STORE_PASSWORD") as String?
+                keyAlias = project.findProperty("NIAV_RELEASE_KEY_ALIAS") as String?
+                keyPassword = project.findProperty("NIAV_RELEASE_KEY_PASSWORD") as String?
+            }
         }
     }
 }

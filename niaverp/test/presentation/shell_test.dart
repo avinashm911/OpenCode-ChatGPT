@@ -17,6 +17,7 @@ import 'package:niaverp/core/value_objects/niav_date.dart';
 import 'package:niaverp/data/db/niav_database.dart';
 import 'package:niaverp/presentation/billing/billing_hub_screen.dart';
 import 'package:niaverp/presentation/home/home_dashboard_screen.dart';
+import 'package:niaverp/presentation/more/more_tab_screen.dart';
 import 'package:niaverp/presentation/onboarding/onboarding_screen.dart';
 import 'package:niaverp/presentation/parties_items/parties_items_screen.dart';
 import 'package:niaverp/presentation/reports/reports_hub_screen.dart';
@@ -79,6 +80,7 @@ void main() {
     testWidgets('five destinations render with the bottom bar',
         (WidgetTester tester) async {
       await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
 
       for (final String label in <String>[
         'Home',
@@ -87,7 +89,7 @@ void main() {
         'Reports',
         'More',
       ]) {
-        expect(find.text(label), findsWidgets);
+        expect(find.text(label, skipOffstage: false), findsWidgets);
       }
       expect(find.byType(BottomNavigationBar), findsOneWidget);
     });
@@ -95,9 +97,10 @@ void main() {
     testWidgets('without a scope every tab shows the gate, never fakes',
         (WidgetTester tester) async {
       await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
 
       for (final NiavDestination d in NiavDestination.values) {
-        await tester.tap(find.text(d.label));
+        await tester.tap(find.byIcon(d.icon, skipOffstage: false));
         await tester.pumpAndSettle();
         expect(
           find.byKey(ValueKey<String>('scope-gate-${d.name}')),
@@ -122,31 +125,32 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
           buildApp(useScope: scope, company: companyId));
+      await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Home'));
+      await tester.tap(find.text('Home', skipOffstage: false));
       await tester.pumpAndSettle();
       expect(find.byType(HomeDashboardScreen), findsOneWidget);
       expect(find.text('Nav Co'), findsOneWidget);
 
-      await tester.tap(find.text('Billing'));
+      await tester.tap(find.text('Billing', skipOffstage: false));
       await tester.pumpAndSettle();
       expect(find.byType(BillingHubScreen), findsOneWidget);
       expect(find.byKey(const ValueKey<String>('billing-empty')),
           findsOneWidget);
 
-      await tester.tap(find.text('Parties & Items'));
+      await tester.tap(find.text('Parties & Items', skipOffstage: false));
       await tester.pumpAndSettle();
       expect(find.byType(PartiesItemsScreen), findsOneWidget);
 
-      await tester.tap(find.text('Reports'));
+      await tester.tap(find.text('Reports', skipOffstage: false));
       await tester.pumpAndSettle();
       expect(find.byType(ReportsHubScreen), findsOneWidget);
       expect(find.byKey(const ValueKey<String>('reports-hub-stock')),
           findsOneWidget);
 
-      await tester.tap(find.text('More'));
+      await tester.tap(find.text('More', skipOffstage: false));
       await tester.pumpAndSettle();
-      expect(find.byType(OnboardingScreen), findsOneWidget);
+      expect(find.byType(MoreTabScreen), findsOneWidget);
     });
 
     testWidgets('opening another company rebinds the tabs',
@@ -173,8 +177,8 @@ void main() {
           .state<NiavShellState>(find.byType(NiavShell))
           .openCompany(CompanyId('c-second'));
       await tester.pumpAndSettle();
-      expect(find.text('Second Co'), findsOneWidget);
-      expect(find.text('Nav Co'), findsNothing);
+      expect(find.text('Second Co', skipOffstage: false), findsOneWidget);
+      expect(find.text('Nav Co', skipOffstage: false), findsNothing);
     });
 
     testWidgets('composition root injects config without widget state',
@@ -187,7 +191,8 @@ void main() {
           ),
         ),
       );
-      expect(find.text('NiAvERP-Test'), findsWidgets);
+      await tester.pumpAndSettle();
+      expect(find.text('NiAvERP-Test', skipOffstage: false), findsWidgets);
     });
   });
 }

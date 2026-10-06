@@ -30,6 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -87,6 +89,7 @@ flutter:
     - lib/data/migrations/m014_ledger_bank.sql
     - lib/data/migrations/m015_stock_valuation.sql
     - lib/data/migrations/m016_company_scope_and_reversal.sql
+    - lib/data/migrations/m017_schema_hardening.sql
 
   # To add assets to your application, add an assets section, like this:
   # assets:

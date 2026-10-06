@@ -41,6 +41,7 @@ import 'package:niaverp/presentation/reports/stock_report_screen.dart';
 import 'package:niaverp/presentation/shared/company_scope.dart';
 import 'package:niaverp/presentation/shared/screen_wiring.dart';
 
+import '../helpers/seeded_post.dart';
 import '../helpers/test_database.dart';
 
 void main() {
@@ -137,6 +138,10 @@ void main() {
           .isOk,
       isTrue,
     );
+    // D3-A1 posting fixture: role ledgers + party-ledger link.
+    VoucherSeeder(ctx, ops: ops, audit: audit)
+      ..ensurePostingLedgers(companyId)
+      ..linkPartyLedgers(companyId, <EntityId>[EntityId('p-h')]);
     // Draft first: D1-D4 forbids adding lines to a voucher created as posted.
     final Result<Voucher> h = vouchers.create(
       id: EntityId('v-h'),

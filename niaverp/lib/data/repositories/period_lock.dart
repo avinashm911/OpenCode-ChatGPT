@@ -122,7 +122,9 @@ class PeriodLockRepository {
           'date_to': dateTo,
           'status': 'locked',
         };
-        final Result<OperationRecord> op = ops.append(
+        final Result<void> lineage = recordLineage(
+          ops: ops,
+          audit: audit,
           opId: opId,
           companyId: companyId.value,
           deviceId: deviceId,
@@ -130,21 +132,12 @@ class PeriodLockRepository {
           entityId: id.value,
           action: 'create',
           payloadHash: auditPayloadHash(row),
-        );
-        if (op.isErr) {
-          txFailure = (op as Err<OperationRecord>).error;
-          throw const RepositoryAbort();
-        }
-        final Result<AuditEvent> ev = audit.append(
           eventId: eventId,
-          companyId: companyId.value,
-          entity: 'period_lock',
-          entityId: id.value,
           newRow: row,
           actor: actor,
         );
-        if (ev.isErr) {
-          txFailure = (ev as Err<AuditEvent>).error;
+        if (lineage.isErr) {
+          txFailure = (lineage as Err<void>).error;
           throw const RepositoryAbort();
         }
         done = PeriodLock(
@@ -198,7 +191,8 @@ class PeriodLockRepository {
         final int now = ctx.clock.nowMs();
         _db.executeArgs(
           "UPDATE period_lock SET status = 'unlocked', unlock_actor = ?, "
-          'unlock_reason = ?, unlocked_at = ? '
+          'unlock_reason = ?, unlocked_at = ?, '
+          'record_version = record_version + 1 '
           'WHERE company_id = ? AND lock_id = ?',
           <Object?>[
             actor,
@@ -213,7 +207,9 @@ class PeriodLockRepository {
           'status': 'unlocked',
           'reason': reason.trim(),
         };
-        final Result<OperationRecord> op = ops.append(
+        final Result<void> lineage = recordLineage(
+          ops: ops,
+          audit: audit,
           opId: opId,
           companyId: companyId.value,
           deviceId: deviceId,
@@ -221,21 +217,16 @@ class PeriodLockRepository {
           entityId: id.value,
           action: 'unlock',
           payloadHash: auditPayloadHash(row),
-        );
-        if (op.isErr) {
-          txFailure = (op as Err<OperationRecord>).error;
-          throw const RepositoryAbort();
-        }
-        final Result<AuditEvent> ev = audit.append(
           eventId: eventId,
-          companyId: companyId.value,
-          entity: 'period_lock',
-          entityId: id.value,
+          oldRow: <String, Object?>{
+            'lock_id': id.value,
+            'status': 'locked',
+          },
           newRow: row,
           actor: actor,
         );
-        if (ev.isErr) {
-          txFailure = (ev as Err<AuditEvent>).error;
+        if (lineage.isErr) {
+          txFailure = (lineage as Err<void>).error;
           throw const RepositoryAbort();
         }
         done = get(companyId, id);

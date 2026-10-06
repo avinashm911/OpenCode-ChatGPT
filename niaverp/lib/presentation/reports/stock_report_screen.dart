@@ -11,12 +11,13 @@
 
 import 'package:flutter/material.dart';
 
+import 'package:niaverp/application/formatting/niav_format.dart';
 import 'package:niaverp/application/queries/stock_levels.dart';
 import 'package:niaverp/core/value_objects/ids.dart';
-import 'package:niaverp/core/value_objects/money.dart';
 import 'package:niaverp/core/value_objects/quantity.dart';
 import 'package:niaverp/data/repositories/item_repository.dart';
 import 'package:niaverp/data/repositories/voucher_type_repository.dart';
+import 'package:niaverp/presentation/localization/app_localizations.dart';
 
 /// One rendered balance row (names resolved, quantities formatted).
 class StockBalanceRow {
@@ -37,8 +38,9 @@ class StockBalanceRow {
   /// Formatted quantity (integer ×10⁴, explicit scale — D-M4).
   String get qtyText => QuantityQ4(qtyQ4).format();
 
-  /// Formatted book value (rupees, D-M4).
-  String get valueText => '₹${MoneyPaise(valuePaise).toRupeesString()}';
+  /// Formatted book value (rupees, D-M4) for [localeCode].
+  String valueTextFor(String localeCode) =>
+      NiavFormat(localeCode).paise(valuePaise);
 }
 
 /// Company stock balances, read from persisted movements.
@@ -70,7 +72,6 @@ class StockReportScreenState extends State<StockReportScreen> {
   }
 
   Future<List<StockBalanceRow>> _load() async {
-    await Future<void>.delayed(Duration.zero);
     if (!mounted) return <StockBalanceRow>[];
     final List<StockValuation> held =
         widget.levels.valuation(widget.companyId);
@@ -107,13 +108,15 @@ class StockReportScreenState extends State<StockReportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Stock report'),
+        title: Text(l10n.t('reportsStock')),
         actions: <Widget>[
           IconButton(
             key: const ValueKey<String>('stock-refresh-button'),
             icon: const Icon(Icons.refresh),
+            tooltip: l10n.t('commonRefresh'),
             onPressed: _refresh,
           ),
         ],
@@ -129,15 +132,15 @@ class StockReportScreenState extends State<StockReportScreen> {
           }
           if (snap.hasError) {
             return _ReportErrorBlock(
-              message: 'Could not load stock',
+              message: l10n.t('errLoadStock'),
               onRetry: _refresh,
             );
           }
           final List<StockBalanceRow> rows = snap.data ?? <StockBalanceRow>[];
           if (rows.isEmpty) {
-            return const Center(
-              key: ValueKey<String>('stock-empty'),
-              child: Text('No stock movements yet.'),
+            return Center(
+              key: const ValueKey<String>('stock-empty'),
+              child: Text(l10n.t('stockNoMovements')),
             );
           }
           return ListView.builder(
@@ -148,7 +151,8 @@ class StockReportScreenState extends State<StockReportScreen> {
               return ListTile(
                 title: Text(r.itemName),
                 subtitle: Text(r.godownName),
-                trailing: Text('${r.qtyText} · ${r.valueText}'),
+                trailing:
+                    Text('${r.qtyText} · ${r.valueTextFor(l10n.localeCode)}'),
               );
             },
           );
@@ -167,12 +171,13 @@ class _ReportErrorBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text(message),
-          TextButton(onPressed: () => onRetry(), child: const Text('Retry')),
+          TextButton(onPressed: () => onRetry(), child: Text(l10n.t('commonRetry'))),
         ],
       ),
     );

@@ -166,7 +166,8 @@ class PartyRepository {
         } else {
           _db.executeArgs(
             'UPDATE party SET ledger_id = ?, name = ?, role = ?, gstin = ?, '
-            'state = ?, mobile = ?, address = ?, terms = ? '
+            'state = ?, mobile = ?, address = ?, terms = ?, '
+            'record_version = record_version + 1 '
             'WHERE company_id = ? AND party_id = ?',
             <Object?>[
               ledgerId,
@@ -191,7 +192,9 @@ class PartyRepository {
           if (state case final String s) 'state': s,
           if (mobile case final String m) 'mobile': m,
         };
-        final Result<OperationRecord> op = ops.append(
+        final Result<void> lineage = recordLineage(
+          ops: ops,
+          audit: audit,
           opId: opId,
           companyId: companyId.value,
           deviceId: deviceId,
@@ -199,22 +202,13 @@ class PartyRepository {
           entityId: id.value,
           action: action,
           payloadHash: auditPayloadHash(row),
-        );
-        if (op.isErr) {
-          txFailure = (op as Err<OperationRecord>).error;
-          throw const RepositoryAbort();
-        }
-        final Result<AuditEvent> ev = audit.append(
           eventId: eventId,
-          companyId: companyId.value,
-          entity: 'party',
-          entityId: id.value,
           oldRow: oldRow,
           newRow: row,
           actor: actor,
         );
-        if (ev.isErr) {
-          txFailure = (ev as Err<AuditEvent>).error;
+        if (lineage.isErr) {
+          txFailure = (lineage as Err<void>).error;
           throw const RepositoryAbort();
         }
         done = Party(
@@ -385,7 +379,9 @@ class PartyRepository {
           'party_id': partyId.value,
           'address': address,
         };
-        final Result<OperationRecord> op = ops.append(
+        final Result<void> lineage = recordLineage(
+          ops: ops,
+          audit: audit,
           opId: opId,
           companyId: companyId.value,
           deviceId: deviceId,
@@ -393,21 +389,12 @@ class PartyRepository {
           entityId: addressId.value,
           action: 'create',
           payloadHash: auditPayloadHash(row),
-        );
-        if (op.isErr) {
-          txFailure = (op as Err<OperationRecord>).error;
-          throw const RepositoryAbort();
-        }
-        final Result<AuditEvent> ev = audit.append(
           eventId: eventId,
-          companyId: companyId.value,
-          entity: 'party_address',
-          entityId: addressId.value,
           newRow: row,
           actor: actor,
         );
-        if (ev.isErr) {
-          txFailure = (ev as Err<AuditEvent>).error;
+        if (lineage.isErr) {
+          txFailure = (lineage as Err<void>).error;
           throw const RepositoryAbort();
         }
         done = PartyAddress(

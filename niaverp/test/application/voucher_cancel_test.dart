@@ -29,6 +29,7 @@ import 'package:niaverp/data/repositories/voucher_repository.dart';
 import 'package:niaverp/data/repositories/voucher_type_repository.dart';
 
 import '../helpers/test_database.dart';
+import '../helpers/seeded_post.dart';
 
 void main() {
   late NiavDatabase db;
@@ -141,6 +142,9 @@ void main() {
           .isOk,
       isTrue,
     );
+    VoucherSeeder(ctx, ops: ops, audit: audit)
+      ..ensurePostingLedgers(companyId)
+      ..linkPartyLedgers(companyId, <EntityId>[EntityId('p-x')]);
   });
 
   tearDown(() {
@@ -287,7 +291,8 @@ void main() {
   Map<String, Object?> layer(String id) {
     return db.queryArgs(
       'SELECT layer_id, qty_q4, value_paise, remaining_qty_q4, '
-      'remaining_value_paise FROM stock_cost_layer WHERE layer_id = ?',
+      'remaining_value_paise, record_version FROM stock_cost_layer '
+      'WHERE layer_id = ?',
       <Object?>[id],
     ).single;
   }
@@ -341,6 +346,7 @@ void main() {
       expect(afterLayer['value_paise'], beforeLayer['value_paise']);
       expect(afterLayer['remaining_qty_q4'], 0);
       expect(afterLayer['remaining_value_paise'], 0);
+      expect(afterLayer['record_version'], 2);
       // The allocation is reversed, with exactly one new audit event: the
       // allocate write plus the reversal write.
       final List<Map<String, Object?>> allocRows = db.queryArgs(
@@ -352,11 +358,16 @@ void main() {
         audit.forEntity('c-x', 'bill_allocation', 'al-v-p-1'),
         hasLength(2),
       );
-      // The voucher carries create + post + cancel audit events.
+      // The voucher carries create + post + cancel audit events; each
+      // posting arm carries its own voucher_line audit event (D3-A1).
       final List<AuditEvent> voucherEvents =
           audit.forEntity('c-x', 'voucher', 'v-p');
       expect(voucherEvents, hasLength(3));
       expect(voucherEvents.last.newData, contains('cancelled'));
+      expect(
+        audit.forEntity('c-x', 'voucher_line', 'la-v-p-party'),
+        hasLength(1),
+      );
       // D6: the compensating movement audit carries the real actor.
       final List<AuditEvent> reversalEvents =
           audit.forEntity('c-x', 'stock_movement', 'mvr-mv-v-p-l1');
@@ -537,6 +548,10 @@ void main() {
           isTrue,
         );
       }
+      VoucherSeeder(ctx, ops: ops, audit: audit)
+        ..ensurePostingLedgers(CompanyId('c-y'), idSuffix: '-y')
+        ..linkPartyLedgers(CompanyId('c-y'), <EntityId>[EntityId('p-y')],
+            idSuffix: '-y');
 
       // c-x buys 1 unit at Rs50: its cost state binds (c-x, i-x).
       postPurchase('v-p', 10000, 5000);

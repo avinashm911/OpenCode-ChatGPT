@@ -11,6 +11,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:niaverp/core/value_objects/ids.dart';
+import 'package:niaverp/presentation/localization/app_localizations.dart';
 import 'package:niaverp/presentation/reports/books_report_screen.dart';
 import 'package:niaverp/presentation/reports/outstanding_report_screen.dart';
 import 'package:niaverp/presentation/reports/stock_report_screen.dart';
@@ -29,14 +30,15 @@ class ReportsHubScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Scaffold(
       body: ListView(
         key: const ValueKey<String>('reports-hub'),
         children: <Widget>[
         ListTile(
           key: const ValueKey<String>('reports-hub-stock'),
-          title: const Text('Stock report'),
-          subtitle: const Text('Balances and book values'),
+          title: Text(l10n.t('reportsStock')),
+          subtitle: Text(l10n.t('reportsStockSub')),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute<void>(
@@ -51,8 +53,8 @@ class ReportsHubScreen extends StatelessWidget {
         ),
         ListTile(
           key: const ValueKey<String>('reports-hub-outstanding'),
-          title: const Text('Outstanding report'),
-          subtitle: const Text('Open bills and totals'),
+          title: Text(l10n.t('reportsOutstanding')),
+          subtitle: Text(l10n.t('reportsOutstandingSub')),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute<void>(
@@ -66,8 +68,8 @@ class ReportsHubScreen extends StatelessWidget {
         ),
         ListTile(
           key: const ValueKey<String>('reports-hub-books'),
-          title: const Text('Books'),
-          subtitle: const Text('Day book, trial balance, ledger account'),
+          title: Text(l10n.t('reportsBooks')),
+          subtitle: Text(l10n.t('reportsBooksSub')),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute<void>(
