@@ -22,11 +22,9 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0' # pin to version used by environment; verify from pubspec.yaml / SDK notes
+          flutter-version: '3.47.6' # real version from this PC (`flutter --version`: 3.47.6 / Dart 3.13.5)
       - name: Accept Android licenses
         run: yes | sdkmanager --licenses || true
-      - name: Local properties
-        run: echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
       - name: Pub get
         working-directory: niaverp
         run: flutter pub get
