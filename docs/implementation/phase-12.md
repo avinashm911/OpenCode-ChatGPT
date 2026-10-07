@@ -88,6 +88,6 @@ Prompt 13 (final verification and gate report) depends on these blocked evidence
 - The sequence stops at 12 (BLOCKED-DEPENDENT) so prompt 13 (final verification/gate) does not run unconditionally. The owner must supply evidence and reset state to CONTINUE before 13 can complete.
 
 ## 13. Next gate / stop reason
-- Next intended prompt: 13_final_verification_and_gate_report.md.
+- Next intended prompt: 13_final_verification_and_gate_report.SPLIT_INDEX.md (5 parts; split 2026-10-07, bodies byte-identical).
 - Cannot proceed because G0-VER-004 / G0-VER-006 / G0-VER-007 / G0-VER-008 are BLOCKED and 13 requires all active IDs to be resolved (VERIFICATION_CATALOG.md / one-to-one audit / no unconditional sign-off while any active ID is unresolved).
 - Action for owner: supply each missing evidence artifact per the 4 owner questions in §5; then update MASTER_STATE.md to CONTINUE and restart at 13.

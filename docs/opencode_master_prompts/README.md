@@ -8,7 +8,7 @@ cd "E:\NiavERP v2 OpenAI\niaverp"
 
 ## Mandatory order
 
-1. `00_resume_baseline_and_traceability.md`
+1. `00_resume_baseline_and_traceability.SPLIT_INDEX.md` (parts p1of6–p6of6, in order)
 2. `01_local_backend_continuation.md`
 3. `02_onboarding_and_localisation.md`
 4. `03_masters_and_search_continuation.md`
@@ -21,12 +21,12 @@ cd "E:\NiavERP v2 OpenAI\niaverp"
 11. `10_outputs_customisation_and_support.md`
 12. `11_frontend_completion.md`
 13. `12_hardware_release_and_evidence.md`
-14. `13_final_verification_and_gate_report.md`
+14. `13_final_verification_and_gate_report.SPLIT_INDEX.md` (parts p1of5–p5of5, in order)
 
 Run one prompt at a time:
 
 ```powershell
-opencode run -f ..\docs\opencode_master_prompts\00_resume_baseline_and_traceability.md "Execute the attached prompt exactly."
+opencode run -f ..\docs\opencode_master_prompts\00_resume_baseline_and_traceability.p1of6.md "Execute the attached prompt part 1 of 6; the full prompt is the 6 parts in SPLIT_INDEX order."
 ```
 
 Do not run the next prompt after FAIL or after a blocked decision affecting that prompt. Every prompt explicitly requires `AGENTS.md` and `DECISIONS.md` first.

@@ -17,7 +17,7 @@ Historical reports may mention the deleted v0.9 paths. Use this mapping:
 
 | Historical prompt | v1.1 continuation prompt |
 |---|---|
-| 00_intake_and_architecture.md | 00_resume_baseline_and_traceability.md |
+| 00_intake_and_architecture.md | 00_resume_baseline_and_traceability.SPLIT_INDEX.md (6 parts; split 2026-10-07) |
 | 01_local_backend_foundation.md | 01_local_backend_continuation.md |
 | 02_masters_and_search.md | 03_masters_and_search_continuation.md |
 | 02A_onboarding_and_localisation.md | 02_onboarding_and_localisation.md |

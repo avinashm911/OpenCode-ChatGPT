@@ -1,5 +1,5 @@
 # Implementation Phase 00 — Resume baseline and traceability
-Date (UTC): 2026-10-06   Prompt: docs/opencode_master_prompts/00_resume_baseline_and_traceability.md   Contract: GLOBAL_NO_INVENTION_CONTRACT.md
+Date (UTC): 2026-10-06   Prompt: docs/opencode_master_prompts/00_resume_baseline_and_traceability.SPLIT_INDEX.md (6 parts; split 2026-10-07, bodies byte-identical to the original)   Contract: GLOBAL_NO_INVENTION_CONTRACT.md
 Outcome: COMPLETE-WITH-BLOCKS   Previous phase report: none (phase-00/01/02.md absent; prior D0–D4 RESULT files consumed as baseline)
 
 ## 1. Document-read log
@@ -14,7 +14,7 @@ Every file in Step 2 read; one-line takeaway per file:
 - SOURCE_CLARIFICATIONS.md: stop list — every TBC/VERIFY/R-gate item stays governed by that gate; no prompt converts blocked to PASS.
 - BASELINE_AND_MIGRATION_MAP.md: phase-00/01/02 reports referenced but absent; v0.9→v1.1 migration map given; D0–D4 deltas in Delta/ folder.
 - PENDING_INPUTS.md (docs/g0): 23 PENDING-INPUT rows (P-SQLIB, P-DEVICE-8, P-DEVICE-CUR, P-KEYSTORE, P-GST-SRC CLOSED, P-DISC-PREC CLOSED, P-FIELD-LIST, P-EINV-SCH, P-GSTR-SCH, P-EWAY-SCH, P-LEGAL-001…005, P-PRN-001…003, P-APK-SHA, P-ZIP-SHA, P-CH-WA, P-CH-EM, P-CH-LINK); 4 DEFERRED rows; exclusions attested by absence in lib/.
-- 00_resume_baseline_and_traceability.md: this prompt — read-only intake; 114 owned IDs; do not rebuild code/migrations.
+- 00_resume_baseline_and_traceability.SPLIT_INDEX.md (6 parts since 2026-10-07): this prompt — read-only intake; 114 owned IDs; do not rebuild code/migrations.
 - RESULT_D0–D4: consumed as baseline evidence (D0: 404/0 re-verified; D1: re-verification PASS; D2: 431/0 PASS; D3: 451/0 PASS; D4: 449/1 PASS-WITH-BLOCKS).
 - Previous phase reports: phase-00/01/02.md missing (stated, not invented). TEST_RUN_20261005.md exists.
 - 15 living HTML docs: not individually opened for this audit (matrix/source-inventory columns cite them); owned-ID rows verified via matrix only — no HTML content invented in this report.
