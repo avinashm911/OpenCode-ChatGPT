@@ -1,0 +1,12 @@
+en content keys: 290
+rows where hi or gu equals en: 10
+| appTitle | NiAvERP | (same as English) | (same as English) |
+| booksBalanced | Dr = Cr | (same as English) | (same as English) |
+| featGst | GST | (same as English) | (same as English) |
+| langEnglish | English | (same as English) | (same as English) |
+| langGujarati | ગુજરાતી | (same as English) | (same as English) |
+| langHindi | हिन्दी | (same as English) | (same as English) |
+| stDeviceDetail | This device could not be recognised. Nothing has been changed. | (same as English) | (same as English) |
+| stDeviceFail | Device identity unavailable | (same as English) | (same as English) |
+| wordCr | Cr | (same as English) | (same as English) |
+| wordDr | Dr | (same as English) | (same as English) |
