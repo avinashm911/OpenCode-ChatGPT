@@ -43,7 +43,7 @@ Analyzing niaverp...
   error - A function body must be provided ... shell_test.dart:214:7
 flutter.bat : 20 issues found. (ran in 5.4s)
 ```
-Full saved at workspace `analyze_full_20261006.txt`.
+Full saved at `docs/implementation/evidence/analyze_full_20261006.txt` (moved 2026-10-07; this file stays the summary).
 
 ### 4. flutter test (real — embedded full text; 25 lines; build hook failure)
 ```
@@ -53,7 +53,7 @@ Compilation of hook returned with exit code: 1.
 ... build.dart stderr: 'E:\NiavERP' is not recognized ...
 Building native assets failed. See the logs for more details.
 ```
-Full saved at workspace `test_full_20261006.txt`.
+Full saved at `docs/implementation/evidence/test_full_20261006.txt` (moved 2026-10-07; this file stays the summary).
 Root cause (honest, not invented): workspace path `E:\NiavERP v2 OpenAI` contains spaces; sqlite3 3.7.0 build hook (`hook/build.dart`) splits on spaces incorrectly when compiling the kernel. No code fix yet attempted.
 
 ## Errors grouped by cause (from REAL outputs)
@@ -76,7 +76,7 @@ C. BUILD HOOK / RUNTIME (test, 1 group):
 - Read AGENTS.md, DECISIONS.md.
 - Found Flutter 3.47.6 / Dart 3.13.5.
 - Ran `pub get` (success), `analyze` (20 issues), `test` (build blocked).
-- Created/updated `docs/implementation/BASELINE_REAL_20261006.md`; saved `analyse_full_20261006.txt` and `test_full_20261006.txt`.
+- Created/updated `docs/implementation/BASELINE_REAL_20261006.md`; saved `docs/implementation/evidence/analyze_full_20261006.txt` and `docs/implementation/evidence/test_full_20261006.txt`.
 - No code edited; no tests weakened/deleted; no false PASS.
 - One git commit on `e3-20261006`: `020220d`.
 
