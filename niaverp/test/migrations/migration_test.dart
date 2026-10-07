@@ -88,7 +88,7 @@ void main() {
   });
 
   group('registry (G0-SCH-001…007 traceability)', () {
-    test('versions are contiguous 1..17 with existing files', () {
+    test('versions are contiguous 1..18 with existing files', () {
       // G0 chain v1..v8 preserved exactly (G0 acceptance); v9 (M03 masters)
       // appended by implementation Phase 02; v10-13 (DSS transaction refs,
       // FY + Dr/Cr, series mode, ledger masters) appended for the
@@ -97,10 +97,12 @@ void main() {
       // for the stock-valuation milestone; v16 (D1-D5 company scope on
       // item_cost_state + stock_movement reversal/cost-method columns);
       // v17 (D2 hardening: triggers, vocabulary guards, indexes, audit
-      // chain columns, migration checksums, trial clock mark).
+      // chain columns, migration checksums, trial clock mark);
+      // v18 (G3 GST posting context: supplier state, buyer registration
+      // type, voucher place-of-supply context, per-line rate/tax columns).
       expect(kMigrations.map((Migration m) => m.version).toList(),
-          <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]);
-      expect(kLatestVersion, 17);
+          <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]);
+      expect(kLatestVersion, 18);
       for (final Migration m in kMigrations) {
         expect(File('lib/data/migrations/${m.fileName}').existsSync(), isTrue,
             reason: m.fileName);
@@ -125,7 +127,7 @@ void main() {
   });
 
   group('clean install creates the complete schema', () {
-    test('migrates to v17 with ordered ledger and all deltas present', () {
+    test('migrates to v18 with ordered ledger and all deltas present', () {
       final Database raw = sqlite3.openInMemory();
       raw.execute('PRAGMA foreign_keys = ON');
       final SqliteMigrationDb db = SqliteMigrationDb(raw);
@@ -134,13 +136,14 @@ void main() {
       migrate(db, sql);
       expect(currentVersion(db), kLatestVersion);
 
-      // Ledger: 17 rows, ordered, one per version
+      // Ledger: 18 rows, ordered, one per version
       // (G0 v1..v8 + M03 v9 + DSS v10-13 + ledger detail/bank v14 +
-      // valuation v15 + D1-D5 company scope/reversal v16 + D2 hardening v17).
+      // valuation v15 + D1-D5 company scope/reversal v16 + D2 hardening v17 +
+      // G3 GST posting context v18).
       final List<Map<String, Object?>> ledger =
           db.query('SELECT version FROM schema_migrations ORDER BY version');
       expect(ledger.map((Map<String, Object?> r) => r['version']).toList(),
-          <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]);
+          <int>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]);
       // D2: every applied migration carries a checksum of its SQL text.
       final List<Map<String, Object?>> checksums = db.query(
           'SELECT COUNT(*) AS n FROM schema_migrations WHERE checksum IS NULL');

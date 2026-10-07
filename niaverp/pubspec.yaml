@@ -91,6 +91,7 @@ flutter:
     - lib/data/migrations/m015_stock_valuation.sql
     - lib/data/migrations/m016_company_scope_and_reversal.sql
     - lib/data/migrations/m017_schema_hardening.sql
+    - lib/data/migrations/m018_gst_posting.sql
 
   # To add assets to your application, add an assets section, like this:
   # assets:

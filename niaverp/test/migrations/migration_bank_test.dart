@@ -26,7 +26,7 @@ void main() {
     test('columns and bank table exist at latest', () {
       db = openTestDatabase();
       addTearDown(() => rawEngineOf(db).close());
-      expect(db.schemaVersion, 17); // registry ends at v17 (m017, D2)
+      expect(db.schemaVersion, 18); // registry ends at v18 (m018, G3)
       expect(
         columns(db, 'ledger'),
         containsAll(<String>[
@@ -75,7 +75,7 @@ void main() {
       v14.sqlByVersion = loadMigrationSql();
       v14.bootstrap();
       addTearDown(() => rawEngineOf(v14).close());
-      expect(v14.schemaVersion, 17); // staged v13, then full bootstrap to latest v17
+      expect(v14.schemaVersion, 18); // staged v13, then full bootstrap to latest v18
       expect(
         v14
             .queryArgs(
@@ -119,7 +119,7 @@ void main() {
           NiavDatabase(rawEngineOf(v14), clock: testClock());
       again.sqlByVersion = loadMigrationSql();
       again.bootstrap();
-      expect(again.schemaVersion, 17); // re-bootstrap stays at latest v17
+      expect(again.schemaVersion, 18); // re-bootstrap stays at latest v18
     });
   });
 }

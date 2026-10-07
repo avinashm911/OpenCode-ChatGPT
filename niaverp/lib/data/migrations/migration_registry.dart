@@ -147,7 +147,16 @@ const List<Migration> kMigrations = <Migration>[
         '(all additive, repeat-safe)',
     fileName: 'm017_schema_hardening.sql',
   ),
+  Migration(
+    version: 18,
+    g0Id: 'G3',
+    description: 'GST tax posting context (CA reply 2026-10-07): supplier '
+        'state, buyer registration type, voucher place-of-supply context '
+        'and determined values, per-line rate and computed tax columns '
+        '(all additive, repeat-safe)',
+    fileName: 'm018_gst_posting.sql',
+  ),
 ];
 
 /// Highest approved schema version.
-const int kLatestVersion = 17;
+const int kLatestVersion = 18;
