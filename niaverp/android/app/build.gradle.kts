@@ -40,26 +40,37 @@ android {
             //     -PNIAV_RELEASE_KEY_PASSWORD=...
             // Never create or commit keystores (G0-VER-004 pending; the key
             // questions below are owner input, not invented values).
-            val releaseStoreFile =
-                project.findProperty("NIAV_RELEASE_STORE_FILE") as String?
-            if (releaseStoreFile == null) {
-                throw GradleException(
-                    "NiAvERP release signing is not configured: re-run with " +
-                    "-PNIAV_RELEASE_STORE_FILE (plus STORE_PASSWORD, KEY_ALIAS, " +
-                    "KEY_PASSWORD). The debug key is never used for releases."
-                )
+            //
+            // The guard below runs ONLY when a release task is requested
+            // (task name contains "release", e.g. assembleRelease): plain
+            // `flutter build apk --debug` configures and builds with no
+            // keystore and no -P flags. A release build without the
+            // properties still fails here with a clear message.
+            val releaseRequested = gradle.startParameter.taskNames.any { name ->
+                name.contains("release", ignoreCase = true)
             }
-            if (!file(releaseStoreFile).exists()) {
-                throw GradleException(
-                    "NiAvERP release keystore missing: $releaseStoreFile not found. " +
-                    "Verify path and permissions (G0-VER-004 / G5 evidence pending)."
-                )
-            }
-            signingConfig = signingConfigs.create("niavRelease") {
-                storeFile = file(releaseStoreFile)
-                storePassword = project.findProperty("NIAV_RELEASE_STORE_PASSWORD") as String?
-                keyAlias = project.findProperty("NIAV_RELEASE_KEY_ALIAS") as String?
-                keyPassword = project.findProperty("NIAV_RELEASE_KEY_PASSWORD") as String?
+            if (releaseRequested) {
+                val releaseStoreFile =
+                    project.findProperty("NIAV_RELEASE_STORE_FILE") as String?
+                if (releaseStoreFile == null) {
+                    throw GradleException(
+                        "NiAvERP release signing is not configured: re-run with " +
+                        "-PNIAV_RELEASE_STORE_FILE (plus STORE_PASSWORD, KEY_ALIAS, " +
+                        "KEY_PASSWORD). The debug key is never used for releases."
+                    )
+                }
+                if (!file(releaseStoreFile).exists()) {
+                    throw GradleException(
+                        "NiAvERP release keystore missing: $releaseStoreFile not found. " +
+                        "Verify path and permissions (G0-VER-004 / G5 evidence pending)."
+                    )
+                }
+                signingConfig = signingConfigs.create("niavRelease") {
+                    storeFile = file(releaseStoreFile)
+                    storePassword = project.findProperty("NIAV_RELEASE_STORE_PASSWORD") as String?
+                    keyAlias = project.findProperty("NIAV_RELEASE_KEY_ALIAS") as String?
+                    keyPassword = project.findProperty("NIAV_RELEASE_KEY_PASSWORD") as String?
+                }
             }
         }
     }
