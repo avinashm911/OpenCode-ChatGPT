@@ -70,6 +70,11 @@ jobs:
       - name: Build APK (debug, no keystore flags)
         working-directory: niaverp
         run: flutter build apk --debug
+      - name: Android unit tests (DbKeyStore JVM tests)
+        # Runs after the APK build so flutter has generated android/local.properties
+        # (settings.gradle.kts reads flutter.sdk from it); gradlew is committed with +x.
+        working-directory: niaverp/android
+        run: ./gradlew :app:testDebugUnitTest
       - name: Upload debug APK
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:

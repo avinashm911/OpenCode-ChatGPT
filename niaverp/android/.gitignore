@@ -1,8 +1,7 @@
-gradle-wrapper.jar
+// Gradle wrapper scripts + jar are committed so CI can run unit tests
+// without Flutter (./gradlew :app:testDebugUnitTest).
 /.gradle
 /captures/
-/gradlew
-/gradlew.bat
 /local.properties
 GeneratedPluginRegistrant.java
 .cxx/
