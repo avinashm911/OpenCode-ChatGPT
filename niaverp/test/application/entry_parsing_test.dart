@@ -74,5 +74,33 @@ void main() {
       expect(parsePercentBps('100.01'), -1);
       expect(parsePercentBps('5.'), -1);
     });
+
+    test('non-finite, exponent and oversized inputs are rejected', () {
+      // double.tryParse accepts all of these — the integer parser must not.
+      for (final String bad in <String>[
+        '1e5',
+        '1E5',
+        '1e-3',
+        'Infinity',
+        '-Infinity',
+        'NaN',
+        '99999999999999999999999',
+        '99999999999999999999999.9999',
+      ]) {
+        expect(parseQuantityQ4(bad), -1, reason: 'qty $bad');
+        expect(parsePaise(bad), -1, reason: 'paise $bad');
+      }
+      // Empty quantity is invalid; empty money counts as zero (unchanged).
+      expect(parseQuantityQ4(''), -1);
+      expect(parseQuantityQ4('   '), -1);
+      expect(parsePaise(''), 0);
+      expect(parsePaise('   '), 0);
+      // 1.005: too many decimals for rupees, fine for quantity (3 <= 4).
+      expect(parsePaise('1.005'), -1);
+      expect(parseQuantityQ4('1.005'), 10050);
+      // 0.29 parses in both.
+      expect(parsePaise('0.29'), 29);
+      expect(parseQuantityQ4('0.29'), 2900);
+    });
   });
 }

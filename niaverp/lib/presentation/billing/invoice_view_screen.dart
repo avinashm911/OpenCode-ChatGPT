@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:niaverp/application/formatting/niav_format.dart';
+import 'package:niaverp/application/parsing/entry_parsing.dart';
 import 'package:niaverp/application/services/voucher_engine.dart';
 import 'package:niaverp/core/result.dart';
 import 'package:niaverp/core/value_objects/ids.dart';
@@ -183,12 +184,11 @@ class InvoiceViewScreenState extends State<InvoiceViewScreen> {
     final String suffixWord = suffix == 'payment'
         ? l10n.t('wordPayment')
         : l10n.t('wordReceipt');
-    final double? rupees = double.tryParse(raw.trim());
-    if (rupees == null || rupees <= 0) {
+    final int paise = parsePaise(raw);
+    if (paise <= 0) {
       setState(() => _notice = l10n.needPositive(suffixWord));
       return;
     }
-    final int paise = (rupees * 100).round();
     final VoucherType type = settlementTypes.first;
     final List<VoucherSeries> auto = <VoucherSeries>[
       for (final VoucherSeries s

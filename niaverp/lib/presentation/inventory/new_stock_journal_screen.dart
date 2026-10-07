@@ -12,6 +12,7 @@
 
 import 'package:flutter/material.dart';
 
+import 'package:niaverp/application/parsing/entry_parsing.dart';
 import 'package:niaverp/application/services/voucher_engine.dart';
 import 'package:niaverp/core/result.dart';
 import 'package:niaverp/core/value_objects/ids.dart';
@@ -135,19 +136,9 @@ class NewStockJournalScreenState extends State<NewStockJournalScreen> {
     });
   }
 
-  int _parseQty(String raw) {
-    final double? units = double.tryParse(raw.trim());
-    if (units == null || units <= 0) return -1;
-    return (units * 10000).round();
-  }
+  int _parseQty(String raw) => parseQuantityQ4(raw);
 
-  int _parsePaise(String raw) {
-    final String t = raw.trim();
-    if (t.isEmpty) return 0;
-    final double? rupees = double.tryParse(t);
-    if (rupees == null || rupees < 0) return -1;
-    return (rupees * 100).round();
-  }
+  int _parsePaise(String raw) => parsePaise(raw);
 
   String _godownName(EntityId? id, List<Godown> godowns) {
     if (id == null) return '—';

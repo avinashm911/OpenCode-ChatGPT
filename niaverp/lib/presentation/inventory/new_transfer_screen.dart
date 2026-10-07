@@ -11,6 +11,7 @@
 
 import 'package:flutter/material.dart';
 
+import 'package:niaverp/application/parsing/entry_parsing.dart';
 import 'package:niaverp/application/services/voucher_engine.dart';
 import 'package:niaverp/core/result.dart';
 import 'package:niaverp/core/value_objects/ids.dart';
@@ -126,11 +127,7 @@ class NewTransferScreenState extends State<NewTransferScreen> {
     });
   }
 
-  int _parseQty(String raw) {
-    final double? units = double.tryParse(raw.trim());
-    if (units == null || units <= 0) return -1;
-    return (units * 10000).round();
-  }
+  int _parseQty(String raw) => parseQuantityQ4(raw);
 
   String _godownName(EntityId? id, List<Godown> godowns) {
     if (id == null) return '—';
