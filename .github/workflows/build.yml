@@ -3,7 +3,9 @@
 # Runners are GitHub-hosted Linux, so the Windows folder-space issue with the
 # local sqlite3 build hook does not apply here.
 #
-# Secrets required ONLY for the release job (names only — values never printed):
+# Secrets required ONLY for the release job (names only — values never printed),
+# and the release job runs ONLY on manual dispatch (pushes/PRs skip it, so a
+# missing keystore never fails a normal build):
 #   NIAV_RELEASE_KEYSTORE_B64    base64 of the release .jks (upload once, keep private)
 #   NIAV_RELEASE_STORE_PASSWORD  keystore password
 #   NIAV_RELEASE_KEY_ALIAS       key alias inside the keystore
@@ -77,6 +79,8 @@ jobs:
 
   build-release:
     name: Release APK (keystore secrets)
+    # Manual runs only: normal pushes/PRs never fail for missing secrets.
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -147,32 +151,20 @@ jobs:
         with:
           name: niav-debug-apk
           path: apk
+      # KVM group permissions, verbatim from the android-emulator-runner README
+      # (pinned commit a421e438) for ubuntu runners.
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
       - name: API 26 emulator — install, launch, assert alive, no FATAL EXCEPTION (AVD, not physical device)
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
         with:
           api-level: 26
           target: default
           arch: x86_64
-          script: |
-            adb install apk/app-debug.apk
-            adb shell am start -n com.niaverp.niaverp/com.niaverp.niaverp.MainActivity
-            sleep 25
-            APP_PID="$(adb shell pidof com.niaverp.niaverp | tr -d '\r')"
-            echo "app pid: $APP_PID"
-            if [ -z "$APP_PID" ]; then
-              echo "FATAL: com.niaverp.niaverp process is not alive after launch"
-              adb logcat -d > emulator-api26-logcat.txt
-              exit 1
-            fi
-            adb logcat -d > emulator-api26-logcat.txt
-            if grep -q "FATAL EXCEPTION" emulator-api26-logcat.txt; then
-              echo "FATAL: FATAL EXCEPTION found in logcat"
-              exit 1
-            fi
-            adb shell getprop ro.product.model > emulator-fingerprint.txt
-            adb shell getprop ro.build.version.release >> emulator-fingerprint.txt
-            adb shell getprop ro.build.version.sdk >> emulator-fingerprint.txt
-            echo "SMOKE PASS: process alive, no FATAL EXCEPTION"
+          script: bash ci/emulator_smoke.sh
       - name: Upload emulator evidence (logcat + fingerprint)
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

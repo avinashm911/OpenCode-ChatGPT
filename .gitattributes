@@ -1,0 +1,2 @@
+# Keep CI shell scripts LF-only on every platform (bash on the runner chokes on CRLF).
+ci/*.sh text eol=lf
