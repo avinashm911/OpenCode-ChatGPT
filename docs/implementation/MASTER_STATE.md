@@ -5,12 +5,12 @@ Rule for this file: every number below comes from a real command output named in
 ## 1. Measured now (2026-10-07, Flutter 3.47.6 / Dart 3.13.5, E:\niaverp-root)
 | Check | Result | Evidence |
 |---|---|---|
-| Full `flutter test` | 455 passed / 2 failed / 2 skipped (failures: entry_parsing quantity expectation; localization_source ARB asset load — both pre-existing; skips: 2 honest BLOCKED cipher-pin placeholders) | outputs/flutter_test_full_20261007_cipherpin.txt |
+| Full `flutter test` | 455 passed / 2 failed / 2 skipped (failures: entry_parsing quantity expectation; localization_source ARB asset load — both pre-existing; skips: 2 honest BLOCKED cipher-pin placeholders) | docs/implementation/evidence/flutter_test_full_20261007_cipherpin.txt |
 | `flutter analyze` (cipher pin files) | No issues found | session output 2026-10-07 (cipher_opener.dart + cipher_opener_test.dart) |
-| `flutter build apk --debug` (no flags) | PASS — app-debug.apk built (162 MB) | outputs/build_debug_fixed.txt |
-| `flutter build apk --release` (no keystore) | FAILS with clear signing message (required behaviour) | outputs/build_release_nokeystore.txt |
-| Pre-fix debug build | FAILED at configuration (signing guard ran for all tasks — bug proven, then fixed in e27701a) | outputs/build_debug_baseline.txt |
-| `flutter doctor -v` | SDK 36.0.0 present, licences accepted; JDK = Studio-bundled 25.0.3 (no standalone Java 17; nothing installed) | outputs/flutter_doctor_20261007.txt |
+| `flutter build apk --debug` (no flags) | PASS — app-debug.apk built (162 MB) | docs/implementation/evidence/build_debug_fixed.txt |
+| `flutter build apk --release` (no keystore) | FAILS with clear signing message (required behaviour) | docs/implementation/evidence/build_release_nokeystore.txt |
+| Pre-fix debug build | FAILED at configuration (signing guard ran for all tasks — bug proven, then fixed in e27701a) | docs/implementation/evidence/build_debug_baseline.txt |
+| `flutter doctor -v` | SDK 36.0.0 present, licences accepted; JDK = Studio-bundled 25.0.3 (no standalone Java 17; nothing installed) | docs/implementation/evidence/flutter_doctor_20261007.txt |
 | Cipher pin E1b-A9 | CLOSED — `PRAGMA cipher='chacha20'` + read-back in opener; 2 new tests pass; licence text from upstream (no text embedded in .so) | docs/g0/evidence/SQLITE3MC_CONFIG_20261007.md; docs/g0/evidence/CIPHER_LIB_LICENSE_20261007.md |
 | E1–E3 claims | Re-verified test-by-test (PROVEN / UNPROVEN / CONTRADICTED per claim) | docs/implementation/CLAIMS_REVERIFIED_20261007.md |
 
