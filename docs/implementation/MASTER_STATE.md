@@ -5,7 +5,7 @@ Rule for this file: every number below comes from a real command output named in
 ## 1. Measured now (2026-10-07, Flutter 3.47.6 / Dart 3.13.5, E:\niaverp-root)
 | Check | Result | Evidence |
 |---|---|---|
-| Full `flutter test` | 455 passed / 2 failed / 2 skipped (failures: entry_parsing quantity expectation; localization_source ARB asset load — both pre-existing; skips: 2 honest BLOCKED cipher-pin placeholders) | docs/implementation/evidence/flutter_test_full_20261007_cipherpin.txt |
+| Full `flutter test` | 460 passed / 0 failed / 2 skipped (skips: 2 honest BLOCKED cipher-pin placeholders) | docs/implementation/evidence/flutter_test_full_20261007_l10nfix.txt |
 | `flutter analyze` (cipher pin files) | No issues found | session output 2026-10-07 (cipher_opener.dart + cipher_opener_test.dart) |
 | `flutter build apk --debug` (no flags) | PASS — app-debug.apk built (162 MB) | docs/implementation/evidence/build_debug_fixed.txt |
 | `flutter build apk --release` (no keystore) | FAILS with clear signing message (required behaviour) | docs/implementation/evidence/build_release_nokeystore.txt |
