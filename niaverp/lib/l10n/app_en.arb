@@ -298,5 +298,13 @@
   "stSchemaDetail": "Database version is newer than the app supports.",
   "stReady": "Ready",
   "stDeviceFail": "Device identity unavailable",
-  "stDeviceDetail": "This device could not be recognised. Nothing has been changed."
+  "stDeviceDetail": "This device could not be recognised. Nothing has been changed.",
+  "stKeyLocked": "Device locked",
+  "stKeyLockedDetail": "Unlock this device and try again. Nothing has been changed.",
+  "stKeyMissing": "Secure key missing",
+  "stKeyMissingDetail": "No key was found. Set up again to continue. Nothing has been changed.",
+  "stKeyCorrupt": "Security data damaged",
+  "stKeyCorruptDetail": "The wrapped key cannot be used. Nothing has been changed.",
+  "stDataLocked": "Existing data is locked",
+  "stDataLockedDetail": "Company data exists but its key is missing. Nothing has been changed or overwritten."
 }

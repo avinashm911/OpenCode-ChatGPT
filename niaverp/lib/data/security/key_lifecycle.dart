@@ -42,6 +42,11 @@ enum KeyFailure {
 
   /// Uninstall/reinstall wiped Keystore keys (expected Android behavior).
   wipedByUninstall,
+
+  /// Database data exists but no wrapped key does (reinstall without the
+  /// blob, or blob lost): minting a fresh key would orphan user data, so
+  /// posting/opening refuses with this code instead.
+  existingDataLocked,
 }
 
 /// Outcome of a key operation. Failures carry only the enum + a static
@@ -117,6 +122,9 @@ class KeyLifecycle {
       case KeyFailure.wipedByUninstall:
         return const KeyResult.fail(KeyFailure.wipedByUninstall,
             'keystore wiped by reinstall; re-provision required');
+      case KeyFailure.existingDataLocked:
+        return const KeyResult.fail(KeyFailure.existingDataLocked,
+            'existing data without a wrapped key; minting refused');
     }
   }
 

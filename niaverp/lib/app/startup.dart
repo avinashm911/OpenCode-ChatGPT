@@ -24,6 +24,7 @@ import 'package:niaverp/core/clock.dart';
 import 'package:niaverp/core/value_objects/niav_date.dart';
 import 'package:niaverp/data/db/cipher_opener.dart';
 import 'package:niaverp/data/db/key_provider.dart';
+import 'package:niaverp/data/security/key_lifecycle.dart';
 import 'package:niaverp/data/db/niav_database.dart';
 import 'package:niaverp/data/migrations/migration_registry.dart';
 import 'package:niaverp/presentation/shared/company_scope.dart';
@@ -43,6 +44,12 @@ class StartupCode {
   /// No key at all and re-provisioning did not happen (wiped install).
   static const String keyMissing = 'key-missing';
 
+  /// The wrapped blob exists but cannot be unwrapped (tamper/version skew).
+  static const String keyCorrupt = 'key-corrupt';
+
+  /// Database data exists but no wrapped key does: minting is refused so
+  /// existing data is never orphaned (MainActivity existingDataLocked).
+  static const String existingDataLocked = 'existing-data-locked';
   /// The encrypted database could not be opened (cipher build, wrong key,
   /// unreadable file, permissions).
   static const String databaseUnavailable = 'database-unavailable';
@@ -204,6 +211,22 @@ Future<StartupOutcome> runStartup(StartupEnvironment env) async {
   final ChannelKeyResult keyResult = await provider.obtainKey();
   final Uint8List? keyBytes = keyResult.bytes;
   if (keyBytes == null) {
+    // Distinct screen per platform failure code (the reference line shows
+    // the code; headlines differ — see StartupStatusScreen).
+    switch (keyResult.failure) {
+      case KeyFailure.authFailed:
+        return const StartupOutcome.keyFailure(StartupCode.keyLocked);
+      case KeyFailure.wipedByUninstall:
+        return const StartupOutcome.keyFailure(StartupCode.keyMissing);
+      case KeyFailure.corruptWrapper:
+        return const StartupOutcome.keyFailure(StartupCode.keyCorrupt);
+      case KeyFailure.existingDataLocked:
+        return const StartupOutcome.keyFailure(
+            StartupCode.existingDataLocked);
+      case KeyFailure.keystoreUnavailable:
+      case null:
+        break;
+    }
     switch (provider.state.name) {
       case 'locked':
         return const StartupOutcome.keyFailure(StartupCode.keyLocked);

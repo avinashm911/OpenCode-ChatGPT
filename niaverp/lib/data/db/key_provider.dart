@@ -74,8 +74,8 @@ class ChannelKeyResult {
 ///     `state`: one of `missing` | `available` | `locked` | `failed`
 ///     `key`:   32 raw bytes (present only when state is `available`)
 ///     `failure`: one of `keystoreUnavailable` | `authFailed` |
-///                `corruptWrapper` | `wipedByUninstall` (when state is
-///                `failed` or `missing` after a wipe)
+///                `corruptWrapper` | `wipedByUninstall` |
+///                `existingDataLocked` (when state is `failed`)
 /// A `locked` state returns no key and no recovery: the caller surfaces the
 /// locked state, and only a fresh platform unlock (device auth) can change it.
 /// A malformed reply is treated as `failed` with [KeyFailure.corruptWrapper] —
@@ -206,6 +206,8 @@ class ChannelKeyProvider implements KeyProvider {
         return KeyFailure.corruptWrapper;
       case 'wipedByUninstall':
         return KeyFailure.wipedByUninstall;
+      case 'existingDataLocked':
+        return KeyFailure.existingDataLocked;
       case 'keystoreUnavailable':
       default:
         return KeyFailure.keystoreUnavailable;

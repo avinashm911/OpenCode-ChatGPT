@@ -103,6 +103,23 @@ class StartupStatusScreen extends StatelessWidget {
   final StartupOutcome outcome;
 
   String _headline(AppLocalizations l10n) {
+    // Key failures show one distinct headline per platform failure code
+    // (the reference line below shows the code itself as well).
+    if (outcome.stage == StartupStage.keyFailure) {
+      switch (outcome.code) {
+        case StartupCode.keyLocked:
+          return l10n.t('stKeyLocked');
+        case StartupCode.keyMissing:
+          return l10n.t('stKeyMissing');
+        case StartupCode.keyCorrupt:
+          return l10n.t('stKeyCorrupt');
+        case StartupCode.existingDataLocked:
+          return l10n.t('stDataLocked');
+        case StartupCode.keyUnavailable:
+        default:
+          return l10n.t('stKeyFail');
+      }
+    }
     switch (outcome.stage) {
       case StartupStage.starting:
         return l10n.t('stStarting');
@@ -120,6 +137,21 @@ class StartupStatusScreen extends StatelessWidget {
   }
 
   String _detail(AppLocalizations l10n) {
+    if (outcome.stage == StartupStage.keyFailure) {
+      switch (outcome.code) {
+        case StartupCode.keyLocked:
+          return l10n.t('stKeyLockedDetail');
+        case StartupCode.keyMissing:
+          return l10n.t('stKeyMissingDetail');
+        case StartupCode.keyCorrupt:
+          return l10n.t('stKeyCorruptDetail');
+        case StartupCode.existingDataLocked:
+          return l10n.t('stDataLockedDetail');
+        case StartupCode.keyUnavailable:
+        default:
+          return l10n.t('stKeyDetail');
+      }
+    }
     switch (outcome.stage) {
       case StartupStage.starting:
         return l10n.t('stStartingDetail');
