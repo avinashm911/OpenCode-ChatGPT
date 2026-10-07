@@ -25,7 +25,7 @@ Date (UTC): 2026-10-07. Status vocabulary: PENDING-INPUT (waiting on someone) / 
 | P-CH-WA (WhatsApp delivery) | Owner | PENDING-INPUT | docs/g0/PENDING_INPUTS.md §A |
 | P-CH-EM (email delivery) | Owner | PENDING-INPUT | docs/g0/PENDING_INPUTS.md §A |
 | P-CH-LINK (hosted-link fetch) | Owner | PENDING-INPUT | docs/g0/PENDING_INPUTS.md §A |
-| TEST-entry_parsing (D3-B1 quantity expectation) | Implementation | FAIL | docs/implementation/evidence/flutter_test_full_20261007_cipherpin.txt (see Failing tests); niaverp/test/application/entry_parsing_test.dart:15 |
+| TEST-entry_parsing (D3-B1 quantity expectation) | Implementation | FIXED 2026-10-07 (regression from rewrite bc75024, not pre-existing; sub-unit totals now decide) | docs/implementation/evidence/entry_parsing_before_fix.txt; docs/implementation/evidence/entry_parsing_after_fix.txt; niaverp/test/application/entry_parsing_test.dart |
 | TEST-localization_source (ARB asset load) | Implementation | FAIL | docs/implementation/evidence/flutter_test_full_20261007_cipherpin.txt (see Failing tests); niaverp/test/presentation/localization_source_test.dart:14 |
 | CI-RUN (workflow never executed) | Owner (push + Run workflow) | NOT-RUN | .github/workflows/build.yml; docs/implementation/CI_DEPENDENCIES.md |
 | EMULATOR-RUN (API 26 smoke never executed) | Owner (run CI) | NOT-RUN | .github/workflows/build.yml (job emulator-api26); docs/g0/evidence/android/EMULATOR_API26_RUN_20261006.md |
