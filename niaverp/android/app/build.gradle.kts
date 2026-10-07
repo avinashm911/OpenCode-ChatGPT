@@ -85,3 +85,9 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // JVM unit tests for DbKeyStore (pure file/decision logic, no device).
+    // JUnit4: single pinned test dependency, Apache-2.0.
+    testImplementation("junit:junit:4.13.2")
+}

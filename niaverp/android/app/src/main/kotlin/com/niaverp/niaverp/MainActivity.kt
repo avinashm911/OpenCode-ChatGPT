@@ -1,6 +1,5 @@
 package com.niaverp.niaverp
 
-import android.content.Context
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
@@ -10,7 +9,10 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.security.KeyStore
 import java.security.SecureRandom
+import java.util.Arrays
+import javax.crypto.BadPaddingException
 import javax.crypto.Cipher
+import javax.crypto.IllegalBlockSizeException
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
@@ -25,14 +27,20 @@ import javax.crypto.spec.GCMParameterSpec
  *      `state`   : "missing" | "available" | "locked" | "failed"
  *      `key`     : 32 raw bytes, present only when state == "available"
  *      `failure` : "keystoreUnavailable" | "authFailed" | "corruptWrapper" |
- *                  "wipedByUninstall" (when a failure is the cause)
+ *                  "wipedByUninstall" | "existingDataLocked" (failure cause)
  *  - a random 256-bit database key is generated once, wrapped with an
- *    Android Keystore AES-GCM key and stored wrapped in app-private storage;
- *    the plaintext key exists only in memory for the duration of the reply.
+ *    Android Keystore AES-GCM key and stored wrapped (single atomic file) in
+ *    app-private storage; the plaintext key exists in memory only for the
+ *    duration of the reply and its working array is zeroed afterwards.
  *  - there is NO recovery API and NO plaintext fallback: if the Keystore key
  *    or the wrapped blob is unusable, the channel reports a failure code and
- *    the database stays closed.
+ *    the database stays closed. A fresh key is NEVER minted when a wrapped
+ *    blob exists (decrypt failure / missing alias) or when database data
+ *    exists without a blob (`existingDataLocked`).
  *  - key bytes are never logged and never placed in an exception message.
+ *
+ * File layout and the provision/refuse decision matrix live in [DbKeyStore]
+ * (pure logic with JVM unit tests). Keystore access and crypto stay here.
  *
  * minSdk stays 26 (Android 8); GCMParameterSpec and the standard KeyStore
  * provider are available from API 23.
@@ -47,10 +55,7 @@ class MainActivity : FlutterActivity() {
         const val WRAP_TRANSFORMATION = "AES/GCM/NoPadding"
         const val WRAP_ALGORITHM = "AES"
         const val GCM_TAG_BITS = 128
-        const val GCM_IV_BYTES = 12
         const val DB_KEY_BYTES = 32
-        const val WRAPPED_SUFFIX = ".wrapped"
-        const val IV_SUFFIX = ".iv"
     }
 
     private val secureRandom = SecureRandom()
@@ -76,10 +81,30 @@ class MainActivity : FlutterActivity() {
      */
     private fun databaseKeyReply(): Map<String, Any?> {
         return try {
-            val wrapped = readWrapped()
-            when {
-                wrapped == null -> missingReply()
-                else -> availableReply(wrapped)
+            val store = DbKeyStore(filesDir)
+            val stored = store.read()
+            val keyStore = try {
+                keyStore()
+            } catch (e: KeystoreUnavailable) {
+                return failureReply("keystoreUnavailable")
+            }
+            val wrappingPresent =
+                storeWrappingKey(keyStore) != null
+            when (store.decide(
+                stored = stored,
+                wrappingKeyPresent = wrappingPresent,
+                databaseExists = store.databaseExists(),
+            )) {
+                is DbKeyStore.KeyDecision.Proceed ->
+                    availableReply(keyStore, (stored as DbKeyStore.Stored.Ok).blob)
+                is DbKeyStore.KeyDecision.Provision ->
+                    provisionReply(keyStore, store)
+                is DbKeyStore.KeyDecision.RefuseExistingData ->
+                    failureReply("existingDataLocked")
+                is DbKeyStore.KeyDecision.RefuseWiped ->
+                    failureReply("wipedByUninstall")
+                is DbKeyStore.KeyDecision.RefuseCorrupt ->
+                    failureReply("corruptWrapper")
             }
         } catch (e: KeystoreUnavailable) {
             failureReply("keystoreUnavailable")
@@ -91,28 +116,53 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    private fun availableReply(wrapped: WrappedKey): Map<String, Any?> {
-        val keyStore = keyStore()
+    private fun availableReply(
+        keyStore: KeyStore,
+        blob: DbKeyStore.WrappedBlob,
+    ): Map<String, Any?> {
+        val wrapping = storeWrappingKey(keyStore)
+            ?: throw KeystoreUnavailable()
         val cipher = Cipher.getInstance(WRAP_TRANSFORMATION)
-        cipher.init(Cipher.DECRYPT_MODE, wrappingKey(keyStore), GCMParameterSpec(GCM_TAG_BITS, wrapped.iv))
-        val plaintext = cipher.doFinal(wrapped.ciphertext)
-        if (plaintext.size != DB_KEY_BYTES) {
-            // Wrong length is a corrupt wrapper, not a usable key.
+        val plaintext: ByteArray
+        try {
+            cipher.init(
+                Cipher.DECRYPT_MODE,
+                wrapping,
+                GCMParameterSpec(GCM_TAG_BITS, blob.iv),
+            )
+            plaintext = cipher.doFinal(blob.ciphertext)
+        } catch (e: BadPaddingException) {
+            throw CorruptWrapper()
+        } catch (e: IllegalBlockSizeException) {
             throw CorruptWrapper()
         }
-        return mapOf<String, Any?>("state" to "available", "key" to plaintext)
+        if (plaintext.size != DB_KEY_BYTES) {
+            // Wrong length is a corrupt wrapper, not a usable key.
+            Arrays.fill(plaintext, 0.toByte())
+            throw CorruptWrapper()
+        }
+        // The reply carries a copy; the working array is zeroed at once.
+        val replyKey = plaintext.copyOf()
+        Arrays.fill(plaintext, 0.toByte())
+        return mapOf<String, Any?>("state" to "available", "key" to replyKey)
     }
 
-    private fun missingReply(): Map<String, Any?> {
-        // First run (or after an uninstall wiped the Keystore entry): provision
-        // a new key pair and store the wrapped database key app-privately.
+    /**
+     * First run only (no blob, no database): provision a fresh database key,
+     * wrap it with a newly minted wrapping key and store it atomically.
+     */
+    private fun provisionReply(
+        keyStore: KeyStore,
+        store: DbKeyStore,
+    ): Map<String, Any?> {
         val fresh = newDatabaseKey()
-        val keyStore = keyStore()
         val cipher = Cipher.getInstance(WRAP_TRANSFORMATION)
-        cipher.init(Cipher.ENCRYPT_MODE, wrappingKey(keyStore))
+        cipher.init(Cipher.ENCRYPT_MODE, mintWrappingKey(keyStore))
         val ciphertext = cipher.doFinal(fresh)
-        writeWrapped(WrappedKey(ciphertext, cipher.iv))
-        return mapOf<String, Any?>("state" to "available", "key" to fresh)
+        store.write(DbKeyStore.WrappedBlob(cipher.iv, ciphertext))
+        val replyKey = fresh.copyOf()
+        Arrays.fill(fresh, 0.toByte())
+        return mapOf<String, Any?>("state" to "available", "key" to replyKey)
     }
 
     private fun failureReply(failure: String): Map<String, Any?> =
@@ -124,56 +174,59 @@ class MainActivity : FlutterActivity() {
         return bytes
     }
 
+    /**
+     * Open the platform Keystore. Any failure to reach it throws
+     * [KeystoreUnavailable] (this is where the code path the contract
+     * documents originates).
+     */
     private fun keyStore(): KeyStore {
-        val store = KeyStore.getInstance(KEY_STORE)
-        store.load(null)
-        return store
+        try {
+            val store = KeyStore.getInstance(KEY_STORE)
+            store.load(null)
+            return store
+        } catch (e: Exception) {
+            throw KeystoreUnavailable()
+        }
     }
 
     /**
-     * The Keystore AES-GCM key that wraps the database key. Created on first
-     * use; it is non-exportable by construction and never leaves the Keystore.
+     * Look up the wrapping key WITHOUT creating one. Null means the alias is
+     * gone (e.g. wiped by an uninstall) — the caller must refuse, never mint
+     * over an existing blob.
      */
-    private fun wrappingKey(store: KeyStore): SecretKey {
-        val existing = store.getKey(KEY_ALIAS, null) as? SecretKey
-        if (existing != null) return existing
-        val generator = KeyGenerator.getInstance(WRAP_ALGORITHM, KEY_STORE)
-        val spec = KeyGenParameterSpec.Builder(
-            KEY_ALIAS,
-            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-        )
-            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-            .setKeySize(256)
-            // No user-authentication requirement: the wrap key only protects the
-            // database key at rest. An app lock/unlock gate, when the product
-            // adds one, is enforced by the Dart lifecycle states, not by
-            // re-inventing a Keystore policy here.
-            .build()
-        generator.init(spec)
-        return generator.generateKey()
-    }
-
-    private fun wrappedFile() = java.io.File(filesDir, "niaverp_db_key$WRAPPED_SUFFIX")
-
-    private fun ivFile() = java.io.File(filesDir, "niaverp_db_key$IV_SUFFIX")
-
-    private fun readWrapped(): WrappedKey? {
-        val wrapped = wrappedFile()
-        val iv = ivFile()
-        if (!wrapped.exists() || !iv.exists()) return null
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (!wrapped.isFile || !iv.isFile) return null
+    private fun storeWrappingKey(store: KeyStore): SecretKey? {
+        return try {
+            store.getKey(KEY_ALIAS, null) as? SecretKey
+        } catch (e: Exception) {
+            throw KeystoreUnavailable()
         }
-        return WrappedKey(wrapped.readBytes(), iv.readBytes())
     }
 
-    private fun writeWrapped(value: WrappedKey) {
-        wrappedFile().writeBytes(value.ciphertext)
-        ivFile().writeBytes(value.iv)
+    /**
+     * Create the wrapping key. Called only on the provision path (no blob
+     * and no database exist), never over existing material.
+     */
+    private fun mintWrappingKey(store: KeyStore): SecretKey {
+        try {
+            val generator = KeyGenerator.getInstance(WRAP_ALGORITHM, KEY_STORE)
+            val spec = KeyGenParameterSpec.Builder(
+                KEY_ALIAS,
+                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+            )
+                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .setKeySize(256)
+                // No user-authentication requirement: the wrap key only protects the
+                // database key at rest. An app lock/unlock gate, when the product
+                // adds one, is enforced by the Dart lifecycle states, not by
+                // re-inventing a Keystore policy here.
+                .build()
+            generator.init(spec)
+            return generator.generateKey()
+        } catch (e: Exception) {
+            throw KeystoreUnavailable()
+        }
     }
-
-    private class WrappedKey(val ciphertext: ByteArray, val iv: ByteArray)
 
     private class KeystoreUnavailable : Exception()
 
