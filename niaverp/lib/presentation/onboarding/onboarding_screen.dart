@@ -58,7 +58,7 @@ class OnboardingScreenState extends State<OnboardingScreen> {
     // v1 store holds companies without a parent scope; read straight rows.
     final List<Map<String, Object?>> rows =
         widget.companies.ctx.db.queryArgs(
-      'SELECT company_id, name, created_at FROM company ORDER BY name',
+      'SELECT company_id, name, state_code, created_at FROM company ORDER BY name',
       <Object?>[],
     );
     return <Company>[

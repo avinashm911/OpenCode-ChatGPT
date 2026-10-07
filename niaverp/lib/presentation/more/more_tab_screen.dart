@@ -126,7 +126,7 @@ class MoreTabScreenState extends State<MoreTabScreen> {
 
   List<Company> _companies() {
     final List<Map<String, Object?>> rows = _scope.companies.ctx.db.queryArgs(
-      'SELECT company_id, name, created_at FROM company ORDER BY name',
+      'SELECT company_id, name, state_code, created_at FROM company ORDER BY name',
       <Object?>[],
     );
     return <Company>[

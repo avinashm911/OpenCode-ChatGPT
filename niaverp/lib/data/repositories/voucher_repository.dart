@@ -35,6 +35,12 @@ class Voucher {
     this.actor,
     this.device,
     this.fyId,
+    this.billState,
+    this.shipState,
+    this.thirdPartyDirection,
+    this.supplyCategory,
+    this.posState,
+    this.taxType,
   });
 
   final EntityId id;
@@ -55,6 +61,21 @@ class Voucher {
   final String? device;
   final EntityId? fyId;
 
+  /// Place-of-supply context (CA reply 2026-10-07, m018). All nullable:
+  /// NULL = unspecified (legacy drafts post tax-free).
+  /// [billState]/[shipState]: 2-digit state codes from the invoice.
+  /// [thirdPartyDirection]: 1 = delivered on a third party's direction
+  /// (IGST Act s.10(1)(b)) — bill-to state decides.
+  /// [supplyCategory]: NULL/regular, or reverse_charge / exempt / nil_rated /
+  /// zero_rated / export_sez / composition / services (posting restricts).
+  /// [posState]/[taxType]: determined at posting ('intra'/'inter'), audit only.
+  final String? billState;
+  final String? shipState;
+  final int? thirdPartyDirection;
+  final String? supplyCategory;
+  final String? posState;
+  final String? taxType;
+
   static Voucher fromRow(Map<String, Object?> r) => Voucher(
         id: EntityId(r['voucher_id'] as String),
         companyId: CompanyId(r['company_id'] as String),
@@ -68,6 +89,12 @@ class Voucher {
         actor: r['actor'] as String?,
         device: r['device'] as String?,
         fyId: r['fy_id'] == null ? null : EntityId(r['fy_id'] as String),
+        billState: r['bill_state'] as String?,
+        shipState: r['ship_state'] as String?,
+        thirdPartyDirection: r['third_party_direction'] as int?,
+        supplyCategory: r['supply_category'] as String?,
+        posState: r['pos_state'] as String?,
+        taxType: r['tax_type'] as String?,
       );
 }
 
@@ -90,6 +117,10 @@ class VoucherLine {
     required this.discountRateBps,
     required this.createdAt,
     this.drCr,
+    this.rateBps,
+    this.cgstPaise = 0,
+    this.sgstPaise = 0,
+    this.igstPaise = 0,
   });
 
   final EntityId id;
@@ -113,6 +144,14 @@ class VoucherLine {
   final int discountAmountPaise;
   final int discountRateBps;
   final int createdAt;
+
+  /// GST rate in basis points (m018). NULL = tax-free line (always allowed).
+  final int? rateBps;
+
+  /// Computed tax written at posting for audit (arms carry the money).
+  final int cgstPaise;
+  final int sgstPaise;
+  final int igstPaise;
 
   static VoucherLine fromRow(Map<String, Object?> r) => VoucherLine(
         id: EntityId(r['voucher_line_id'] as String),
@@ -141,6 +180,10 @@ class VoucherLine {
         discountAmountPaise: (r['discount_amount_paise'] as int?) ?? 0,
         discountRateBps: (r['discount_rate_bps'] as int?) ?? 0,
         createdAt: r['created_at'] as int,
+        rateBps: r['rate_bps'] as int?,
+        cgstPaise: (r['cgst_paise'] as int?) ?? 0,
+        sgstPaise: (r['sgst_paise'] as int?) ?? 0,
+        igstPaise: (r['igst_paise'] as int?) ?? 0,
       );
 }
 
@@ -163,11 +206,14 @@ class VoucherRepository {
 
   static const String _headerCols =
       'voucher_id, company_id, voucher_type, series, voucher_no, '
-      'voucher_date, status, created_at, narration, actor, device, fy_id';
+      'voucher_date, status, created_at, narration, actor, device, fy_id, '
+      'bill_state, ship_state, third_party_direction, supply_category, '
+      'pos_state, tax_type';
   static const String _lineCols =
       'voucher_line_id, voucher_id, company_id, line_no, item_id, qty_q4, '
       'rate_paise, amount_paise, discount_amount_paise, discount_rate_bps, '
-      'ledger_id, party_id, godown_id, batch_id, dr_cr, created_at';
+      'ledger_id, party_id, godown_id, batch_id, dr_cr, created_at, rate_bps, '
+      'cgst_paise, sgst_paise, igst_paise';
 
   /// Create a draft voucher header with operation + audit lineage.
   /// [narration]/[headerActor]/[headerDevice] are the DSS §3 header fields
@@ -184,6 +230,10 @@ class VoucherRepository {
     String? headerActor,
     String? headerDevice,
     EntityId? fyId,
+    String? billState,
+    String? shipState,
+    int? thirdPartyDirection,
+    String? supplyCategory,
     required String deviceId,
     required String opId,
     required String eventId,
@@ -207,7 +257,9 @@ class VoucherRepository {
         _db.executeArgs(
           'INSERT INTO voucher (voucher_id, company_id, voucher_type, '
           'series, voucher_no, voucher_date, status, created_at, narration, '
-          'actor, device, fy_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          'actor, device, fy_id, bill_state, ship_state, '
+          'third_party_direction, supply_category) '
+          'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
           <Object?>[
             id.value,
             companyId.value,
@@ -221,6 +273,10 @@ class VoucherRepository {
             headerActor,
             headerDevice,
             fyId?.value,
+            billState,
+            shipState,
+            thirdPartyDirection,
+            supplyCategory,
           ],
         );
         final Map<String, Object?> row = <String, Object?>{
@@ -263,6 +319,10 @@ class VoucherRepository {
           actor: headerActor,
           device: headerDevice,
           fyId: fyId,
+          billState: billState,
+          shipState: shipState,
+          thirdPartyDirection: thirdPartyDirection,
+          supplyCategory: supplyCategory,
         );
       });
       return ok(created!);
@@ -294,6 +354,7 @@ class VoucherRepository {
     required int ratePaise,
     int discountAmountPaise = 0,
     int discountRateBps = 0,
+    int? rateBps,
     required String deviceId,
     required String opId,
     required String eventId,
@@ -304,6 +365,9 @@ class VoucherRepository {
         'validation',
         'line_no must be > 0, rate must be >= 0, device id not empty',
       );
+    }
+    if (rateBps != null && (rateBps < 0 || rateBps > 10000)) {
+      return err('validation', 'rate_bps must be 0..10000 when given');
     }
     // Editable-state rule: a line may only be added while the voucher is still
     // a working document. `posted` and `cancelled` history is immutable
@@ -349,8 +413,8 @@ class VoucherRepository {
           'INSERT INTO voucher_line (voucher_line_id, voucher_id, '
           'company_id, line_no, item_id, qty_q4, rate_paise, amount_paise, '
           'discount_amount_paise, discount_rate_bps, ledger_id, party_id, '
-          'godown_id, batch_id, dr_cr, created_at) '
-          'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          'godown_id, batch_id, dr_cr, created_at, rate_bps) '
+          'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
           <Object?>[
             lineId.value,
             voucherId.value,
@@ -368,6 +432,7 @@ class VoucherRepository {
             batchId?.value,
             drCr,
             now,
+            rateBps,
           ],
         );
         final Map<String, Object?> row = <String, Object?>{
@@ -413,6 +478,7 @@ class VoucherRepository {
           amountPaise: amount,
           discountAmountPaise: discountAmountPaise,
           discountRateBps: discountRateBps,
+          rateBps: rateBps,
           createdAt: now,
         );
       });

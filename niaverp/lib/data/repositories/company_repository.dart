@@ -12,22 +12,26 @@ import 'audit_log.dart';
 import 'operation_log.dart';
 import 'repository.dart';
 
-/// One company row.
+/// One company row. [stateCode] is the 2-digit GST state code of the
+/// company's location (supplier location for place-of-supply rules).
 class Company {
   const Company({
     required this.id,
     required this.name,
     required this.createdAt,
+    this.stateCode,
   });
 
   final CompanyId id;
   final String name;
   final int createdAt;
+  final String? stateCode;
 
   static Company fromRow(Map<String, Object?> r) => Company(
         id: CompanyId(r['company_id'] as String),
         name: r['name'] as String,
         createdAt: r['created_at'] as int,
+        stateCode: r['state_code'] as String?,
       );
 }
 
@@ -44,6 +48,7 @@ class CompanyRepository {
   Result<Company> create({
     required CompanyId id,
     required String name,
+    String? stateCode,
     required String deviceId,
     required String opId,
     required String eventId,
@@ -58,8 +63,9 @@ class CompanyRepository {
       _db.runInTransaction(() {
         final int now = ctx.clock.nowMs();
         _db.executeArgs(
-          'INSERT INTO company (company_id, name, created_at) VALUES (?, ?, ?)',
-          <Object?>[id.value, name, now],
+          'INSERT INTO company (company_id, name, state_code, created_at) '
+          'VALUES (?, ?, ?, ?)',
+          <Object?>[id.value, name, stateCode, now],
         );
         final Map<String, Object?> row = <String, Object?>{
           'company_id': id.value,
@@ -84,7 +90,7 @@ class CompanyRepository {
           txFailure = (lineage as Err<void>).error;
           throw const RepositoryAbort();
         }
-        created = Company(id: id, name: name, createdAt: now);
+        created = Company(id: id, name: name, createdAt: now, stateCode: stateCode);
       });
       return ok(created!);
     } on RepositoryAbort {
@@ -100,7 +106,8 @@ class CompanyRepository {
   /// Fetch one company by id (null when absent — not an error).
   Company? get(CompanyId id) {
     final List<Map<String, Object?>> rows = _db.queryArgs(
-      'SELECT company_id, name, created_at FROM company WHERE company_id = ?',
+      'SELECT company_id, name, state_code, created_at FROM company '
+      'WHERE company_id = ?',
       <Object?>[id.value],
     );
     if (rows.isEmpty) return null;

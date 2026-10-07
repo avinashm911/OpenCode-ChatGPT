@@ -33,6 +33,7 @@ class Party {
     this.mobile,
     this.address,
     this.terms,
+    this.registrationType,
     required this.createdAt,
   });
 
@@ -48,6 +49,11 @@ class Party {
   final String? terms;
   final int createdAt;
 
+  /// Buyer classification for place-of-supply rules (CA reply 2026-10-07):
+  /// 'registered' / 'unregistered' / 'composition'. Free text validated in
+  /// Dart; the documents specify no CHECK vocabulary.
+  final String? registrationType;
+
   static Party fromRow(Map<String, Object?> r) => Party(
         id: EntityId(r['party_id'] as String),
         companyId: CompanyId(r['company_id'] as String),
@@ -59,6 +65,7 @@ class Party {
         mobile: r['mobile'] as String?,
         address: r['address'] as String?,
         terms: r['terms'] as String?,
+        registrationType: r['registration_type'] as String?,
         createdAt: r['created_at'] as int,
       );
 }
@@ -102,7 +109,7 @@ class PartyRepository {
 
   static const String _cols =
       'party_id, company_id, ledger_id, name, role, gstin, state, mobile, '
-      'address, terms, created_at';
+      'address, terms, registration_type, created_at';
 
   Result<Party> _insert({
     required EntityId id,
@@ -115,6 +122,7 @@ class PartyRepository {
     String? mobile,
     String? address,
     String? terms,
+    String? registrationType,
     required String deviceId,
     required String opId,
     required String eventId,
@@ -147,8 +155,9 @@ class PartyRepository {
         if (action == 'create') {
           _db.executeArgs(
             'INSERT INTO party (party_id, company_id, ledger_id, name, role, '
-            'gstin, state, mobile, address, terms, created_at) '
-            'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            'gstin, state, mobile, address, terms, registration_type, '
+            'created_at) '
+            'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             <Object?>[
               id.value,
               companyId.value,
@@ -160,6 +169,7 @@ class PartyRepository {
               mobile,
               address,
               terms,
+              registrationType,
               now,
             ],
           );
@@ -167,6 +177,7 @@ class PartyRepository {
           _db.executeArgs(
             'UPDATE party SET ledger_id = ?, name = ?, role = ?, gstin = ?, '
             'state = ?, mobile = ?, address = ?, terms = ?, '
+            'registration_type = ?, '
             'record_version = record_version + 1 '
             'WHERE company_id = ? AND party_id = ?',
             <Object?>[
@@ -178,6 +189,7 @@ class PartyRepository {
               mobile,
               address,
               terms,
+              registrationType,
               companyId.value,
               id.value,
             ],
@@ -222,6 +234,7 @@ class PartyRepository {
           mobile: mobile,
           address: address,
           terms: terms,
+          registrationType: registrationType,
           createdAt: now,
         );
       });
@@ -247,6 +260,7 @@ class PartyRepository {
     String? mobile,
     String? address,
     String? terms,
+    String? registrationType,
     required String deviceId,
     required String opId,
     required String eventId,
@@ -263,6 +277,7 @@ class PartyRepository {
         mobile: mobile,
         address: address,
         terms: terms,
+        registrationType: registrationType,
         deviceId: deviceId,
         opId: opId,
         eventId: eventId,
@@ -283,6 +298,7 @@ class PartyRepository {
     String? mobile,
     String? address,
     String? terms,
+    String? registrationType,
     required String deviceId,
     required String opId,
     required String eventId,
@@ -303,6 +319,7 @@ class PartyRepository {
       mobile: mobile,
       address: address,
       terms: terms,
+      registrationType: registrationType,
       deviceId: deviceId,
       opId: opId,
       eventId: eventId,
