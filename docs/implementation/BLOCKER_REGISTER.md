@@ -7,7 +7,7 @@ Date (UTC): 2026-10-07. Status vocabulary: PENDING-INPUT (waiting on someone) / 
 | P-DEVICE-8 (Android 8 device) | Owner | PENDING-INPUT | docs/g0/PENDING_INPUTS.md §A; docs/g0/evidence/android/EMULATOR_API26_RUN_20261006.md |
 | P-DEVICE-CUR (current-Android record device) | Owner | PENDING-INPUT | docs/g0/PENDING_INPUTS.md §A |
 | P-KEYSTORE (on-device Keystore runs) | Owner (device) | PENDING-INPUT | docs/g0/PENDING_INPUTS.md §A |
-| GST-TAX-POSTING (B3–B5 implementation) | CA (answers) + Owner (sign-off) | BLOCKED | docs/implementation/OWNER_DECISION_MEMO_GST_POSTING.md |
+| GST-TAX-POSTING (B3–B5 implementation) | CA (answers) + Owner (sign-off) | FIXED 2026-10-07 (CA reply applied: place-of-supply, blocks, separate-halves math, mirroring, Dr=Cr; see DECISIONS.md P-GST-POST) | docs/implementation/evidence/CA_REPLY_TEXT_20261007.txt; niaverp/lib/application/tax/gst_posting.dart; niaverp/test/application/gst_posting_test.dart; niaverp/test/application/gst_posting_engine_test.dart |
 | P-FIELD-LIST (R1a field list) | Owner | PENDING-INPUT | docs/g0/PENDING_INPUTS.md §A |
 | P-EINV-SCH (e-invoice schema) | Owner | PENDING-INPUT | docs/g0/PENDING_INPUTS.md §A |
 | P-GSTR-SCH (GST return schema) | Owner | PENDING-INPUT | docs/g0/PENDING_INPUTS.md §A |
