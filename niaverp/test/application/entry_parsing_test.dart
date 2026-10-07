@@ -42,5 +42,37 @@ void main() {
       expect(parsePercentBps('-5'), -1);
       expect(parsePercentBps('half'), -1);
     });
+
+    test('quantities below one unit parse (total decides, not whole part)', () {
+      expect(parseQuantityQ4('0.5'), 5000);
+      expect(parseQuantityQ4('0.0001'), 1);
+      expect(parseQuantityQ4('.5'), 5000);
+      expect(parseQuantityQ4('1.5'), 15000);
+      expect(parseQuantityQ4('100'), 1000000);
+      expect(parseQuantityQ4('0.00001'), -1); // >4 decimals rejected
+      expect(parseQuantityQ4('5.'), -1); // malformed
+      expect(parseQuantityQ4('1e3'), -1); // no exponents
+      expect(parseQuantityQ4('0.0000'), -1); // total is zero
+      expect(parseQuantityQ4('99999999999999999999'), -1); // overflow-safe
+      expect(parseQuantityQ4('99999999999999999999.9999'), -1); // overflow-safe
+    });
+
+    test('paise edge cases (total decides; .5 counts)', () {
+      expect(parsePaise('0.50'), 50);
+      expect(parsePaise('.5'), 50);
+      expect(parsePaise('0.05'), 5);
+      expect(parsePaise('100.00'), 10000);
+      expect(parsePaise('100.01'), 10001);
+      expect(parsePaise('5.'), -1);
+      expect(parsePaise('99999999999999999999'), -1); // overflow-safe
+    });
+
+    test('percent edge cases (.5 counts; cap holds)', () {
+      expect(parsePercentBps('.5'), 50);
+      expect(parsePercentBps('0.05'), 5);
+      expect(parsePercentBps('100.00'), 10000);
+      expect(parsePercentBps('100.01'), -1);
+      expect(parsePercentBps('5.'), -1);
+    });
   });
 }
