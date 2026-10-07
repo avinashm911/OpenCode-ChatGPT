@@ -20,27 +20,23 @@ int invoiceRoundOff(int totalPaise) {
   return rounded - totalPaise;
 }
 
-/// CGST/SGST split of an intra-state GST total (fixture convention
-/// F-GST-SPLIT, PROPOSED): equal halves floored, the odd-paise remainder to
-/// CGST. Stated here because 1 paise cannot be halved; owner to confirm.
-({int cgst, int sgst}) splitCgstSgst(int totalPaise) {
-  final int half = totalPaise ~/ 2;
-  return (cgst: half + (totalPaise % 2), sgst: half);
-}
+/// Largest taxable base whose half-rate scaling cannot overflow 64-bit.
+/// (CA reply Q3: CGST/SGST are computed separately from the half rate.)
+const int _kMaxTaxablePaise = 9223372036854775807 ~/ 20000;
 
-/// Per-line GST for posting displays (D3-A2 documented subset): the rate is
-/// the item's documented GST rate; the math is D-M4 (gstTotal) with the
-/// P-DISC-PREC odd-to-CGST split. This is intra-state CGST/SGST ONLY — the
-/// CGST+SGST-vs-IGST determination (place of supply) is NOT defined by the
-/// documents (G0-VER-003), so no IGST arm is produced anywhere from this.
-/// Callers must treat the result as a calculation aid behind that boundary.
-({int gst, int cgst, int sgst}) lineGstPaise({
-  required int netPaise,
-  required int rateBps,
-}) {
-  final int gst = gstTotal(netPaise, rateBps);
-  final ({int cgst, int sgst}) split = splitCgstSgst(gst);
-  return (gst: gst, cgst: split.cgst, sgst: split.sgst);
+/// CGST and SGST computed SEPARATELY from the half rate (CA reply 2026-10-07,
+/// Q3 — approved rule, replaces the PROPOSED total-split convention): each is
+/// round-half-up(taxable × rateBps / 20000). The halves are always equal, so
+/// no odd-paise remainder exists and none is assigned. Never compute a total
+/// first and halve it (that path is rejected: it can differ by a paisa).
+/// Throws [ArgumentError] on negative inputs or unrepresentable totals.
+({int cgst, int sgst}) cgstSgstSeparate(int taxablePaise, int rateBps) {
+  if (taxablePaise <= 0 || rateBps <= 0) return (cgst: 0, sgst: 0);
+  if (taxablePaise > _kMaxTaxablePaise) {
+    throw ArgumentError('taxable base overflows half-rate scaling');
+  }
+  final int half = ((taxablePaise * rateBps) + 10000) ~/ 20000;
+  return (cgst: half, sgst: half);
 }
 
 /// Render integer paise as a decimal rupee string (always ≤ 2 decimals).

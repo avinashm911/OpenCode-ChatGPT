@@ -568,23 +568,22 @@ void main() {
     });
   });
 
-  group('GST calculation subset (D3-A2)', () {
-    test('line GST with CGST/SGST split, odd remainder to CGST', () {
-      final ({int gst, int cgst, int sgst}) even =
-          lineGstPaise(netPaise: 10000, rateBps: 1800);
-      expect(even.gst, 1800);
-      expect(even.cgst, 900);
-      expect(even.sgst, 900);
-      final ({int gst, int cgst, int sgst}) odd =
-          lineGstPaise(netPaise: 10006, rateBps: 1800);
-      expect(odd.gst, 1801);
-      expect(odd.cgst, 901);
-      expect(odd.sgst, 900);
+  group('GST calculation subset (D3-A2, CA reply 2026-10-07 Q3)', () {
+    test('line GST with separately computed equal CGST/SGST halves', () {
+      final ({int cgst, int sgst}) even = cgstSgstSeparate(10000, 1800);
+      expect(gstTotal(10000, 1800), 1800);
+      expect((even.cgst, even.sgst), (900, 900));
+      // 10006p @ 18%: separate halves 901/901 (sum 1802); a total-first
+      // split would give 901/900 — rejected, never implemented.
+      final ({int cgst, int sgst}) oddBase = cgstSgstSeparate(10006, 1800);
+      expect((oddBase.cgst, oddBase.sgst), (901, 901));
     });
 
     test('zero rate or zero base yields zero tax, never negative', () {
-      expect(lineGstPaise(netPaise: 10000, rateBps: 0).gst, 0);
-      expect(lineGstPaise(netPaise: 0, rateBps: 1800).gst, 0);
+      expect(cgstSgstSeparate(10000, 0), (cgst: 0, sgst: 0));
+      expect(cgstSgstSeparate(0, 1800), (cgst: 0, sgst: 0));
+      expect(gstTotal(10000, 0), 0);
+      expect(gstTotal(0, 1800), 0);
     });
   });
 }

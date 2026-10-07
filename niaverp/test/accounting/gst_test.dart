@@ -76,14 +76,21 @@ void main() {
     });
   });
 
-  group('F-GST-008 CGST/SGST split (fixture convention F-GST-SPLIT, PROPOSED)', () {
-    test('odd paise remainder goes to CGST', () {
-      final ({int cgst, int sgst}) odd = splitCgstSgst(1801);
-      expect(odd.cgst, 901);
-      expect(odd.sgst, 900);
-      final ({int cgst, int sgst}) even = splitCgstSgst(1800);
-      expect(even.cgst, 900);
-      expect(even.sgst, 900);
+  group('F-GST-008 CGST/SGST computed separately (CA reply 2026-10-07 Q3)', () {
+    test('equal halves from the half rate; never split a total', () {
+      // 10000 × 1800 half-rate: (10000×1800+10000)/20000 = 900 each.
+      final ({int cgst, int sgst}) even = cgstSgstSeparate(10000, 1800);
+      expect((even.cgst, even.sgst), (900, 900));
+      // 10006 × 1800: separate halves are 901/901 (sum 1802), while a
+      // total-first computation gives 1801 — the 1p gap is WHY the CA
+      // rejects splitting a total. Halves are always equal here.
+      final ({int cgst, int sgst}) oddBase = cgstSgstSeparate(10006, 1800);
+      expect((oddBase.cgst, oddBase.sgst), (901, 901));
+      // CA worked example line 1: 1123457p @ 18% → 101111 each.
+      final ({int cgst, int sgst}) worked = cgstSgstSeparate(1123457, 1800);
+      expect((worked.cgst, worked.sgst), (101111, 101111));
+      expect(cgstSgstSeparate(10000, 0), (cgst: 0, sgst: 0));
+      expect(cgstSgstSeparate(0, 1800), (cgst: 0, sgst: 0));
     });
   });
 }
