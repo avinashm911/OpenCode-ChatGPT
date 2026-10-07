@@ -19,6 +19,7 @@
 // Traceability: M04/M05/M06/M07/M08; D-M4; DSS-C-001/004; OD-DB-004;
 // D-M5(5) period lock; FR-M04-001/002.
 
+import 'package:niaverp/application/tax/gst_posting.dart';
 import 'package:niaverp/core/result.dart';
 import 'package:niaverp/core/value_objects/ids.dart';
 import 'package:niaverp/data/accounting/costing.dart';
@@ -752,7 +753,7 @@ class VoucherEngine {
           movementIds: plan.movementIds,
           warnings: plan.warnings,
           unallocated: unallocated,
-          pendingEffects: _pendingEffects(canonical),
+          pendingEffects: _pendingEffects(companyId, id, canonical),
         );
       });
       return ok(done!);
@@ -860,16 +861,187 @@ class VoucherEngine {
     return EntityId(ledger as String);
   }
 
+  /// GST tax arms (CA reply 2026-10-07, Q1-Q4). Runs inside [_postLedgerArms]'s
+  /// transaction, before round-off: determines the place of supply from the
+  /// company/party/voucher context, computes per-line kept-paise tax (separate
+  /// CGST/SGST halves; IGST inter-state), persists per-line tax columns and
+  /// the voucher pos_state/tax_type (draft row, still mutable), resolves the
+  /// used tax ledgers by exact master name (missing refuses the post — tax
+  /// ledgers are never auto-created), and writes balanced tax arms. Returns
+  /// the tax total and the last used line number (0/0 for tax-free vouchers).
+  /// Exempt/nil-rated vouchers post with all-tax-free lines and no arms.
+  /// Throws [TxFailure] on any breach.
+  ({int total, int lastLineNo, bool taxIsDr}) _postTaxArms(
+    CompanyId companyId,
+    _Postable p,
+    String? canonical,
+    String deviceId,
+    String actor,
+  ) {
+    int lineNo = 0;
+    for (final VoucherLine l in p.lines) {
+      if (l.lineNo > lineNo) lineNo = l.lineNo;
+    }
+    final Voucher v = p.voucher;
+    EntityId? partyId;
+    for (final VoucherLine l in p.lines) {
+      if (l.partyId != null) {
+        partyId = l.partyId;
+        break;
+      }
+    }
+    // Item lines carry the taxable base; ledger arms (none yet at this point)
+    // never do.
+    final List<VoucherLine> itemLines = <VoucherLine>[
+      for (final VoucherLine l in p.lines)
+        if (l.itemId != null) l,
+    ];
+    final String rawCategory = (v.supplyCategory ?? '').trim();
+    final String category = rawCategory.isEmpty ? 'regular' : rawCategory;
+    if (category == 'exempt' || category == 'nil_rated') {
+      for (final VoucherLine l in itemLines) {
+        if (l.rateBps != null) {
+          throw TxFailure(const AppError('validation',
+              'exempt/nil-rated voucher lines must be tax-free (no rate)'));
+        }
+      }
+      return (total: 0, lastLineNo: lineNo, taxIsDr: false);
+    }
+    final List<Map<String, Object?>> companies = _db.queryArgs(
+      'SELECT state_code FROM company WHERE company_id = ?',
+      <Object?>[companyId.value],
+    );
+    final String? supplierState = companies.isEmpty
+        ? null
+        : companies.first['state_code'] as String?;
+    String? partyGstin;
+    String? partyRegType;
+    if (partyId != null) {
+      final List<Map<String, Object?>> parties = _db.queryArgs(
+        'SELECT gstin, registration_type FROM party WHERE company_id = ? '
+        'AND party_id = ?',
+        <Object?>[companyId.value, partyId.value],
+      );
+      if (parties.isNotEmpty) {
+        partyGstin = parties.first['gstin'] as String?;
+        partyRegType = parties.first['registration_type'] as String?;
+      }
+    }
+    // Legacy path: no rate on any line and no recorded tax context — posts
+    // exactly as before (tax-free, no arms, no pos write). Any tax signal
+    // engages the full CA-approved determination below, which blocks rather
+    // than guesses when inputs are insufficient.
+    final bool hasRates = p.lines.any((VoucherLine l) => l.rateBps != null);
+    final bool hasCtx = supplierState != null ||
+        v.billState != null ||
+        v.shipState != null ||
+        (v.thirdPartyDirection ?? 0) == 1 ||
+        partyGstin != null ||
+        partyRegType != null;
+    if (!hasRates && !hasCtx) return (total: 0, lastLineNo: lineNo, taxIsDr: false);
+    final Result<PlaceOfSupply> posResult = determinePlaceOfSupply(TaxContext(
+      supplierState: supplierState,
+      billState: v.billState,
+      shipState: v.shipState,
+      thirdPartyDirection: (v.thirdPartyDirection ?? 0) == 1,
+      supplyCategory: v.supplyCategory,
+      partyGstin: partyGstin,
+      partyRegType: partyRegType,
+    ));
+    if (posResult.isErr) {
+      final AppError e = (posResult as Err<PlaceOfSupply>).error;
+      throw TxFailure(AppError(e.code, e.message));
+    }
+    final PlaceOfSupply pos = (posResult as Ok<PlaceOfSupply>).value;
+    // Tax sides mirror the income sides: sales collect output tax (Cr),
+    // purchases claim input tax (Dr); returns reverse the original sides.
+    final bool outputSide;
+    final bool creditSide;
+    switch (canonical) {
+      case 'Sales Invoice':
+        outputSide = true;
+        creditSide = true;
+      case 'Purchase Invoice':
+        outputSide = false;
+        creditSide = false;
+      case 'Sales Return / Credit Note with items':
+        outputSide = true;
+        creditSide = false;
+      case 'Purchase Return / Debit Note with items':
+        outputSide = false;
+        creditSide = true;
+      default:
+        return (total: 0, lastLineNo: lineNo, taxIsDr: false);
+    }
+    int cgst = 0, sgst = 0, igst = 0;
+    for (final VoucherLine l in itemLines) {
+      final int taxable =
+          lineNet(l.amountPaise, l.discountAmountPaise, l.discountRateBps);
+      final TaxHeads heads = computeLineTax(
+        TaxLineInput(taxablePaise: taxable, rateBps: l.rateBps),
+        pos.taxType,
+      );
+      _db.executeArgs(
+        'UPDATE voucher_line SET cgst_paise = ?, sgst_paise = ?, '
+        'igst_paise = ? WHERE company_id = ? AND voucher_line_id = ?',
+        <Object?>[
+          heads.cgst,
+          heads.sgst,
+          heads.igst,
+          companyId.value,
+          l.id.value,
+        ],
+      );
+      cgst += heads.cgst;
+      sgst += heads.sgst;
+      igst += heads.igst;
+    }
+    int written = 0;
+    void writeTaxArm(String ledgerName, String suffix, int amount) {
+      if (amount == 0) return;
+      final EntityId ledger = _roleLedger(companyId, ledgerName);
+      lineNo += 1;
+      _writeLedgerArm(
+        companyId: companyId,
+        voucherId: v.id,
+        lineNo: lineNo,
+        armId: 'la-${v.id.value}-$suffix',
+        ledgerId: ledger,
+        drCr: creditSide ? 'Cr' : 'Dr',
+        amountPaise: amount,
+        deviceId: deviceId,
+        actor: actor,
+      );
+      written += amount;
+    }
+
+    if (pos.taxType == 'intra') {
+      writeTaxArm(
+          outputSide ? TaxLedgers.outputCgst : TaxLedgers.inputCgst, 'cgst', cgst);
+      writeTaxArm(
+          outputSide ? TaxLedgers.outputSgst : TaxLedgers.inputSgst, 'sgst', sgst);
+    } else {
+      writeTaxArm(
+          outputSide ? TaxLedgers.outputIgst : TaxLedgers.inputIgst, 'igst', igst);
+    }
+    _db.executeArgs(
+      'UPDATE voucher SET pos_state = ?, tax_type = ? WHERE company_id = ? '
+      'AND voucher_id = ?',
+      <Object?>[pos.posState, pos.taxType, companyId.value, v.id.value],
+    );
+    return (total: written, lastLineNo: lineNo, taxIsDr: !creditSide);
+  }
+
   /// Balanced ledger arms for the four invoice types, written as voucher_line
   /// rows (ledger + Dr/Cr, no item — the documented VoucherLedgerLine shape:
   /// m010 refs, books derive from posted lines) in the caller's transaction,
   /// after stock and allocations, before the status move. Types without a
-  /// documented arm template post no arms. Tax arms are NOT written: the
-  /// CGST+SGST-vs-IGST determination is undefined in the documents
-  /// (D3-A2 blocked, G0-VER-003), so invoices post tax-free with the pending
-  /// effect below. Round-off (D-M4 + F-GST-006) persists as its own arm; a
-  /// zero amount writes no arm. Throws [TxFailure] on any rule breach, so a
-  /// refused post leaves no stock, no allocations and no arms behind.
+  /// documented arm template post no arms. GST tax arms (CA reply 2026-10-07:
+  /// per-line kept-paise math, separate CGST/SGST halves, invoice sums) are
+  /// written by [_postTaxArms] first; round-off (D-M4 + F-GST-006) is computed
+  /// on net + tax and persists as its own arm; a zero amount writes no arm.
+  /// Throws [TxFailure] on any rule breach, so a refused post leaves no
+  /// stock, no allocations and no arms behind.
   void _postLedgerArms(
     CompanyId companyId,
     _Postable p,
@@ -881,7 +1053,12 @@ class VoucherEngine {
         canonical == null ? null : _postingIncomeLedger[canonical];
     if (incomeName == null) return;
     final int net = p.totals.netPaise;
-    final int ro = invoiceRoundOff(net);
+    // GST tax arms first (writes arms + per-line tax columns + voucher
+    // pos/tax_type; arms continue the line numbering for the arms below).
+    final ({int total, int lastLineNo, bool taxIsDr}) tax =
+        _postTaxArms(companyId, p, canonical, deviceId, actor);
+    final int taxTotal = tax.total;
+    final int ro = invoiceRoundOff(net + taxTotal);
     EntityId? partyId;
     for (final VoucherLine l in p.lines) {
       if (l.partyId != null) {
@@ -906,7 +1083,7 @@ class VoucherEngine {
         suffix: 'party',
         ledgerId: partyLedger,
         drCr: drParty ? 'Dr' : 'Cr',
-        amountPaise: net + ro,
+        amountPaise: net + taxTotal + ro,
       ),
       _LedgerArm(
         suffix: 'income',
@@ -922,12 +1099,19 @@ class VoucherEngine {
           amountPaise: ro.abs(),
         ),
     ];
-    int lineNo = 0;
+    int lineNo = tax.lastLineNo;
     for (final VoucherLine l in p.lines) {
       if (l.lineNo > lineNo) lineNo = l.lineNo;
     }
     int dr = 0;
     int cr = 0;
+    // Tax arms were written by _postTaxArms above; count their side here so
+    // the balance check covers the whole posting.
+    if (tax.taxIsDr) {
+      dr = tax.total;
+    } else {
+      cr = tax.total;
+    }
     for (final _LedgerArm arm in arms) {
       if (arm.amountPaise == 0) continue;
       lineNo += 1;
@@ -1047,25 +1231,36 @@ class VoucherEngine {
   }
 
   /// Effects the pipeline deliberately does NOT produce (explicit per post,
-  /// never silent). GST needs verified schemas (G0-VER-003); ledger-template
-  /// auto-posting needs posting templates; material issue/receive need the
-  /// R1b document-flow slice (their lines post the document but move no
-  /// stock in V1).
-  List<String> _pendingEffects(String? canonical) {
+  /// never silent). Material issue/receive need the R1b document-flow slice.
+  /// GST arms persist for invoice types whose place of supply was determined
+  /// at posting (voucher tax_type set); invoice types posted without tax
+  /// context keep the explicit pending note. Delivery notes move stock only
+  /// and carry no tax arms by design.
+  List<String> _pendingEffects(
+      CompanyId companyId, EntityId id, String? canonical) {
     final List<String> out = <String>[];
     if (canonical == 'Material Issue to Party' ||
         canonical == 'Material Receive from Party') {
       out.add('material issue/receive stock effects pending R1b slice');
     }
-    const Set<String> taxed = <String>{
+    const Set<String> invoiced = <String>{
       'Sales Invoice',
       'Purchase Invoice',
       'Sales Return / Credit Note with items',
       'Purchase Return / Debit Note with items',
-      'Delivery Note / Delivery Challan',
     };
-    if (canonical != null && taxed.contains(canonical)) {
-      out.add('gst persistence pending verified schemas');
+    if (canonical != null && invoiced.contains(canonical)) {
+      final List<Map<String, Object?>> rows = _db.queryArgs(
+        'SELECT tax_type FROM voucher WHERE company_id = ? AND voucher_id = ?',
+        <Object?>[companyId.value, id.value],
+      );
+      if (rows.isEmpty || rows.first['tax_type'] == null) {
+        out.add('gst persistence pending verified schemas');
+      }
+    }
+    if (canonical != null &&
+        canonical == 'Delivery Note / Delivery Challan') {
+      out.add('delivery carries no tax arms (stock movement only)');
     }
     return out;
   }
