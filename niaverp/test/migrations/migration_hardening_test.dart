@@ -521,7 +521,7 @@ void main() {
   });
 
   group('migration checksums (D2-B5, DSS-C-007)', () {
-    test('staged v16 upgrade to v17 preserves rows and fills checksums', () {
+    test('staged v16 upgrade to v18 preserves rows and fills checksums', () {
       final TestDatabase engine =
           TestDatabase.open(sqlite3.openInMemory());
       final NiavDatabase staged = NiavDatabase(engine, clock: TestClock(1700000000000));
@@ -539,7 +539,7 @@ void main() {
       latest.sqlByVersion = loadMigrationSql();
       addTearDown(engine.close);
       latest.bootstrap();
-      expect(latest.schemaVersion, 17);
+      expect(latest.schemaVersion, 18);
       expect(
         latest.queryArgs(
           'SELECT name FROM company WHERE company_id = ?',
