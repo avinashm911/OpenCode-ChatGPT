@@ -1,30 +1,61 @@
-# NiAvERP CI — build + Android 8 emulator proof (template; E3)
-# Not executed from this session (session has no GitHub Actions runner / emulator).
-# Evidence: PENDING-INPUT until real CI run records APK hash, emulator fingerprint, logcat.
+# NiAvERP CI — build + Android 8 emulator proof.
+#
+# Runners are GitHub-hosted Linux, so the Windows folder-space issue with the
+# local sqlite3 build hook does not apply here.
+#
+# Secrets required ONLY for the release job (names only — values never printed):
+#   NIAV_RELEASE_KEYSTORE_B64    base64 of the release .jks (upload once, keep private)
+#   NIAV_RELEASE_STORE_PASSWORD  keystore password
+#   NIAV_RELEASE_KEY_ALIAS       key alias inside the keystore
+#   NIAV_RELEASE_KEY_PASSWORD    key password
+# The debug job and the emulator job need NO secrets.
+#
+# local.properties: intentionally NOT created. The runners provide the Android
+# SDK via ANDROID_HOME and flutter-action provides Flutter; the app directory
+# is niaverp/android (see `defaults.run.working-directory` overrides below).
 name: NiAvERP Build and Android 8 Proof
 
 on:
   push:
-    branches: [main, baseline-triage-20261006-d0r2, e3-20261006]
+    branches: [main, e3-20261006]
   pull_request:
-    branches: [main, baseline-triage-20261006-d0r2]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      build_name:
+        description: 'Version name (e.g. 1.0.0)'
+        required: false
+        default: '1.0.0'
+      build_number:
+        description: 'Version code (integer as string, e.g. 1)'
+        required: false
+        default: '1'
+
+permissions:
+  contents: read
+
+env:
+  # Must match the PC-verified toolchain (pubspec sdk ^3.13.4; Dart 3.13.5 ships in Flutter 3.47.6).
+  FLUTTER_VERSION: '3.47.6'
+  JAVA_VERSION: '17'
+  JAVA_DISTRO: 'temurin'
 
 jobs:
-  build:
+  build-debug:
+    name: Debug APK (no secrets)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - name: Setup Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
         with:
-          java-version: '17'
-          distribution: 'temurin'
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRO }}
+      - name: Setup Flutter 3.47.6
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
-          flutter-version: '3.47.6' # real version from this PC (`flutter --version`: 3.47.6 / Dart 3.13.5)
-      - name: Accept Android licenses
-        run: yes | sdkmanager --licenses || true
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
       - name: Pub get
         working-directory: niaverp
         run: flutter pub get
@@ -34,59 +65,120 @@ jobs:
       - name: Test
         working-directory: niaverp
         run: flutter test
-      - name: Build APK release
+      - name: Build APK (debug, no keystore flags)
+        working-directory: niaverp
+        run: flutter build apk --debug
+      - name: Upload debug APK
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: niav-debug-apk
+          path: niaverp/build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
+
+  build-release:
+    name: Release APK (keystore secrets)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Setup Java 17
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRO }}
+      - name: Setup Flutter 3.47.6
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+      - name: Check release secrets present (names only, values never printed)
+        env:
+          HAS_KEYSTORE: ${{ secrets.NIAV_RELEASE_KEYSTORE_B64 != '' }}
+          HAS_STORE_PW: ${{ secrets.NIAV_RELEASE_STORE_PASSWORD != '' }}
+          HAS_ALIAS: ${{ secrets.NIAV_RELEASE_KEY_ALIAS != '' }}
+          HAS_KEY_PW: ${{ secrets.NIAV_RELEASE_KEY_PASSWORD != '' }}
+        run: |
+          if [ "$HAS_KEYSTORE" != "true" ] || [ "$HAS_STORE_PW" != "true" ] || [ "$HAS_ALIAS" != "true" ] || [ "$HAS_KEY_PW" != "true" ]; then
+            echo "::error::Release secrets missing. Add NIAV_RELEASE_KEYSTORE_B64, NIAV_RELEASE_STORE_PASSWORD, NIAV_RELEASE_KEY_ALIAS and NIAV_RELEASE_KEY_PASSWORD under repository Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+      - name: Decode keystore to file
+        env:
+          NIAV_RELEASE_KEYSTORE_B64: ${{ secrets.NIAV_RELEASE_KEYSTORE_B64 }}
+        run: |
+          echo "$NIAV_RELEASE_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/niav-release.jks"
+          echo "keystore decoded (${#NIAV_RELEASE_KEYSTORE_B64} base64 chars in, file written)"
+      - name: Pub get
+        working-directory: niaverp
+        run: flutter pub get
+      - name: Build APK (release, signed via -P properties)
         working-directory: niaverp
         env:
-          NIAV_RELEASE_STORE_FILE: ${{ secrets.NIAV_RELEASE_STORE_FILE }}
+          NIAV_RELEASE_STORE_FILE: ${{ runner.temp }}/niav-release.jks
           NIAV_RELEASE_STORE_PASSWORD: ${{ secrets.NIAV_RELEASE_STORE_PASSWORD }}
           NIAV_RELEASE_KEY_ALIAS: ${{ secrets.NIAV_RELEASE_KEY_ALIAS }}
           NIAV_RELEASE_KEY_PASSWORD: ${{ secrets.NIAV_RELEASE_KEY_PASSWORD }}
         run: |
           flutter build apk --release \
-            --build-name=${{ github.event.inputs.build_name || '1.0.0' }} \
-            --build-number=${{ github.event.inputs.build_number || '1' }}
-        # Note: build-name / build-number from CI inputs documented in result file (A3).
+            --build-name="${{ inputs.build_name || '1.0.0' }}" \
+            --build-number="${{ inputs.build_number || '1' }}" \
+            -PNIAV_RELEASE_STORE_FILE="$NIAV_RELEASE_STORE_FILE" \
+            -PNIAV_RELEASE_STORE_PASSWORD="$NIAV_RELEASE_STORE_PASSWORD" \
+            -PNIAV_RELEASE_KEY_ALIAS="$NIAV_RELEASE_KEY_ALIAS" \
+            -PNIAV_RELEASE_KEY_PASSWORD="$NIAV_RELEASE_KEY_PASSWORD"
       - name: Compute APK SHA-256
         run: sha256sum niaverp/build/app/outputs/flutter-apk/app-release.apk | tee apk-sha256.txt
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - name: Upload release APK + SHA
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: niaverp-apk-sha-log
+          name: niav-release-apk-sha
           path: |
             niaverp/build/app/outputs/flutter-apk/app-release.apk
             apk-sha256.txt
-            niaverp/test/*.log
+          if-no-files-found: error
+
   emulator-api26:
+    name: Android 8 emulator smoke test
     runs-on: ubuntu-latest
-    needs: build
+    needs: build-debug
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Download debug APK artifact
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          java-version: '17'
-          distribution: 'temurin'
-      - name: Setup Flutter (pinned)
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.0'
-      - name: Launch emulator API 26 (AVD evidence — not physical device)
-        uses: reactivecircus/android-emulator-runner@v2
+          name: niav-debug-apk
+          path: apk
+      - name: API 26 emulator — install, launch, assert alive, no FATAL EXCEPTION (AVD, not physical device)
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
         with:
           api-level: 26
           target: default
           arch: x86_64
-      - name: Install APK
-        run: adb install niaverp/build/app/outputs/flutter-apk/app-release.apk || adb install niaverp/build/app/outputs/flutter-apk/app-debug.apk
-      - name: Smoke test (home screen opens; relaunch same DB)
-        run: |
-          adb shell am start -n com.niaverp.niaverp/com.niaverp.niaverp.MainActivity
-          sleep 5
-          adb logcat -d > emulator-api26-logcat.txt
-          # Instrumented assertion (host-only evidence placeholder): app opens to home.
-          echo "AVD evidence — not physical device (G0-VER-005/008 pending)" >> emulator-api26-logcat.txt
-      - name: Upload AVD evidence
-        uses: actions/upload-artifact@v4
+          script: |
+            adb install apk/app-debug.apk
+            adb shell am start -n com.niaverp.niaverp/com.niaverp.niaverp.MainActivity
+            sleep 25
+            APP_PID="$(adb shell pidof com.niaverp.niaverp | tr -d '\r')"
+            echo "app pid: $APP_PID"
+            if [ -z "$APP_PID" ]; then
+              echo "FATAL: com.niaverp.niaverp process is not alive after launch"
+              adb logcat -d > emulator-api26-logcat.txt
+              exit 1
+            fi
+            adb logcat -d > emulator-api26-logcat.txt
+            if grep -q "FATAL EXCEPTION" emulator-api26-logcat.txt; then
+              echo "FATAL: FATAL EXCEPTION found in logcat"
+              exit 1
+            fi
+            adb shell getprop ro.product.model > emulator-fingerprint.txt
+            adb shell getprop ro.build.version.release >> emulator-fingerprint.txt
+            adb shell getprop ro.build.version.sdk >> emulator-fingerprint.txt
+            echo "SMOKE PASS: process alive, no FATAL EXCEPTION"
+      - name: Upload emulator evidence (logcat + fingerprint)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: emulator-api26-evidence
-          path: emulator-api26-logcat.txt
+          path: |
+            emulator-api26-logcat.txt
+            emulator-fingerprint.txt
+          if-no-files-found: error
