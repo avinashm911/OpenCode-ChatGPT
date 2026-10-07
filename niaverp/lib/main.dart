@@ -25,6 +25,21 @@ import 'package:niaverp/data/security/device_id_service.dart';
 /// Database file inside the app-private sandbox (never a shared location).
 const String kDatabaseFileName = 'niaverp.db';
 
+/// Device identity for operation lineage. Returns null when the identity
+/// cannot be established (missing/corrupt/unwritable file, platform fault);
+/// the caller turns null into the visible device-identity failure state.
+Future<String?> _resolveDeviceId() async {
+  try {
+    return await DeviceIdService().getOrCreate();
+  } on DeviceIdCorruptException {
+    return null;
+  } on DeviceIdWriteException {
+    return null;
+  } catch (_) {
+    return null;
+  }
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   const MethodChannel channel =
@@ -41,9 +56,14 @@ Future<void> main() async {
     filesDir = '';
   }
 
-  final deviceId = await DeviceIdService().getOrCreate();
+  final deviceId = await _resolveDeviceId();
   final StartupOutcome outcome;
-  if (filesDir.isEmpty) {
+  if (deviceId == null) {
+    // Device identity unusable: visible failure screen, never a blank
+    // screen or a crash, and no backend without lineage.
+    outcome = const StartupOutcome.deviceIdFailure(
+        StartupCode.deviceIdUnavailable);
+  } else if (filesDir.isEmpty) {
     outcome = const StartupOutcome.databaseFailure(
         StartupCode.databaseUnavailable);
   } else {

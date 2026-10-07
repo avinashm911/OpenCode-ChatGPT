@@ -4,7 +4,8 @@
 // [CompanyScope] produced by the startup sequence. Holds no business state; the
 // shell keeps only navigation chrome.
 // Startup states are distinct and non-technical: starting, key failure
-// (codes only), database failure, newer-schema refusal. When the outcome is
+// (codes only), database failure, newer-schema refusal, device-identity
+// failure. When the outcome is
 // not [StartupStage.ready] the shell is never built, so no tab can show fake
 // or unencrypted data.
 // D4: MaterialApp carries the launch locales (D-03 en/hi/gu), the NiAvERP
@@ -111,6 +112,8 @@ class StartupStatusScreen extends StatelessWidget {
         return l10n.t('stDbFail');
       case StartupStage.schemaRefused:
         return l10n.t('stSchemaOld');
+      case StartupStage.deviceIdFailure:
+        return l10n.t('stDeviceFail');
       case StartupStage.ready:
         return l10n.t('stReady');
     }
@@ -126,6 +129,8 @@ class StartupStatusScreen extends StatelessWidget {
         return l10n.t('stDbDetail');
       case StartupStage.schemaRefused:
         return l10n.t('stSchemaDetail');
+      case StartupStage.deviceIdFailure:
+        return l10n.t('stDeviceDetail');
       case StartupStage.ready:
         return '';
     }

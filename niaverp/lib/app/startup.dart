@@ -6,7 +6,7 @@
 //
 // Every failure becomes one of a small, non-technical, DISTINCT states:
 //   starting · keyUnavailable(code) · databaseUnavailable(code) ·
-//   schemaTooNew · ready
+//   schemaTooNew · deviceIdFailure(code) · ready
 // There is no plaintext path and no unencrypted fallback anywhere in this
 // file: when the key or the database cannot be opened the app stops at the
 // matching state and never constructs a backend over an unencrypted engine.
@@ -53,6 +53,10 @@ class StartupCode {
 
   /// Migration SQL assets missing or unreadable from the bundle.
   static const String migrationAssetsMissing = 'migration-assets-missing';
+
+  /// The device identity file is missing, corrupt or unwritable, so no
+  /// operation lineage can be stamped. Shown on its own failure screen.
+  static const String deviceIdUnavailable = 'device-id-unavailable';
 }
 
 /// Terminal or transient startup states.
@@ -71,6 +75,10 @@ enum StartupStage {
 
   /// Stored schema is newer than this build (restore required).
   schemaRefused,
+
+  /// The device identity could not be established (missing, corrupt or
+  /// unwritable device_id file). No backend is built without lineage.
+  deviceIdFailure,
 }
 
 /// Outcome of one startup run. Exactly one of [scope]/[code] is meaningful.
@@ -110,6 +118,10 @@ class StartupOutcome {
   /// Stored schema newer than this build.
   const StartupOutcome.schemaRefused()
       : this._(stage: StartupStage.schemaRefused, code: StartupCode.schemaTooNew);
+
+  /// Device identity unusable: no scope is built and no lineage is stamped.
+  const StartupOutcome.deviceIdFailure(String code)
+      : this._(stage: StartupStage.deviceIdFailure, code: code);
 
   final StartupStage stage;
 

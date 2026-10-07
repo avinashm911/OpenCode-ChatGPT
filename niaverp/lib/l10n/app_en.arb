@@ -296,5 +296,7 @@
   "stDbDetail": "Local database could not be opened.",
   "stSchemaOld": "Schema refused",
   "stSchemaDetail": "Database version is newer than the app supports.",
-  "stReady": "Ready"
+  "stReady": "Ready",
+  "stDeviceFail": "Device identity unavailable",
+  "stDeviceDetail": "This device could not be recognised. Nothing has been changed."
 }

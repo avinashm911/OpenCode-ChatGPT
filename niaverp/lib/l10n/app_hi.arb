@@ -296,5 +296,7 @@
   "stDbDetail": "स्थानीय डेटाबेस खोल नहीं सकता।",
   "stSchemaOld": "स्कीमा अस्वीकृत",
   "stSchemaDetail": "डेटाबेस संस्करण ऐप को समर्थन नहीं करता।",
-  "stReady": "तैयार"
+  "stReady": "तैयार",
+  "stDeviceFail": "Device identity unavailable",
+  "stDeviceDetail": "This device could not be recognised. Nothing has been changed."
 }

@@ -296,5 +296,7 @@
   "stDbDetail": "સ્થ.local ડેટابેઝ ખોલાઈ શકતું નથી.",
   "stSchemaOld": "સ્કima અસ્વીકાર",
   "stSchemaDetail": "ડેટાબેઝ આવૃત્તિ એપને સપورت નથી કરતી.",
-  "stReady": "તૈયાર"
+  "stReady": "તૈયાર",
+  "stDeviceFail": "Device identity unavailable",
+  "stDeviceDetail": "This device could not be recognised. Nothing has been changed."
 }
