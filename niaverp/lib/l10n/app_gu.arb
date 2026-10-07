@@ -287,4 +287,14 @@
   "wordRow": "પંક્તિ",
   "wordSalesInvoice": "વેચાણ બિલ",
   "wordStatus": "સ્થિતિ",
-  "wordSync": "સિંક",`n  "stStarting": "શરૂ",`n  "stStartingDetail": "એપ શરૂ થઈ રહ્યું છે.",`n  "stKeyFail": "કી નિષ્ફળ",`n  "stKeyDetail": "એન크рип્શન કી ઉપલબ્ધ નથી.",`n  "stDbFail": "ડેટાબેઝ નિષ્ફળ",`n  "stDbDetail": "સ્થ.local ડેટابેઝ ખોલાઈ શકતું નથી.",`n  "stSchemaOld": "સ્કima અસ્વીકાર",`n  "stSchemaDetail": "ડેટાબેઝ આવૃત્તિ એપને સપورت નથી કરતી.",`n  "stReady": "તૈયાર"`n}
+  "wordSync": "સિંક",
+  "stStarting": "શરૂ",
+  "stStartingDetail": "એપ શરૂ થઈ રહ્યું છે.",
+  "stKeyFail": "કી નિષ્ફળ",
+  "stKeyDetail": "એન크рип્શન કી ઉપલબ્ધ નથી.",
+  "stDbFail": "ડેટાબેઝ નિષ્ફળ",
+  "stDbDetail": "સ્થ.local ડેટابેઝ ખોલાઈ શકતું નથી.",
+  "stSchemaOld": "સ્કima અસ્વીકાર",
+  "stSchemaDetail": "ડેટાબેઝ આવૃત્તિ એપને સપورت નથી કરતી.",
+  "stReady": "તૈયાર"
+}

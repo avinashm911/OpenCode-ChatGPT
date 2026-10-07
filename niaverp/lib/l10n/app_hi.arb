@@ -287,4 +287,14 @@
   "wordRow": "पंक्ति",
   "wordSalesInvoice": "बिक्री बिल",
   "wordStatus": "स्थिति",
-  "wordSync": "सिंक",`n  "stStarting": "शुरू हो रहा है...",`n  "stStartingDetail": "ऐप प्रारंभ कर रहा है।",`n  "stKeyFail": "कुंजी विफल",`n  "stKeyDetail": "एन्क्रिप्शन कुंजी उपलब्ध नहीं है।",`n  "stDbFail": "डेटाबेस विफल",`n  "stDbDetail": "स्थानीय डेटाबेस खोल नहीं सकता।",`n  "stSchemaOld": "स्कीमा अस्वीकृत",`n  "stSchemaDetail": "डेटाबेस संस्करण ऐप को समर्थन नहीं करता।",`n  "stReady": "तैयार"`n}
+  "wordSync": "सिंक",
+  "stStarting": "शुरू हो रहा है...",
+  "stStartingDetail": "ऐप प्रारंभ कर रहा है।",
+  "stKeyFail": "कुंजी विफल",
+  "stKeyDetail": "एन्क्रिप्शन कुंजी उपलब्ध नहीं है।",
+  "stDbFail": "डेटाबेस विफल",
+  "stDbDetail": "स्थानीय डेटाबेस खोल नहीं सकता।",
+  "stSchemaOld": "स्कीमा अस्वीकृत",
+  "stSchemaDetail": "डेटाबेस संस्करण ऐप को समर्थन नहीं करता।",
+  "stReady": "तैयार"
+}
