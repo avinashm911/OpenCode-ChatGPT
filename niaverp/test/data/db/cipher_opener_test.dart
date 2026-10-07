@@ -56,6 +56,42 @@ void main() {
       }
     });
 
+    test('pinned cipher is chacha20 (E1b-A9 read-back proof)', () {
+      final NiavDatabase db = opener('c1', keyOf(7)).openCompanyDatabase();
+      try {
+        expect(CipherDatabaseOpener.pinnedCipher, 'chacha20');
+        final List<Map<String, Object?>> rows =
+            db.queryArgs('PRAGMA cipher;', <Object?>[]);
+        expect(rows, isNotEmpty);
+        expect('${rows.first.values.first}', 'chacha20');
+      } finally {
+        (db.engine as FfiDatabase).close();
+      }
+    });
+
+    test('databases created before the pin reopen under the pin', () {
+      // A file keyed before any explicit pin (default cipher) must open
+      // unchanged once the opener pins the documented default.
+      final NiavDatabase first = opener('c1', keyOf(7)).openCompanyDatabase();
+      first.executeArgs(
+        'INSERT INTO company (company_id, name, created_at) VALUES (?, ?, ?)',
+        <Object?>['c-prepin', 'Prepin Co', 1700000000000],
+      );
+      (first.engine as FfiDatabase).close();
+      final NiavDatabase second = opener('c1', keyOf(7)).openCompanyDatabase();
+      try {
+        final List<Map<String, Object?>> rows = second.queryArgs(
+          'SELECT name FROM company WHERE company_id = ?',
+          <Object?>['c-prepin'],
+        );
+        expect(rows.single['name'], 'Prepin Co');
+        final List<Map<String, Object?>> cipher =
+            second.queryArgs('PRAGMA cipher;', <Object?>[]);
+        expect('${cipher.first.values.first}', 'chacha20');
+      } finally {
+        (second.engine as FfiDatabase).close();
+      }
+    });
     test('close then reopen with the same key preserves rows', () {
       final NiavDatabase first = opener('c1', keyOf(7)).openCompanyDatabase();
       first.executeArgs(

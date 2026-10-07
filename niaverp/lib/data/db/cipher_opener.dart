@@ -15,6 +15,15 @@
 // [CipherOpenException] whose code never contains the key hex, so a
 // misconfigured driver, a driver that echoes the statement, or a bad key can
 // never leak key material through an error string or `toString()`.
+// Cipher pin (P-SQLIB / E1b-A9, confirmed 2026-10-07 against the official
+// SQLite3MultipleCiphers SQL-pragma docs and the bundled 2.5.0 build):
+// `PRAGMA cipher = 'chacha20'` is executed BEFORE `PRAGMA key` (docs order:
+// cipher select, then optional params, then key), and the active cipher is
+// read back with `PRAGMA cipher;` after the key — any value other than
+// `chacha20` throws code-only `cipher-pin-mismatch`. `chacha20` is the
+// documented default (verified live: default read-back is `chacha20`), so
+// existing databases created under the default reopen unchanged; an unknown
+// cipher name throws from the driver and the setting is left untouched.
 // The opener keeps the [FfiDatabase] it created, so [closeHandle] releases the
 // native handle; [NiavDatabase.close] does the same through the engine.
 // Android 8 / on-device cipher and Keystore proof stays G0-VER-001/005
@@ -48,6 +57,9 @@ class CipherOpenException implements Exception {
 
 /// Opens the encrypted per-company database file.
 class CipherDatabaseOpener implements EncryptedDatabaseOpener {
+  /// Cipher scheme pinned before every `PRAGMA key` (official
+  /// SQLite3MultipleCiphers default; verified live against the bundled build).
+  static const String pinnedCipher = 'chacha20';
   CipherDatabaseOpener({
     required this.dbPath,
     required DbKey dbKey,
@@ -106,7 +118,11 @@ class CipherDatabaseOpener implements EncryptedDatabaseOpener {
       // (driver error, wrong key, SQLITE_NOTADB) becomes a code-only error
       // that cannot contain the key hex.
       _guarded(() {
-        raw!.execute("PRAGMA key = \"x'$hex'\";");
+        // Step 1 (docs order): pin the cipher scheme BEFORE the key.
+        // 'chacha20' is the documented default; pinning it explicitly makes
+        // the scheme verifiable without changing what existing databases use.
+        raw!.execute("PRAGMA cipher = 'chacha20';");
+        raw.execute("PRAGMA key = \"x'$hex'\";");
         // Prove the cipher build: SQLite3MultipleCiphers registers its own
         // functions (plain SQLite builds have none of these).
         // `PRAGMA cipher_version` is NOT a valid probe here — MC returns zero
@@ -117,6 +133,16 @@ class CipherDatabaseOpener implements EncryptedDatabaseOpener {
         );
         if (codec.isEmpty) {
           throw const _CipherBuildUnavailable();
+        }
+        // Read back the active cipher: proves the pin actually holds.
+        // An unknown cipher name throws in the driver (setting untouched),
+        // so reaching here with any other value is a hard mismatch.
+        final ResultSet active = raw.select('PRAGMA cipher;');
+        final String activeName =
+            active.isEmpty ? '' : '${active.first.values.first}';
+        if (activeName != pinnedCipher) {
+          throw const CipherOpenException('cipher-pin-mismatch',
+              'cipher pin mismatch: refusing to carry data');
         }
       }, 'key-application-failed');
       final FfiDatabase engine = FfiDatabase.wrap(raw);
