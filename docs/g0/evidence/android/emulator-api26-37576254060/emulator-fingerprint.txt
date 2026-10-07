@@ -1,0 +1,3 @@
+Android SDK built for x86_64
+8.0.0
+26
