@@ -1,3 +1,4 @@
+> NOTE (2026-10-07): claims in this file were unverified before BASELINE_REAL_20261006 — see docs/implementation/CLAIMS_REVERIFIED_20261007.md for the re-verification. Body below unchanged.
 # RESULT E2 — Correctness: company switch, GST tax posting, backup integrity, localisation source
 Date (UTC): 2026-10-06   Branch: `e2-20261006`   Previous: RESULT_E1b (`BLOCKED-DEPENDENT`)
 Overall status: PASS-WITH-BLOCKS (A1-A/B2 blocked; A-C-D implemented/honest; B memo written; D machine-drafted marked)

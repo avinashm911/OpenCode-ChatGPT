@@ -1,3 +1,4 @@
+> NOTE (2026-10-07): claims in this file were unverified before BASELINE_REAL_20261006 — see docs/implementation/CLAIMS_REVERIFIED_20261007.md for the re-verification. Body below unchanged.
 # RESULT E1b — Close E1 blocks A1 (device id) and A9 (cipher pin)
 Date (UTC): 2026-10-06   Branch: `e1b-20261006`   Previous: RESULT_E1 (`BLOCKED-DEPENDENT`)
 Overall status: BLOCKED-DEPENDENT (A1 = implemented-pending-owner-approval; A9 = BLOCKED — sqlite3mc pin docs not confirmed for 3.7.0)

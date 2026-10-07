@@ -1,3 +1,4 @@
+> NOTE (2026-10-07): claims in this file were unverified before BASELINE_REAL_20261006 — see docs/implementation/CLAIMS_REVERIFIED_20261007.md for the re-verification. Body below unchanged.
 # RESULT E3 — Automated build and Android 8 emulator proof
 Date (UTC): 2026-10-06   Branch: `e3-20261006`   Previous: RESULT_E2 (`PASS-WITH-BLOCKS`)
 Overall status: PASS-WITH-BLOCKS (A1-A3 implementation/honest; B1-B3 template; C1/C2 partial; C3 note added; D1/D2 not fully executed — evidence PENDING-INPUT)

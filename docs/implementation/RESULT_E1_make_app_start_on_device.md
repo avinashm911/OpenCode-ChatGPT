@@ -1,3 +1,4 @@
+> NOTE (2026-10-07): claims in this file were unverified before BASELINE_REAL_20261006 — see docs/implementation/CLAIMS_REVERIFIED_20261007.md for the re-verification. Body below unchanged.
 # RESULT E1 — Make the app start on a real Android device
 Date (UTC): 2026-10-06   Branch: `e1-20261006`   Previous: RESULT_D1 (PASS, 404/0) / RESULT_D2 (PASS)
 Overall status: BLOCKED-DEPENDENT (A1 BLOCKED; A2-A10 implemented/boundary with host-only verification; G0-VER-005/008 device evidence still missing)
