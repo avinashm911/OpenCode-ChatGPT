@@ -84,6 +84,24 @@ Risk of changing later: trial lengths already issued would need recomputation.
 Who decides: you (owner).
 - [ ] Approved: trial end = install start + 3 calendar months (UTC), day clamped to month end. Name/date: _____
 
+## 11. Cryptographic primitives (slow KDF now, AES/signatures need a package)
+Plain English: passwords and backup passphrases are stretched with a slow,
+standard key function (PBKDF2, 100,000 rounds — measured at a quarter of a
+second on our machine; phones may differ). Real backup encryption and licence
+signatures need one well-known extra code package (`cryptography`, free
+Apache licence, works on all phones). Until you approve it, backups cannot be
+encrypted and licence keys cannot be checked — the app refuses those steps
+with a clear message instead of using weak homemade crypto.
+Recommended default: keep PBKDF2/100k now; approve the `cryptography` package
+for the encryption and signature steps (full comparison in
+`docs/owner/DECISION_CRYPTO_PRIMITIVES.md`).
+Risk of keeping PBKDF2 only: password-guessing resistance is CPU-only (no
+memory-hardness); acceptable interim, Argon2id later via the same package.
+Risk of adding the package: a new third-party dependency to trust and update.
+Who decides: you (owner).
+- [ ] Approved: PBKDF2-HMAC-SHA256 at 100,000 iterations as the interim KDF (P-CRYPTO-KDF). Name/date: _____
+- [ ] Approved: add `cryptography` (Apache-2.0) for AES-256-GCM + Ed25519 (P-CRYPTO-AEAD, P-CRYPTO-SIGN). Name/date: _____
+
 ---
 Overall sign-off: _____OWNER/07/10/2026____________________ Date: ____07/10/2026___________
 Note: GST detail lives in the CA brief; legal detail lives with the reviewer. This file decides nothing by itself — only your ticks do.
