@@ -1,3 +1,4 @@
+> NOTE (2026-10-08): dispositions unverified before B0 — see docs/implementation/BACKEND_CAPABILITY_REGISTER.md.
 # Implementation Phase 05 — Document flow, approvals and counter (FR-M09/10/11, M09/M10/M11, OD-FD-004)
 Date (UTC): 2026-10-06   Prompt: 05_document_flow_approvals_and_counter.md   Contract: GLOBAL_NO_INVENTION_CONTRACT.md
 Outcome: COMPLETE-WITH-BLOCKS   Previous: phase-04.md

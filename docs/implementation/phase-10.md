@@ -1,3 +1,4 @@
+> NOTE (2026-10-08): dispositions unverified before B0 — see docs/implementation/BACKEND_CAPABILITY_REGISTER.md.
 # Implementation Phase 10 — Outputs, customisation and support (FG-011, FR-M21/23/24, M21/M23/M24, OD-FD-005/OD-UI-005 reference)
 Date (UTC): 2026-10-06   Prompt: 10_outputs_customisation_and_support.md
 Outcome: COMPLETE-WITH-BLOCKS   Previous: phase-09.md

@@ -1,3 +1,4 @@
+> NOTE (2026-10-08): dispositions unverified before B0 — see docs/implementation/BACKEND_CAPABILITY_REGISTER.md.
 # Implementation Phase 09 — Security, backup and sync boundary (FG-009/010, FR-M22-001..003, G0-SCH-005, M22, OD-DB-004/005/006)
 Date (UTC): 2026-10-06   Prompt: 09_security_backup_and_sync_boundary.md
 Outcome: COMPLETE-WITH-BLOCKS   Previous: phase-08.md

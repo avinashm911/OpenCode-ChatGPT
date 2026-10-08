@@ -1,3 +1,4 @@
+> NOTE (2026-10-08): dispositions unverified before B0 — see docs/implementation/BACKEND_CAPABILITY_REGISTER.md.
 # Implementation Phase 12 — Hardware release and evidence
 Date (UTC): 2026-10-06   Prompt: 12_hardware_release_and_evidence.md   Contract: GLOBAL_NO_INVENTION_CONTRACT.md
 Outcome: BLOCKED-DEPENDENT   Previous: phase-11.md (COMPLETE-WITH-BLOCKS, 450/1)

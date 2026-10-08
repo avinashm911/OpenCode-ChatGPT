@@ -1,3 +1,4 @@
+> NOTE (2026-10-08): dispositions unverified before B0 — see docs/implementation/BACKEND_CAPABILITY_REGISTER.md.
 # Implementation Phase 07 — Import, GST, BRS and statutory boundary (FG-001..008/015, FR-M16-001..004, FR-M17-001..005, G0-SCH-004, M16/M17, OD-DB-003, OD-FD-002/003)
 Date (UTC): 2026-10-06   Prompt: 07_import_gst_brs_and_statutory_boundary.md
 Outcome: COMPLETE-WITH-BLOCKS   Previous: phase-06.md

@@ -1,3 +1,4 @@
+> NOTE (2026-10-08): dispositions unverified before B0 — see docs/implementation/BACKEND_CAPABILITY_REGISTER.md.
 # Implementation Phase 11 — Frontend completion (OD-001..010, OD-UI-001/002/003/004, UI-001..018, UX-001..009)
 Date (UTC): 2026-10-06   Prompt: 11_frontend_completion.md   Previous: phase-10.md
 Outcome: COMPLETE-WITH-BLOCKS

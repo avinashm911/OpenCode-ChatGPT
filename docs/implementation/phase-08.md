@@ -1,3 +1,4 @@
+> NOTE (2026-10-08): dispositions unverified before B0 — see docs/implementation/BACKEND_CAPABILITY_REGISTER.md.
 # Implementation Phase 08 — Admin users and licensing (FG-012/014, FR-M18/19/20, G0-SCH-006, M18/M19/M20, OD-FD-005/OD-UI-005)
 Date (UTC): 2026-10-06   Prompt: 08_admin_users_and_licensing.md
 Outcome: COMPLETE-WITH-BLOCKS   Previous: phase-07.md

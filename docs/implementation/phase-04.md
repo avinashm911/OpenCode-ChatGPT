@@ -1,3 +1,4 @@
+> NOTE (2026-10-08): dispositions unverified before B0 — see docs/implementation/BACKEND_CAPABILITY_REGISTER.md.
 # Implementation Phase 04 — Voucher engine and orders (FR-M04 / FR-M05 / FR-M06 / FR-M07 / FR-M08 / G0-SCH-003 / G0-SCH-007 / M04–M08)
 Date (UTC): 2026-10-06   Prompt: docs/opencode_master_prompts/04_voucher_engine_and_orders.md   Contract: GLOBAL_NO_INVENTION_CONTRACT.md
 Outcome: COMPLETE-WITH-BLOCKS   Previous: phase-03.md (COMPLETE-WITH-BLOCKS, 450/1)

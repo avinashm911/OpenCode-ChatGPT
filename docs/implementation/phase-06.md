@@ -1,3 +1,4 @@
+> NOTE (2026-10-08): dispositions unverified before B0 — see docs/implementation/BACKEND_CAPABILITY_REGISTER.md.
 # Implementation Phase 06 — Inventory accounting and reports (D-M5 / FG-013 / FR-M13 / FR-M14 / G0-SCH-001/002 / M13 / M14 / M15 / OD-DB-002 / OD-FD-001)
 Date (UTC): 2026-10-06   Prompt: 06_inventory_accounting_and_reports.md
 Outcome: COMPLETE-WITH-BLOCKS   Previous: phase-05.md (COMPLETE-WITH-BLOCKS)
