@@ -49,11 +49,14 @@ void main() {
           .isOk,
       isTrue,
     );
+    // B1 repair (reported in RESULT_B1): CompanyRepository.create now writes
+    // the trial anchor in the same transaction (SEC §3.3), so the fixture
+    // row is set with UPDATE instead of a second INSERT. Window is unchanged.
     db.executeArgs(
-      'INSERT INTO trial_anchor (anchor_id, company_id, installed_at, '
-      'trial_ends_at, status, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-      <Object?>['a-e', 'c-e', 1700000000000, 1700000000000 + 90 * kDayMs,
-          'trial', 1700000000000],
+      'UPDATE trial_anchor SET anchor_id = ?, installed_at = ?, '
+      'trial_ends_at = ?, status = ?, created_at = ? WHERE company_id = ?',
+      <Object?>['a-e', 1700000000000, 1700000000000 + 90 * kDayMs,
+          'trial', 1700000000000, 'c-e'],
     );
   });
 

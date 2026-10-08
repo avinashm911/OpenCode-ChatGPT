@@ -17,14 +17,18 @@
 // Traceability: D1 (A3/A4); D-06; P-SQLIB; G0-CON-003 (no downgrade);
 // DSS-C-007; strategy Slice 0/1.
 
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:niaverp/app/composition_root.dart';
 import 'package:niaverp/app/migration_assets.dart';
 import 'package:niaverp/core/clock.dart';
+import 'package:niaverp/core/uuid_v7.dart';
 import 'package:niaverp/core/value_objects/niav_date.dart';
 import 'package:niaverp/data/db/cipher_opener.dart';
 import 'package:niaverp/data/db/key_provider.dart';
 import 'package:niaverp/data/security/key_lifecycle.dart';
+import 'package:niaverp/data/security/trial_store.dart';
 import 'package:niaverp/data/db/niav_database.dart';
 import 'package:niaverp/data/migrations/migration_registry.dart';
 import 'package:niaverp/presentation/shared/company_scope.dart';
@@ -273,16 +277,56 @@ Future<StartupOutcome> runStartup(StartupEnvironment env) async {
   // closes the database itself if bootstrap fails, so a failure here leaves no
   // dangling handle.
   final BackendBundle backend;
+  // B1 (A1/A2): the app-private install copy lives beside the database file
+  // (same sandbox directory). A corrupt/unwritable copy degrades to
+  // database-anchor-only enforcement (R1 residual) instead of failing startup:
+  // the anchors remain authoritative and the gap stays queryable via
+  // `trial.fileCopyUsable`. No silent trial reset is possible while any
+  // anchor row survives.
+  TrialFileStore? trialFiles;
+  try {
+    final String filesDir = Directory(env.dbPath).parent.path;
+    trialFiles = TrialFileStore(filesDir);
+    trialFiles.ensureInstallMs(env.clock.nowMs());
+  } on TrialStoreCorruptException {
+    trialFiles = null;
+  } on TrialStoreWriteException {
+    trialFiles = null;
+  }
   try {
     backend = CompositionRoot.backend(
       engine: database,
       sqlByVersion: sql,
       clock: env.clock,
+      deviceId: env.deviceId,
+      trialFiles: trialFiles,
     );
   } catch (_) {
     database.close();
     return const StartupOutcome.databaseFailure(
         StartupCode.databaseUnavailable);
+  }
+
+  // 4b. Trial/clock guard (B1, A3): per-company anchors plus one clock
+  // observation each. Rollback writes a security-event audit row but never
+  // blocks startup or billing (SEC §3.5). A failed guard diagnostic is
+  // recorded on the facade (`trial.lastGuardError`) and startup continues:
+  // every later write is still gated by the choke point.
+  final int startupNowMs = env.clock.nowMs();
+  final List<Map<String, Object?>> companyRows = database.queryArgs(
+    'SELECT company_id FROM company',
+    <Object?>[],
+  );
+  final UuidV7 idGen = UuidV7();
+  for (final Map<String, Object?> row in companyRows) {
+    final String companyId = row['company_id'] as String;
+    backend.trial.ensureCompanyAnchor(companyId, startupNowMs);
+    backend.guardCompanyOpen(
+      companyId: companyId,
+      deviceNowMs: startupNowMs,
+      actor: env.actor,
+      eventId: 'co-${idGen.next()}',
+    );
   }
 
   // 5. Tab surface for the five destinations.

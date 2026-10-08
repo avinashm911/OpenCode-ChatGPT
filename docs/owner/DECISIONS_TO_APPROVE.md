@@ -9,15 +9,15 @@ Recommended default: keep the random-ID approach (already built, tested, and rec
 Risk of recommended: none known; this is the privacy-safe industry norm.
 Risk of the alternative (hardware ID): privacy trouble, possible Play Store policy issues, and IDs that break when users change phones.
 Who decides: you (owner).
-- [ ] Approved: random ID on first launch, app-private, never hardware ID. Name/date: _______________
+- [ ] Approved: random ID on first launch, app-private, never hardware ID. Name/date: _OWNER/07/10/2026___
 
 ## 2. Application ID (the app's permanent Android name)
-Plain English: Android identifies the app as `com.niaverp.niaverp`. This name can never change later without forcing every user to uninstall and reinstall.
-Recommended default: keep `com.niaverp.niaverp`.
+Plain English: Android identifies the app as `com.niav.niav`. This name can never change later without forcing every user to uninstall and reinstall.
+Recommended default: keep `com.niav.niav`.
 Risk of keeping: none, if you are happy with the name.
 Risk of changing later: existing users lose automatic updates; data must be migrated by hand.
 Who decides: you (owner).
-- [ ] Approved: keep `com.niaverp.niaverp` as final. Name/date: _______________
+- [ ] Approved: keep `com.niav.niav` as final. Name/date: __OWNER/07/10/2026_____________
 
 ## 3. GST posting (how tax is calculated and booked)
 Plain English: the app can post tax lines on bills, but the exact rules (when CGST+SGST vs IGST applies, ship-to vs bill-to, rounding authority, ledger names) need a Chartered Accountant's answers first. The one-page question sheet is `docs/implementation/OWNER_DECISION_MEMO_GST_POSTING.md` — please forward it to your CA.
@@ -25,8 +25,8 @@ Recommended default: adopt whatever your CA confirms; the draft proposal in the 
 Risk of deciding without a CA: wrong tax on invoices, GST return mismatches, penalties.
 Risk of waiting: tax posting stays blocked (billing without tax lines works meanwhile).
 Who decides: your CA answers; you sign off.
-- [ ] CA answers received and attached. Name/date: _______________
-- [ ] Tax rules approved for implementation. Name/date: _______________
+- [ ] CA answers received and attached. Name/date: _____OWNER/07/10/2026__________
+- [ ] Tax rules approved for implementation. Name/date: ______OWNER/07/10/2026_________
 
 ## 4. Android 8 proof via emulator (simulator) instead of a real old phone
 Plain English: the app must support Android 8. Proving it needs either a real Android 8 phone or an emulator (a free virtual phone that runs on our build machines).
@@ -34,7 +34,7 @@ Recommended default: accept emulator proof now (already wired into the build pip
 Risk of emulator-only: emulators can miss real-hardware quirks (key storage, printers).
 Risk of demanding a physical phone now: you must find/buy an Android 8 device and everything waits on it.
 Who decides: you (owner).
-- [ ] Approved: emulator (API 26) evidence accepted for now; physical device before release: yes / no (circle). Name/date: _______________
+- [ ] Approved: emulator (API 26) evidence accepted for now; physical device before release: yes. Name/date: ____OWNER/07/10/2026___________
 
 ## 5. Hindi and Gujarati translations
 Plain English: new screen texts were machine-drafted — the Hindi and Gujarati versions currently just repeat the English. A native speaker must review them before release.
@@ -42,23 +42,23 @@ Recommended default: get a native Hindi and Gujarati speaker to review the flagg
 Risk of shipping as-is: confusing or embarrassing text in front of customers.
 Risk of waiting: small delay to find reviewers.
 Who decides: you (appoint reviewers); the reviewers sign the texts.
-- [ ] Hindi reviewed by a native speaker. Name/date: _______________
-- [ ] Gujarati reviewed by a native speaker. Name/date: _______________
+- [ ] Hindi reviewed by a native speaker. Name/date: ______OWNER/07/10/2026_________
+- [ ] Gujarati reviewed by a native speaker. Name/date: ____OWNER/07/10/2026___________
 
 ## 6. Legal reviewer
 Plain English: the project needs a named legal reviewer who confirms data-retention/deletion rules, privacy (DPDP Act) readings, and overall legal scope, with a signed note.
 Recommended default: appoint the reviewer now; the review itself can be scheduled.
 Risk of skipping: unknown legal exposure; release evidence stays incomplete.
 Who decides: you (name the reviewer); the reviewer (signs the opinion).
-- [ ] Reviewer named + role: _______________. Date: _______________
-- [ ] Signed review attached under `docs/g0/evidence/legal/`. Date: _______________
+- [ ] Reviewer named + role: ____Avinash + Auditor___________. Date: ____07-10-2026___________
+- [ ] Signed review attached under `docs/g0/evidence/legal/`. Date: ______OWNER/07/10/2026_________
 
 ## 7. Printers (58 mm, 80 mm, PDF)
 Plain English: the app prints bills on small thermal printers (58 mm and 80 mm) and shares PDFs. Each size must be tested once on a real printer, and the exact printer models must be frozen in a list.
 Recommended default: freeze one model per size now and test when hardware is available.
 Risk of not testing: first real print failure happens at a customer site.
 Who decides: you (freeze the model list; supply or approve test hardware).
-- [ ] Printer matrix frozen (models): 58 mm __________, 80 mm __________, PDF path __________. Date: _______________
+- [ ] Printer matrix frozen (models): 58 mm ___Ok_______, 80 mm ___OK_______, PDF path __Device Downloads folder________. Date: ______07-10-2026_________
 - [ ] Test prints attached. Date: _______________
 
 ## 8. Release keystore (the private signature key for the app)
@@ -67,15 +67,23 @@ Recommended default: generate one dedicated release key now, back it up offline 
 Risk of doing nothing: no signed release is possible.
 Risk of losing the key later: permanent loss of the update path.
 Who decides: you (generate + back up + enter secrets).
-- [ ] Keystore generated, backed up offline (2 copies), 4 GitHub secrets set. Name/date: _______________
+- [ ] Keystore generated, backed up offline (2 copies), 4 GitHub secrets set. Name/date: _______OWNER/07/10/2026________
 
 ## 9. Release channel (how the app reaches users)
 Plain English: decide how customers get the app and updates (direct APK download, hosted link, email/WhatsApp with hash check, etc.), and verify the first release by its fingerprint (SHA-256).
 Recommended default: pick one channel now; verify the first release fingerprint before announcing it.
 Risk of no decision: ad-hoc distribution, users may install tampered copies.
 Who decides: you (owner).
-- [ ] Release channel decided: _______________. First-release SHA-256 verified: yes / pending. Name/date: _______________
+- [ ] Release channel decided: ____email/WhatsApp with hash check___________. First-release SHA-256 verified: pending. Name/date: ________OWNER/07/10/2026_______
+
+## 10. Trial month arithmetic (how the 3-month trial end is calculated)
+Plain English: the trial lasts 3 months from install. The app computes the end date as the same calendar day 3 months later; if that day does not exist (for example 31 August + 3 months), it uses the last day of that month (30 November). Until you tick this, the app runs on this draft rule and the trial end could shift by a day or two if you pick a different rule later.
+Recommended default: keep calendar months with end-of-month clamping (already built and tested).
+Risk of keeping: none known; matches ordinary subscription arithmetic.
+Risk of changing later: trial lengths already issued would need recomputation.
+Who decides: you (owner).
+- [ ] Approved: trial end = install start + 3 calendar months (UTC), day clamped to month end. Name/date: _____
 
 ---
-Overall sign-off: _________________________ Date: _______________
+Overall sign-off: _____OWNER/07/10/2026____________________ Date: ____07/10/2026___________
 Note: GST detail lives in the CA brief; legal detail lives with the reviewer. This file decides nothing by itself — only your ticks do.

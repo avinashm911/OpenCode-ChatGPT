@@ -8,6 +8,7 @@
 import 'package:niaverp/core/clock.dart';
 import 'package:niaverp/core/result.dart';
 import 'package:niaverp/data/migrations/migration_runner.dart';
+import 'package:niaverp/data/security/trial_store.dart';
 
 /// Maps a database engine exception to a stable [AppError].
 AppError dbError(Object e, String op) {
@@ -73,8 +74,31 @@ class TxFailure implements Exception {
 
 /// Current time source shared by repositories (inject a [TestClock] in tests).
 class RepositoryContext {
-  const RepositoryContext({required this.db, required this.clock});
+  const RepositoryContext(
+      {required this.db, required this.clock, this.gate, this.trialFiles});
 
   final MigrationDb db;
   final Clock clock;
+
+  /// Write gate consulted by [recordLineage] before any material write.
+  /// Null means allow-all: test scaffolding that builds its own context.
+  /// Production always supplies the enforcing gate via
+  /// `CompositionRoot.backend` (B1). Reads, audit appends and clock
+  /// observations never consult the gate.
+  final EntitlementGate? gate;
+
+  /// App-private trial install-copy store (B1). Null in test scaffolding;
+  /// production wires the real sandbox store so new companies inherit the
+  /// installation's start even on the repository path. Read-only use: row
+  /// creation never writes the file (runStartup owns first-launch creation).
+  final TrialFileStore? trialFiles;
+}
+
+/// Write gate for material writes (B1, A5). Implemented by the trial service
+/// (`TrialWriteGate`); the B4 permission hook rides the same gate.
+abstract class EntitlementGate {
+  const EntitlementGate();
+
+  /// True when [companyId] currently has full function (trial or grace).
+  bool canWrite(String companyId);
 }

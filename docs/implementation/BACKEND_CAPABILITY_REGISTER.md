@@ -240,12 +240,12 @@ Status vocabulary: WIRED+TESTED / ISLAND / PARTIAL / ABSENT / BOUNDARY / BLOCKED
 | M19.7 | Password policy | P2 | P2 | FR-M19-002 | ABSENT | — | — | lockout delays undecided (B4 question) | B4 |
 
 ## M20 Licensing & Trial → B5
-| M20.1 | Free trial | P1 | P1 active | FR-M20-001 | PARTIAL | `trial_anchor` (m007) + `security/entitlements.dart` evaluation | entitlements_test + clock_rollback_test | activation/key absent | B5 |
-| M20.2 | Trial rules (edition-in-trial TBC) | P1 | P1 TBC | FR-M20-001 | PARTIAL | same evaluation | entitlements_test (boundaries/grace/denylist) | edition-in-trial undecided | B5 |
+| M20.1 | Free trial | P1 | P1 active | FR-M20-001 | WIRED+TESTED | `lib/main.dart:70 runStartup` → `lib/app/startup.dart:277 CompositionRoot.backend` → bundle `trial:211` → `data/security/trial_service.dart` (`ensureCompanyAnchor`, `evaluate`) + `data/security/trial_store.dart` | trial_service_test (anchor lifecycle, earliest-wins, R1 named) + write_gate_test (table) | activation/key format waits B5 (denylist preimage = sha256(deviceId), documented) | B5 |
+| M20.2 | Trial rules (edition-in-trial TBC) | P1 | P1 TBC | FR-M20-001 | PARTIAL | same as M20.1 + `entitlements.json` trial cell | trial_service_test (JSON parity) | edition-in-trial undecided; month arithmetic PROPOSAL P-TRIAL-END | B5 |
 | M20.3 | Paid licences (prices TBC) | P1 | P1 TBC prices | FR-M20-001 | ABSENT | — (no licence table) | — | licence structure undecided (B5 question) | B5 |
 | M20.4 | Licence activation | P1 | P1 active | FR-M20-001 | ABSENT | — | — | key/signature absent | B5 |
 | M20.5 | Renewal and payment (mechanism TBC) | P2 | P2 TBC | FR-M20-002 deferred | DEFERRED | — | — | no in-app payment in V1 | B5 |
-| M20.6 | Post-expiry behaviour (grace TBC) | P1 | P1 TBC grace | D-04 | PARTIAL | evaluation: 10-day grace full function → read-only + export + backup; never delete | entitlements_test (capability matrix) | grace length/edition binding per D-10/R1a | B5 |
+| M20.6 | Post-expiry behaviour (grace TBC) | P1 | P1 TBC grace | D-04 | WIRED+TESTED | bundle facade `entitlementState/daysLeft/reminderDue/exportBackupAllowed` (`composition_root.dart`) + choke `TrialWriteGate` via `recordLineage` | write_gate_test (expired/denied refuse, reads+export survive) | grace length per D-10/R1a; banner copy is UI work (UI_HANDOFF_B1) | B5 |
 | M20.7 | Vendor-side licence admin | P2 | P2 | FR-M20-001 | ABSENT | — | — | — | B5 |
 
 ## M21 Printing, Sharing & Communication → B11 (transport → B13)
@@ -260,7 +260,7 @@ Status vocabulary: WIRED+TESTED / ISLAND / PARTIAL / ABSENT / BOUNDARY / BLOCKED
 | M22.1 | Offline-first storage | P1 | P1 active | FR-M22-001 | WIRED+TESTED | `startup.dart:243` encrypted open + `NiavDatabase.bootstrap` | cipher_opener_test + persistence_reload_test | — | B3 |
 | M22.2 | Device sync (cloud relay deferred) | P1 | P1 S1 (D-R6/ZCP §6) | FG-009/010, G0-SCH-005 | BOUNDARY | `ops` + `operation_dependency` + `sync_conflict` tables; no transport | migration_hardening_test (version/chain) | open points undecided (B12 question) | B12 |
 | M22.3 | Backup / restore | P1 | P1 active | FR-M22-001 | PARTIAL | `data/security/backup.dart:179 checkRestorable` guard (no full restore flow; no manifest table) | backup_test + backup_integrity_test + backup_company_guard_test | container/extension/passphrase/schedule undecided (B3); restore flow deferred | B3 |
-| M22.4 | Data security (Keystore/cipher) | P1 | P1 active, device pending | D-06, DB-011 | PARTIAL | `key_lifecycle.dart` + `cipher_opener.dart` (chacha20 pin read-back) | key_lifecycle_test + cipher_opener_test | KDF/AEAD/signatures undecided (B2); device proof pending | B2 |
+| M22.4 | Data security (Keystore/cipher) | P1 | P1 active, device pending | D-06, DB-011 | PARTIAL | `key_lifecycle.dart` + `cipher_opener.dart` (chacha20 pin read-back) + B1 `guardCompanyOpen` clock observation w/ rollback audit | key_lifecycle_test + cipher_opener_test + trial_service_test (clock guard) | KDF/AEAD/signatures undecided (B2); device proof pending | B2 |
 | M22.5 | Audit trail (see M18.8) | P1 | P1 active | FR-M18-002 | WIRED+TESTED | bundle `audit:189` + m017 append-only triggers | audit_append_only_test | — | B4 |
 | M22.6 | Data privacy compliance (VERIFY law) | P2 | P2 VERIFY | O-14/R-13, G0-VER-007 | BLOCKED | — (draft map only) | — | reviewer + retention + DPDP readings missing | B4+B14 |
 | M22.7 | Platform support (Android-only V1) | P1 | P1 decided D-05 | FR-M22-001 | WIRED+TESTED | Android Keystore channel + `MainActivity.kt` (no-op without device) | production_boundary_test + startup_error_state_test | iOS/web deferred; adapters pending B13 | B13 |

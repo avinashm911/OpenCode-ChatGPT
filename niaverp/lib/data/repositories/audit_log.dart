@@ -248,6 +248,19 @@ Result<void> recordLineage({
   Map<String, Object?>? newRow,
   required String actor,
 }) {
+  // B1 single write choke point (A5): every material write funnels through
+  // here. Expired/denied companies refuse with a typed error; the caller's
+  // transaction aborts, so a refused write leaves no residue. Reads, audit
+  // appends, clock observations and trial-anchor bootstrapping never pass
+  // through here and stay available in every state.
+  final EntitlementGate? gate = ops.ctx.gate;
+  if (gate != null && !gate.canWrite(companyId)) {
+    return err<void>(
+      'entitlement',
+      'trial expired or denied: material writes are refused '
+      '(read-only + export + backup remain)',
+    );
+  }
   final Result<OperationRecord> op = ops.append(
     opId: opId,
     companyId: companyId,

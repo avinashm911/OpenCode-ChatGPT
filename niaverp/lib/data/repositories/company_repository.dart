@@ -7,6 +7,7 @@
 import 'package:niaverp/core/result.dart';
 import 'package:niaverp/core/value_objects/ids.dart';
 import 'package:niaverp/data/migrations/migration_runner.dart';
+import 'package:niaverp/data/security/trial_service.dart';
 
 import 'audit_log.dart';
 import 'operation_log.dart';
@@ -71,6 +72,13 @@ class CompanyRepository {
           'company_id': id.value,
           'name': name,
         };
+        // B1 (SEC §3.3): every company gets its trial anchor in the same
+        // transaction. Single earliest-wins logic (TrialService): new
+        // companies inherit the installation's start, including the
+        // app-private file copy when the context carries it. Never rewrites
+        // an existing row.
+        TrialService(db: _db, clock: ctx.clock, files: ctx.trialFiles)
+            .ensureCompanyAnchor(id.value, now);
         final String hash = auditPayloadHash(row);
         final Result<void> lineage = recordLineage(
           ops: ops,

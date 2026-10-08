@@ -1,0 +1,31 @@
+{
+  "name": "NiAvERP entitlement matrix — single source for gates and tests",
+  "authority": "D-04 / O-05 / D-FG-014 (Decided: proposed value, G5); D-11/D-13/A-R2 (trial 3 months)",
+  "note": "B1 creates this file with trial/grace cells ONLY. Edition and limit cells stay absent and BLOCKED until B5 fills them from approved sources. Code constants mirror these cells; test/data/security/trial_service_test.dart asserts parity.",
+  "trial": {
+    "status": "approved",
+    "months": 3,
+    "monthArithmetic": "PROPOSED (owner approval pending, DECISIONS.md P-TRIAL-END): calendar months, UTC, day clamped to month end",
+    "anchorPerCompany": true,
+    "installCopy": "app-private file beside device_id, written once (R1 residual on full deletion)"
+  },
+  "grace": {
+    "status": "approved",
+    "days": 10,
+    "behaviour": "full function + daily reminder"
+  },
+  "expired": {
+    "status": "approved",
+    "behaviour": "read-only + export + backup"
+  },
+  "denyWins": true,
+  "dataNeverDeleted": true,
+  "editions": {
+    "status": "BLOCKED until B5",
+    "cells": "Simple vs Advanced × Monthly/Annual/Lifetime — unfilled"
+  },
+  "limits": {
+    "status": "BLOCKED until B5",
+    "cells": "device limits, reissue limit (D-FG-012: 20) wiring — unfilled"
+  }
+}
